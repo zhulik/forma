@@ -1,32 +1,94 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+# Injected into AI context when creating/updating OpenSpec artifacts.
+# Constraints for planning — do not paste verbatim into proposal/design/specs.
+context: |
+  Product: forma — a Go-native UI framework for building web (and later desktop) apps
+  without writing HTML/CSS/JS. Developers compose semantic widgets in Go; a fixed React +
+  shadcn/ui host renders a tree built at runtime. Optimized for human and agent authors:
+  dense DSL, strong types, minimal review surface.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+  Canonical documents (read before proposing or implementing):
+  - doc/DESIGN.md — architecture, stack choices, user model, non-goals
+  - doc/ROADMAP.md — phased delivery; OpenSpec changes must align unless a proposal
+    explicitly revises the roadmap
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+  Current phase: greenfield. Reference demo: main.go (todo app). Package ui/ holds stub
+  types and hand-written *.gen.go placeholders — not a working runtime yet. Breaking
+  changes allowed until a stable DSL v1 is declared.
+
+  Delivery order (hard constraint for tasks and proposals):
+  1. DSL — specify and refine the Go authoring model (dense, extensible, expressive);
+     main.go is the north-star example
+  2. User documentation — install, dev workflow, adding shadcn components, codegen, custom
+     widgets; written against the stabilized DSL, before large runtime work
+  3. Implementation — React host, GopherJS bridge, generator, Mount/Refresh; driven by DSL
+     specs + user guide expectations
+
+  Stack (target — document deviations in design):
+  - Go application logic compiled with GopherJS (not Wasm syscall/js for v1)
+  - JavaScript host: React 18 + shadcn/ui (Tailwind); static ComponentRegistry + recursive
+    tree renderer (Widget loop)
+  - Bridge: Go builds a component tree (Node / Component.Render); GopherJS passes structs
+    and func callbacks to JS without JSON serialization on the hot path
+  - Codegen: deterministic Go structs from local shadcn .tsx (ts-morph or equivalent);
+    emit ui/*.gen.go; union props → string + optional const block; React events → sanitized
+    Go callbacks (context.Context first arg where applicable)
+
+  DSL conventions (from demo — evolve via OpenSpec, do not silently diverge):
+  - ui.Mount(rootElementID, rootComponent); ui.Refresh() after state mutation
+  - Components are Go structs with value-receiver .With(...) for children; implement
+    ui.Component with Render(ctx) *Node
+  - String children via .With("text"); layout helpers (Row, Column, Container, …) are
+    first-class, not raw div soup
+  - Typed props on generated shadcn wrappers (Variant, Size, …); escape hatches: Class,
+    Style, Attrs on BaseComponent
+  - App state: plain Go structs/vars owned by the app; no React state for business logic
+  - List keys and text-input behavior are spec-level concerns (see DESIGN.md)
+
+  Composition & interop:
+  - Go-side: functions returning Component or composite structs
+  - JS-side: register wrappers for third-party React modules in the host; Go passes props +
+    callbacks only; JS sanitizes events before calling Go
+
+  Out of scope until later (see ROADMAP): SSR/SSG, Wasm-first bridge, Electron, full shadcn
+  catalog parity on day one, desktop native webview packaging before web loop works.
+
+rules:
+  proposal:
+    - Keep Why short; put architecture and DSL detail in design, not proposal
+    - State out-of-scope explicitly; defer to doc/ROADMAP.md phases when scoping
+    - Name capabilities for user-visible behavior (e.g. ui-dsl, ui-runtime, ui-codegen,
+      ui-docs) not internal package names alone
+    - Do not start implementation-phase changes until DSL specs and user-doc outline exist
+      unless the proposal is explicitly P1/P2 only
+  specs:
+    - Behavior contracts (SHALL/MUST + scenarios); no import paths or framework choices
+    - DSL semantics (Mount, Refresh, composition, events, keys, controlled inputs) belong
+      in specs when they affect authors
+    - Distinguish author-facing DSL from host/runtime behavior when they differ
+  design:
+    - Follow doc/DESIGN.md and doc/ROADMAP.md unless documenting a deliberate deviation
+    - Record GopherJS + React + shadcn rationale only when relevant to the change
+    - Codegen pipeline changes must describe inputs (tsx paths), outputs (*.gen.go), and
+      manual override/escape hatch policy
+    - Prefer sentinel errors in Go; keep React host thin (registry + render loop + event
+      sanitization)
+  tasks:
+    - "Order by ROADMAP — DSL, then user docs, then implementation sub-phases"
+    - "P1 tasks may update main.go and spec-only stubs; avoid building full host until P3"
+    - "P2 tasks are documentation and examples, not production runtime"
+    - "Link tasks to roadmap phase in PR text when useful"
+
+operations:
+  apply:
+    guidance:
+      - "Follow tasks.md; consult doc/ROADMAP.md for phase and doc/DESIGN.md for architecture"
+      - "Preserve main.go as the canonical DSL example when touching the demo app"
+      - "Generated ui/*.gen.go: regenerate via codegen when props change; hand-edit only
+        escape hatches documented in DESIGN.md"
+      - "React host stays dumb: no business logic in JS; sanitize third-party events before Go"
+  archive:
+    guidance:
+      - Note which ROADMAP phase advanced and update doc/ROADMAP.md status table if needed
+      - Summarize DSL or doc deltas authors should know about
