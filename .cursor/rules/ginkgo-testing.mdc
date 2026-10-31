@@ -1,0 +1,47 @@
+---
+description: Ginkgo SpecContext, no Skip, error assert ladder
+globs: "**/*_test.go"
+alwaysApply: false
+---
+
+# Ginkgo tests
+
+Never use `context.Background()` or `context.TODO()` in Ginkgo specs.
+
+- Accept `SpecContext` (or `context.Context`) on interruptible nodes: `It`, `BeforeEach`, `AfterEach`, `JustBeforeEach`, etc.
+- Pass that `ctx` into `Init`, codec, clients, RPC calls, and `httptest.NewRequestWithContext`.
+- Prefer `httptest.NewRequestWithContext(ctx, ...)` over `httptest.NewRequest`.
+
+Never `Skip` a spec. Missing or invalid configuration MUST fail the test, not skip it. `task test` runs `go test -race ./...`.
+
+## Error assertions
+
+Identify expected failures by error identity when possible. Prefer this ladder:
+
+1. **Identity** — `Expect(err).To(MatchError(target))` for own package sentinels (always) and for third-party / stdlib targets when identity alone is enough.
+2. **Identity + message** — when identity is correct but too coarse, compose:
+   ```go
+   Expect(err).To(And(
+       MatchError(someThirdPartyErr),
+       MatchError(ContainSubstring("distinctive detail")),
+   ))
+   ```
+3. **Message only** — `Expect(err).To(MatchError(ContainSubstring("…")))` (or `err.Error()` substring) only when identity matching cannot apply.
+
+```go
+// BAD — own sentinel by message text
+Expect(err.Error()).To(ContainSubstring("missing token source"))
+
+// GOOD — own sentinel by identity
+Expect(err).To(MatchError(youtube.ErrMissingTokenSource))
+```
+
+`ContainSubstring` stays fine for non-error text (logs, SQL, help output, cookies) and for negative leak checks (`NotTo(ContainSubstring("secret"))` on bodies / messages).
+
+## Suite logging
+
+Use the suite default slog harness and matchers — see `test-slog` rule. Do not thread `slog.Default()` through test helper arguments.
+
+## Core ports and Integration
+
+Consumer tests MUST mockery-mock `core` port fields — see `mock-core-ports`. Multi-package smoke Describes use `Label("Integration")` and MUST mock external networked systems (offline-safe).

@@ -1,0 +1,42 @@
+---
+description: Pal DI field names match types; Get prefix for IO noun-reads
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Naming: DI fields and methods
+
+## Pal-injected field names
+
+Exported pal-injected collaborator fields MUST use the type name (drop the package qualifier; keep idiomatic initialisms). Locals and params use the same words in camelCase.
+
+```go
+UserRepository    core.UserRepository
+HTTPClientFactory core.HTTPClientFactory
+YouTubeClient     core.YouTubeClient
+Config            *persistence.Config // or *SessionConfig, *ListenConfig, …
+Logger            *slog.Logger
+```
+
+When several config types share a package, use the concrete type name as the field name (`SessionConfig *SessionConfig`, not a bare ambiguous `Config` unless only one config type is injected).
+
+Do **not** name fields after domain nouns or plurals (`Users`, `HTTPClients`, `YouTube`, `Sessions`).
+
+## Method names: Get for IO reads
+
+IO reads that would otherwise look like a property or collection access MUST use a `Get` prefix (including paged collections — this project does not use AIP `List`/`Get` split for those):
+
+```go
+GetRefreshToken(...)  // DB
+GetLikedVideos(...)   // HTTP / API
+Get(id)               // already correct on a repository
+```
+
+Do **not** use `Get` on:
+
+- Command / mutation verbs: `Upsert`, `Delete`, `Write…`
+- Pure or local work: `Sign`, `Parse`, `New`, mapping helpers
+- Struct field accessors that only return in-memory state (no IO)
+- Verbs that already announce work: `Classify`, `HealthCheck`, `Init`
+
+`Get` on non-IO getters is discouraged.

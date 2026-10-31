@@ -1,0 +1,13 @@
+---
+description: Preserve intentional .keep placeholder files
+alwaysApply: true
+---
+
+# Preserve `.keep` files
+
+`.keep` files may exist only to keep a directory tracked in git.
+
+- Never delete a `.keep` file unless user explicitly asks.
+- If real files are added to that directory, deleting `.keep` is allowed.
+- Be extra careful when staging with `git add -A` or deleting generated assets.
+- If a `.keep` file is the only tracked file in a directory, preserve it by default.

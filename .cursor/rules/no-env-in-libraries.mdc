@@ -1,0 +1,38 @@
+---
+description: Do not read environment variables in libraries; bind config at cmd and pass in
+globs: "**/*.go"
+alwaysApply: true
+---
+
+# No environment reads in libraries
+
+Process configuration is bound once at the composition root (`cmd/`) — typically via CLI flags with `Sources: cli.EnvVars(...)` — and passed into packages as function arguments or injected structs.
+
+## Rules
+
+- Do **not** call `os.Getenv`, `os.LookupEnv`, or `os.Environ` in production code under `pkg/` or `internal/`.
+- `cmd/` is the only production code that resolves operator configuration from the environment (through the CLI layer).
+- Pass required settings into setup and runtime code explicitly (e.g. `logging.Configure(level, …)`, `telemetry.Setup(ctx, cfg)`).
+- **Allowed:** `os.Getenv` / `os.LookupEnv` in `*_test.go`, `internal/testutil/`, and other test-only helpers.
+
+## Examples
+
+```go
+// BAD — library reads env
+func Setup() error {
+    return Configure(os.Getenv("LOG_LEVEL"), ...)
+}
+
+// GOOD — caller passes config
+func Setup(level string) error {
+    return Configure(level, ...)
+}
+
+// GOOD — test helper
+func RequireDatabaseURL() string {
+    url := os.Getenv("DATABASE_URL")
+    ...
+}
+```
+
+When adding a new process setting, add a CLI flag with the matching `EnvVars` source in `cmd/`, map it into the appropriate config struct, and thread it through — do not add a new `os.Getenv` in a library.

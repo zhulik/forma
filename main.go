@@ -20,7 +20,7 @@ type AppState struct {
 	nextID     int
 }
 
-var state = &AppState{
+var state = &AppState{ //nolint:gochecknoglobals // demo app root state
 	Todos:  []*Todo{},
 	nextID: 1,
 }
@@ -57,6 +57,7 @@ func TodoApp() ui.Component {
 						Placeholder: "What needs to be done?",
 						Value:       state.InputValue,
 						OnChange: func(ctx context.Context, val string) {
+							_ = ctx
 							state.InputValue = val
 							ui.Refresh()
 						},
@@ -105,6 +106,7 @@ func renderTodoList() []any {
 				ui.Checkbox{
 					Checked: todo.Done,
 					OnCheckedChange: func(ctx context.Context, checked bool) {
+						_ = ctx
 						todo.Done = checked
 						ui.Refresh()
 					},
@@ -119,6 +121,7 @@ func renderTodoList() []any {
 				Variant: "ghost",
 				Size:    "icon",
 				OnClick: func(ctx context.Context) {
+					_ = ctx
 					deleteTodo(todo.ID)
 					ui.Refresh()
 				},
@@ -134,6 +137,7 @@ func renderTodoList() []any {
 // --- Business Logic ---
 
 func handleAddTodo(ctx context.Context) {
+	_ = ctx
 	if state.InputValue == "" {
 		return
 	}

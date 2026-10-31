@@ -1,0 +1,83 @@
+version: "2"
+
+linters:
+  default: all
+  disable:
+    - wsl
+    - wsl_v5
+    - gomodguard
+    - exhaustruct
+    - exhaustruct_v5
+    - ireturn
+    - paralleltest
+  settings:
+    errcheck:
+      check-blank: true
+    depguard:
+      rules:
+        no-cmd-imports:
+          list-mode: lax
+          deny:
+            - pkg: "github.com/zhulik/forma/cmd"
+              desc: cmd/ must not be imported
+        pkg-no-internal:
+          list-mode: lax
+          files:
+            - "**/pkg/**/*.go"
+          deny:
+            - pkg: "github.com/zhulik/forma/internal"
+              desc: pkg/ cannot import internal/
+            - pkg: "github.com/zhulik/forma/cmd"
+              desc: pkg/ cannot import cmd/
+    sloglint:
+      context: all
+    varnamelen:
+      ignore-names:
+        - err
+        - ok
+        - ctx
+        - i
+        - j
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - depguard
+        path: cmd/.*
+      - linters:
+          - mnd
+        path: main\.go
+      - linters:
+          - revive
+        path: _test\.go
+        text: "dot-imports"
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      - ui/.*\.gen\.go$
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/zhulik/forma
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+      - ui/.*\.gen\.go$

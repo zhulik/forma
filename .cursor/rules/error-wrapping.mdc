@@ -1,0 +1,34 @@
+---
+description: Wrap errors with samber/oops; sentinel+cause via Errorf
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Error wrapping
+
+- Wrap returned errors with `github.com/samber/oops` (`oops.FromContext(ctx).Wrap` / `Wrapf` / `Errorf`), never `fmt.Errorf(... %w)`.
+- Prefer `oops.FromContext(ctx)` when a context is available so domain/trace/request metadata is preserved.
+- Thin interface adapters that must forward errors unchanged may use `//nolint:wrapcheck` with a short reason.
+
+## Sentinel + cause
+
+oops `Wrapf` keeps **only** its first error argument in the `errors.Is` / unwrap chain. Format `%w` / `%v` args become **message text only** (oops README foot-gun).
+
+When returning a package sentinel **and** an underlying cause, use `Errorf` with two `%w` verbs so both stay identity-matchable:
+
+```go
+// BAD — sentinel is message-only
+oops.FromContext(ctx).Wrapf(err, "%w", ErrDatabasePing)
+
+// BAD — cause is message-only
+oops.FromContext(ctx).Wrapf(ErrDatabasePing, "%v", err)
+
+// GOOD — both in the errors.Is chain
+oops.FromContext(ctx).Errorf("%w: %w", ErrDatabasePing, err)
+```
+
+Still fine:
+
+- `Wrap(ErrSentinel)` — sentinel alone, no cause
+- `Wrapf(err, "plain message")` / `Wrapf(err, "msg %s", detail)` — wrap cause with a message, no second identity target
+- `Wrapf(ErrSentinel, "status %d", code)` — annotate sentinel with non-error format args only

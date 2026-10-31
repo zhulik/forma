@@ -1,0 +1,54 @@
+---
+description: No nil or zero-value guards without evidence they can occur (all Go)
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# No speculative nil or zero guards
+
+Applies to every Go file in the repo (`cmd/`, `internal/`, `pkg/`, tests, and generated Go if edited by hand).
+
+Do not add `if x == nil`, `if x == 0`, or other zero-value checks unless you have **evidence** that nil or zero is possible at that point (types, API contract, control flow, or boundary input).
+
+## Evidence counts
+
+- **Yes, guard or branch:** `errors.Is` / `errors.As`; map index `v, ok := m[k]`; channel receive `v, ok := <-ch`; optional config or API documented as empty-means-off; values from external/untrusted input; pointer fields that tests or constructors may leave unset by design.
+- **Not evidence alone:** “might be nil someday”; defensive habit; hiding a pal wiring bug; a channel element type is a pointer (producers still might never send nil).
+
+If nil or zero means broken wiring or an invariant violation, **omit the guard** and let the failure surface (panic, error return from a lower layer, or a test failure).
+
+## Related rules
+
+- Pal-injected collaborators: never nil-check — see `pal-components` and `no-init-wiring-guards`.
+- Do not add `Init` (or similar) only to assert dependencies are non-nil.
+
+## Examples
+
+```go
+// BAD — ingress only enqueues non-nil envelopes; nil would be a producer bug
+func (e *Engine) Process(_ context.Context, env *core.Envelope) {
+	if env == nil {
+		return
+	}
+	e.fanOut(ctx, *env)
+}
+
+// GOOD — trust the pipeline contract
+func (e *Engine) Process(ctx context.Context, env *core.Envelope) {
+	e.fanOut(ctx, *env)
+}
+
+// GOOD — ErrNoCursor is an documented alternate outcome of Get
+cursorMicros, err := store.Get(ctx)
+if errors.Is(err, core.ErrNoCursor) {
+	cursorMicros = 0
+}
+
+// GOOD — channel closed is real
+env, ok := <-buffer.Out()
+if !ok {
+	return nil
+}
+```
+
+When adding a guard, prefer a one-line comment citing **why** zero/nil is possible if it is not obvious from the type alone.

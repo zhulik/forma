@@ -1,0 +1,20 @@
+---
+description: Prefer modern Go stdlib over legacy patterns
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Modern Go
+
+Target the Go version in `go.mod`. Prefer current stdlib and language features over legacy idioms when they fit.
+
+- **One-shot init with a result:** `sync.OnceValues` / `sync.OnceFunc` when init needs no inputs; `xsync.OnceValues` when init needs the first caller's `context.Context`. Prefer these over `sync.Once` plus extra struct fields for cached values or errors.
+- **Collections:** `slices` and `maps` over hand-rolled sort/search/clone loops when equivalent.
+- **Compare / bounds:** `cmp`, built-in `min` / `max`, `clear` where they simplify the code.
+- **Errors:** sentinel + `errors.Is` / `errors.As`; `errors.Join` for multiple failures; avoid string-matching errors.
+- **Logging:** `log/slog` (already project standard); not the legacy `log` package for new code.
+- **Types:** `any` instead of empty-interface literals in new code; defined types for domain IDs/secrets (see distinct-types rule).
+
+Do not rewrite working code only to chase novelty. Do not use a modern feature when it hides behavior (for example, replacing an obvious loop with a clever one-liner that is harder to read).
+
+When a legacy pattern remains because context or APIs constrain you (for example, closing over request context in a constructor passed to `sync.OnceValues`), say so in a short comment and keep the smallest bridge.

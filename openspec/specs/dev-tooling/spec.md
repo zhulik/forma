@@ -1,0 +1,62 @@
+# dev-tooling Specification
+
+## Purpose
+
+Define the engineering gates and contributor conventions forma uses so local development and automation enforce the same quality bar before product features land.
+
+## Requirements
+
+### Requirement: Default local check runs static analysis
+
+The project SHALL provide a single default developer command that runs static analysis on all Go packages.
+
+#### Scenario: Contributor runs default check
+
+- **WHEN** a contributor runs the project's default task target from the repository root
+- **THEN** static analysis completes with zero reported issues
+
+### Requirement: Static analysis rejects issues
+
+The project SHALL treat static analysis findings as blocking: no linter category may report unresolved issues on committed Go code in the main branch workflow.
+
+#### Scenario: Lint clean tree
+
+- **WHEN** static analysis runs on a clean checkout with no uncommitted Go changes
+- **THEN** the process exits successfully with zero findings
+
+### Requirement: Generated output must be committed
+
+When code generation is configured, the project SHALL verify that running generation produces no diff against the committed tree.
+
+#### Scenario: Generate check in automation
+
+- **WHEN** the automation job runs the generate-and-compare step on a clean checkout
+- **THEN** the working tree remains unchanged after generation completes
+
+### Requirement: Modernizer fix output must be committed
+
+The project SHALL verify that running the configured Go modernizer pass produces no diff against the committed tree.
+
+#### Scenario: Fix check in automation
+
+- **WHEN** the automation job runs the fix-and-compare step on a clean checkout
+- **THEN** the working tree remains unchanged after the modernizer pass completes
+
+### Requirement: Continuous integration mirrors local lint gates
+
+The repository SHALL run, on every push, the same generate check, static analysis, and fix check that contributors are expected to run locally before merge.
+
+#### Scenario: Push triggers backend CI
+
+- **WHEN** a change is pushed to any branch
+- **THEN** automation runs generate verification, static analysis, and fix verification
+- **AND** the workflow fails if any step fails
+
+### Requirement: Agent-oriented Go rules are present
+
+The repository SHALL include Cursor rules covering early-stage compatibility policy, Go error handling, testing conventions (for when tests are added later), and file/type organization so automated edits follow the same standards as sister zhulik Go projects.
+
+#### Scenario: Rules available for Go edits
+
+- **WHEN** an agent or contributor opens Go source under this repository
+- **THEN** applicable Cursor rules document early-stage breaking-change policy, error variable naming, and one-type-one-file expectations

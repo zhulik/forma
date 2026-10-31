@@ -1,0 +1,21 @@
+---
+description: Do not add compile-time interface satisfaction checks
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# No interface assertion variables
+
+Do not add compile-time interface checks such as:
+
+```go
+// BAD
+var _ MyInterface = (*myType)(nil)
+var _ clibind.Valuer = (*CLIFlags)(nil)
+```
+
+Interface compliance is already checked when a value is passed to a function or stored in a field typed as that interface. The assertion adds noise and duplicates what the compiler verifies at use sites.
+
+- Do not add new `var _ … = (*…)(nil)` lines in hand-written code.
+- Remove them when touching a file for other reasons, or when asked to clean them up.
+- Do not edit generated files (proto output, mockery output) to remove them — those are owned by codegen.

@@ -1,0 +1,28 @@
+---
+description: Do not store context.Context in structs (containedctx)
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# No context in structs
+
+Do not put `context.Context` on structs (including job/request DTOs queued for later). Pass `ctx` as the first parameter and cancel via the pal run context or request scope.
+
+**Linter:** [containedctx](https://github.com/sivchari/containedctx) — enabled in `.golangci.yaml` via `linters.default: all` (not in `disable`).
+
+```go
+// BAD — ctx stored for async work
+type deliveryJob struct {
+	ctx context.Context
+	env core.Envelope
+}
+
+// GOOD — queue payload only; workers receive ctx from Run(ctx)
+func (e *Engine) workerLoop(ctx context.Context, w *targetWorker) {
+	for env := range w.queue {
+		e.deliver(ctx, w, env)
+	}
+}
+```
+
+Rare exceptions (HTTP `Request`, generated code) may use `//nolint:containedctx` with a one-line reason.

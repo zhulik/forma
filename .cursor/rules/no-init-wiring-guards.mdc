@@ -1,0 +1,59 @@
+---
+description: Do not use Init or guards to verify pal injection or wiring
+alwaysApply: true
+---
+
+# No Init wiring guards
+
+Pal owns dependency injection and lifecycle order. Components **trust** injected collaborators after `Init` runs.
+
+## Do not
+
+- Use `Init` (or other lifecycle hooks) only to check that pal-injected fields, structs, or funcs are non-nil / non-zero.
+- Return package sentinels from `Init` when the failure mode is “dependency not wired” (e.g. `Lookup == nil`, `Logger == nil`).
+- Add defensive nil checks on pal-injected fields before use in production code (see `pal-components`: never nil-check pal-injected fields).
+- Add redundant nil guards on parameters that represent the same wiring (e.g. `EnvLookup` passed into compile/load when the composition root always supplies it).
+
+Missing or broken wiring should surface when the collaborator is **used** (panic or natural error), not via a dedicated “required dependency” error in `Init`.
+
+## Do
+
+- Keep `Init` for real work: bind CLI into config, load state, start background loops, validate **domain shape** of bound values (ratios, paths required by flags, YAML semantics after decode).
+- In tests, construct components with explicit collaborators (maps, stubs, `os.LookupEnv` wrappers from `cmd/`) — do not add production guards to paper over nil test wiring.
+
+## Examples
+
+```go
+// BAD — Init exists only to guard injection
+func (e *EnvBinding) Init(_ context.Context) error {
+	if e.Lookup == nil {
+		return ErrEnvLookupRequired
+	}
+	return nil
+}
+
+// BAD — re-validates wiring in a library helper
+func Compile(_ context.Context, doc *Document, lookup EnvLookup) (*CompiledConfig, error) {
+	if lookup == nil {
+		return nil, ErrEnvLookupRequired
+	}
+	// ...
+}
+
+// GOOD — use injected lookup; nil wiring fails at template execute
+func Compile(ctx context.Context, doc *Document, lookup EnvLookup) (*core.CompiledConfig, error) {
+	funcs := templateFuncMap(lookup)
+	// ...
+}
+
+// GOOD — Init validates bound config shape, not pointer presence
+func (c *Config) Init(ctx context.Context) error {
+	if err := clibind.BindInto(c.Valuer, c); err != nil {
+		return err
+	}
+	if c.Path == "" {
+		return ErrConfigPathRequired // flag/CLI contract, not “is Valuer nil?”
+	}
+	return nil
+}
+```

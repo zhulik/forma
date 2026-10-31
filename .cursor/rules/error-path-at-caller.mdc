@@ -1,0 +1,51 @@
+---
+description: Do not pass parameters whose only use is error message text; the caller that already has that context wraps failures.
+globs: **/*.go
+alwaysApply: false
+---
+
+# Error context at caller
+
+Do not add function parameters that exist only so the callee can mention them in `Errorf` / `Wrapf`. If the **caller** already has that value (loop key, resource id, field path, request id), it wraps the returned error. The callee returns domain failure only—sentinel, cause, and details the callee actually validates (bad literal, attempt index, inner parse error).
+
+Loops are the usual shape: `for name, item := range items` owns `name`; a parser helper takes `item` fields, not `name`.
+
+## Do not
+
+```go
+func targetKindFromDoc(ctx context.Context, name, rawType string) (core.TargetKind, error) {
+	return "", oops.FromContext(ctx).Errorf("%w: targets.%s type %q", ErrInvalidTargetType, name, rawType)
+}
+
+kind, err := targetKindFromDoc(ctx, name, target.Type)
+if err != nil {
+	return err
+}
+```
+
+`name` never affects logic—only the error string.
+
+## Do
+
+```go
+func targetKindFromDoc(ctx context.Context, rawType string) (core.TargetKind, error) {
+	return "", oops.FromContext(ctx).Errorf("%w: type %q", ErrInvalidTargetType, rawType)
+}
+
+kind, err := targetKindFromDoc(ctx, target.Type)
+if err != nil {
+	return oops.FromContext(ctx).Errorf("%w: targets.%s", err, name)
+}
+```
+
+Same idea outside loops: if `compileTarget(ctx, name, …)` already has `name` for `CompiledTarget.Name`, it wraps helper errors with `targets.%s`—do not push `name` into helpers that do not need it for behavior.
+
+## Parameters that belong on the callee
+
+- Inputs the function uses for **logic** (e.g. `kind` when log-level rules depend on target type).
+- Identifiers the callee **writes** into outputs (`CompiledTarget.Name`).
+- Facts only the callee knows (template name `filter` vs `url`, dry-run `attempt` number).
+
+## Wrapping
+
+One path segment per level: `oops.FromContext(ctx).Errorf("%w: targets.%s", err, name)`. See `error-wrapping.mdc` for `%w` chains.

@@ -1,0 +1,16 @@
+---
+description: Pre-deploy — breaking changes allowed, no compatibility shims
+alwaysApply: true
+---
+
+# Early stage — no compatibility
+
+forma is not deployed. No production users or stable DSL v1 yet.
+
+- Breaking API, ENV, and config shape changes are allowed.
+- Do not add dual-write, dual-read, feature flags for old clients, or migration shims.
+- Do not design for zero-downtime or rolling-deploy compatibility.
+- Drop old paths. Rewrite in place.
+- Stop citing "existing deployments" as a reason to keep a design.
+
+See doc/ROADMAP.md for phased delivery.

@@ -1,0 +1,31 @@
+---
+description: Keep every method of a Go type in one file; no golangci linter enforces this
+globs: "**/*.go"
+alwaysApply: true
+---
+
+# One type, one file
+
+Declare a struct (or named type) and **all** of its methods in a **single** source file. Do not scatter `(t *T)` / `(t T)` methods across files.
+
+Package-level helpers (mapping, parsing, classification) may live in other files. Generated code (`ent/`, protos, mocks) is exempt.
+
+```go
+// BAD — Client methods split across client.go and shorts_prober.go
+func (c *Client) GetLikedVideos(...)
+func (c *Client) omitShorts(...) // shorts_prober.go
+
+// GOOD — every Client method in client.go
+// GOOD — mapDisplayableLikedVideo in displayable.go (not a method)
+```
+
+File for a method-bearing type is `snake_case(Type).go` (see also `pal-components`).
+
+## Lint status
+
+No golangci-lint linter enforces “all methods of a type in one file.”
+
+- `funcorder` — order of constructors/methods **within** a file, not across files
+- `recvcheck` — pointer vs value receiver consistency only
+
+Rely on this rule + review. Do not invent a custom analyzer unless the team later chooses one.

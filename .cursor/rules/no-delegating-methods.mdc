@@ -1,0 +1,34 @@
+---
+description: Do not add methods that only forward to another method on the same type
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# No delegating method aliases
+
+Do not add a method whose entire body only calls another method on the **same** receiver (or only returns `t.field`) when the two names mean the same thing to callers. Pick one entry point and put the logic there.
+
+## Do not
+
+```go
+// BAD — Process is a useless alias for fanOut
+func (e *Engine) Process(ctx context.Context, env *core.Envelope) {
+	e.fanOut(ctx, *env)
+}
+
+// BAD — re-export wrappers on the same type when embedding works
+func (b *SharedBuffer) TryEnqueue(env *core.Envelope) bool {
+	return b.buf.TryEnqueue(env)
+}
+```
+
+Prefer **embedding** or **call the real method** from outside the type.
+
+## Allowed
+
+- **Shared implementation, multiple entry points:** `Init(ctx) { return s.Reload(ctx) }` when `Reload` is also invoked from SIGHUP or other paths.
+- **Interface requirements:** `slog.Handler` decorators that forward `Enabled` / `WithAttrs` / `WithGroup` to an inner handler.
+- **Field accessors** that expose an injected or constructed dependency (`TracerProvider() trace.TracerProvider { return p.providers.TracerProvider }`).
+- **Small package-level functions** that are not duplicate names on the same type (e.g. `Provide() pal.ServiceDef` in `services.go`).
+
+When refactoring, merge the wrapper into the kept name or use embedding instead of forward-only methods.

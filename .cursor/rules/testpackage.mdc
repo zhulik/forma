@@ -1,0 +1,11 @@
+---
+description: Go tests must live in external *_test packages and only exercise public APIs
+globs: "**/*_test.go"
+alwaysApply: false
+---
+
+# External test packages
+
+- Every `*_test.go` file must use an external test package (`foo_test`, never `foo`).
+- Never call unexported (private) functions, types, or methods from tests.
+- Exercise behavior through the package’s public API only. If a behavior cannot be reached publicly, export a deliberate public surface or test it indirectly—do not reach into internals.

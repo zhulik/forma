@@ -1,0 +1,13 @@
+---
+description: Leave lint and tests green before finishing code changes
+alwaysApply: true
+---
+
+# Verify before done
+
+After any Go code change, do not consider the task finished until checks pass:
+
+1. `task test`
+2. `task lint` (requires golangci-lint built with Go >= version in go.mod; CI uses golangci-lint-action)
+
+Run these yourself before marking the work done.

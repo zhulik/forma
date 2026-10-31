@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** Greenfield. [`main.go`](../main.go) is the DSL reference demo; [`ui/`](../ui/) has stub `Mount`/`Refresh` and placeholder `*.gen.go` files. No working GopherJS bundle or React host in-repo yet.
+**Current status:** Greenfield with P0 dev tooling in place ([README.md](../README.md)). [`main.go`](../main.go) is the DSL reference demo; [`ui/`](../ui/) has stub `Mount`/`Refresh` and placeholder `*.gen.go` files. No working GopherJS bundle or React host in-repo yet.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md)
 
@@ -32,6 +32,7 @@ Work proceeds in **strict order**: DSL → user documentation → implementation
 
 | Phase | Scope | OpenSpec / deliverables | Status |
 |-------|--------|-------------------------|--------|
+| **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; tests deferred | **`forma-dev-tooling`** (archive after apply) | **Done** |
 | **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches; evolve `main.go` as reference; stub `ui` types only | Change e.g. **`forma-ui-dsl`**: proposal, specs (`ui-dsl`), design, tasks; may add `examples/` variants | **Next** |
 | **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `Mount`/`Refresh`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | Change e.g. **`forma-user-docs`**: specs for doc completeness OR doc-only tasks; publish under `doc/user/` (or site later) | Planned |
 | **P3a** | **Codegen pipeline** — ts-morph (or equivalent) from shadcn TSX → `ui/*.gen.go`; CI check for drift | **`forma-ui-codegen`** | Planned |

@@ -1,0 +1,21 @@
+---
+description: Use distinct Go types for IDs and secrets that can be swapped
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Distinct domain types
+
+Identifiers and secrets that share `string` but must not be swapped get a **defined type**, not an alias (`type UserID = string` is documentation only).
+
+```go
+type UserID string
+type VideoID string
+type RefreshToken string
+```
+
+- Domain types live in `internal/core`. Auth/session tokens stay in their package (`session.Token`).
+- Convert at edges only: proto, Ent, oauth2, JWT claims, HTTP cookies. Do not convert back to `string` inside domain logic.
+- Do not wrap a single field in a struct when the type is the value (`Credentials{RefreshToken}` → `RefreshToken`).
+- Do not type display names, titles, or URLs. Do not type values that exist only as a local constant.
+- Empty values still type-check; types prevent swaps, not invalid data.

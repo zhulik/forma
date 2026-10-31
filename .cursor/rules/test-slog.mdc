@@ -1,0 +1,55 @@
+---
+description: Suite slog capture + matchers; no redundant helper logger args
+globs: "**/*_test.go"
+alwaysApply: false
+---
+
+# Test slog
+
+Ginkgo suites install one default slog handler via `pkg/testutil` (blank import is enough): structured capture for assertions, trace attrs when a span is active, plus JSON write-through to `GinkgoWriter` (quiet on pass, dump on fail). Capture clears automatically in a package `BeforeEach` at the start of each Ginkgo spec.
+
+## Assert logs
+
+Dot-import matchers from `pkg/testutil/slogmatch`:
+
+```go
+. "github.com/zhulik/hosehook/pkg/testutil/slogmatch"
+
+Expect(slog.Default()).To(HaveLoggedMessages(1))
+Expect(slog.Default()).To(Not(HaveLoggedMessages()))
+Expect(slog.Default()).To(Logged(0, "path", "/ping"))
+Expect(slog.Default()).To(Logged(0, "error", ContainSubstring("kaboom")))
+Expect(slog.Default()).To(LoggedWithout(0, "cookie", "authorization"))
+Expect(slog.Default()).To(LoggedNoValues(0, "secret-cookie", "secret-token"))
+Expect(slog.Default()).To(Not(HaveLoggedLevel("ERROR")))
+Expect(slog.Default()).To(HaveLoggedText(ContainSubstring("sql query")))
+Expect(slog.Default()).To(HaveLoggedRecordText(And(
+	ContainSubstring("display_name"),
+	Not(ContainSubstring("refresh_token")),
+)))
+```
+
+- `HaveLoggedMessages()` (no args) means at least one; `HaveLoggedMessages(n)` is exact (including 0).
+- Raise level with `testutil.SetLogLevel` + `DeferCleanup` restore when a spec needs DEBUG or ERROR-only capture.
+- Prefer a new `It` (auto-clears capture) over clearing mid-spec. Use `HaveLoggedRecordText` when one record among several must match.
+- Assert via matchers on `slog.Default()` only — do not reach into the capture handler from specs.
+
+Do **not** invent a second capture backend (`memHandler`, buffer-only logger) for normal asserts.
+
+## Helpers
+
+Shared test helpers that need a logger MUST use `slog.Default()` internally. Do **not** add a `*slog.Logger` parameter whose callers would only pass `slog.Default()` (or Discard “for quiet”).
+
+```go
+// BAD
+wireTestServer(ctx, slog.Default(), repo, factory)
+
+// GOOD
+wireTestServer(ctx, repo, factory) // Logger: slog.Default() inside
+```
+
+SUT struct literals may still set `Logger: slog.Default()` when constructing components in tests.
+
+## Production
+
+Production components keep an injected `Logger *slog.Logger`. Never nil-check or fall back to `slog.Default()` — see `pal-components`.

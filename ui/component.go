@@ -18,6 +18,7 @@ type BaseComponent struct {
 
 func (c BaseComponent) With(children ...any) BaseComponent {
 	c.children = append(c.children, toComponents(children)...)
+
 	return c
 }
 
@@ -40,5 +41,6 @@ func toComponents(items []any) []Component {
 			components = append(components, Text{Text: v})
 		}
 	}
+
 	return components
 }

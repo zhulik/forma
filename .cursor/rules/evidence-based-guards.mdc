@@ -1,0 +1,44 @@
+---
+description: Nil/empty guards only with documented evidence; explain each keep
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Evidence-based nil and empty checks
+
+Do not add `== nil`, `== ""`, `IsZero`, or `== 0` guards “just in case.”
+
+Add such a check **only** when you know the value can be absent — from API/docs, generated types (`omitempty` pointers), observed payloads, or an explicit product/proto absence rule. If evidence is missing, omit the guard; prefer a clear panic over speculative soft-skips.
+
+Every kept guard gets a short comment stating **why** absence is real (cite the source of truth in a few words).
+
+```go
+// BAD — no evidence YouTube omits requested snippet
+if item.Snippet == nil {
+	continue
+}
+
+// BAD — silent skip with no comment
+if id == "" {
+	return
+}
+
+// GOOD — proto/domain absence (conventional API response)
+// Leave Duration unset: unknown/zero must not become a zero protobuf Duration.
+if video.Duration > 0 {
+	msg.Duration = durationpb.New(video.Duration)
+}
+
+// GOOD — documented API quirk
+// YouTube omits likeCount (or returns 0) when ratings are hidden.
+if item.Statistics.LikeCount == 0 {
+	return details
+}
+```
+
+## Not this rule
+
+- `err != nil` and other real error handling
+- Pal-injected collaborator nil checks — never; see `pal-components` (nil means wiring is broken)
+- Auth/config fail-fast empties that are already product requirements (`DatabaseURL`, OAuth `code`) — still comment if non-obvious
+- Generated code (`ent/`, protos, mocks)

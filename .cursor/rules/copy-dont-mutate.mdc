@@ -1,0 +1,29 @@
+---
+description: Copy data instead of mutating arguments; no third-party immutable collections
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Copy, don't mutate
+
+Prefer immutable structs and containers. Copy data; do not write through arguments (pointer targets, slice elements, map entries).
+
+Methods may mutate the receiver. Assigning into a local slice or map the function allocated is fine. Rebinding a parameter is fine.
+
+Do not import third-party immutable collection libraries. Overkill. Use stdlib slices, maps, and structs.
+
+Do not be fanatic. If a mutating API is clearly simpler and you are unsure, ask the user.
+
+```go
+// BAD
+func enrich(videos []LikedVideo) { videos[0].Duration = d }
+func apply(v *LikedVideo, d details) { v.Duration = d.Duration }
+
+// GOOD
+func merge(v LikedVideo, d details) LikedVideo {
+	v.Duration = d.Duration
+	return v
+}
+
+videos[i] = merge(videos[i], d) // local slice the function allocated
+```

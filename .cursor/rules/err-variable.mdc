@@ -1,0 +1,39 @@
+---
+description: Name Go error variables err by default; distinct names only for concurrent multi-error
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Error variable naming
+
+Always name the error variable `err`.
+
+Do **not** use descriptive names like `someErr`, `claimErr`, or `dbErr` for a single error in scope.
+
+Exception: when several errors must be kept alive at once (collecting or joining multiple failures), use distinct names so values are not overwritten.
+
+```go
+// BAD — descriptive name for a single in-scope error
+claimErr := repo.Claim(ctx)
+if claimErr != nil {
+	return claimErr
+}
+
+// GOOD
+err := repo.Claim(ctx)
+if err != nil {
+	return err
+}
+
+// GOOD — multiple errors must stay alive concurrently
+var errs []error
+if err := stepA(ctx); err != nil {
+	errs = append(errs, err)
+}
+if err := stepB(ctx); err != nil {
+	errs = append(errs, err)
+}
+return errors.Join(errs...)
+```
+
+Guidance only. No golangci analyzer required by this rule.
