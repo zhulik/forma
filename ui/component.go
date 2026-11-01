@@ -11,13 +11,7 @@ type Component interface {
 }
 
 type BaseComponent struct {
-	Key string `js:"-"`
-
-	// Top-level escape hatches
-	Class string            `js:"-"`
-	Style map[string]string `js:"-"`
-	ID    string            `js:"-"`
-	Attrs map[string]any    `js:"-"`
+	WidgetMeta
 
 	children []Component
 	fallback []Component

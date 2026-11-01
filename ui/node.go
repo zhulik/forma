@@ -6,4 +6,5 @@ type Node struct {
 	Class    string
 	Props    any
 	Children []*Node
+	Slots    map[string][]*Node
 }

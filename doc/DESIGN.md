@@ -80,14 +80,16 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 ### Composition
 
-- **Struct literals + `.With(...)`** — primary children as **`Component` values only** (no bare strings); value receivers keep trees immutable per build. Splat `[]Component` from **`fn.Map`** into `.With(items...)`.
+- **Struct literals + `.With(...)`** — on **layout and leaf** widgets, primary children as **`Component` values only** (no bare strings); value receivers keep trees immutable per build. Splat `[]Component` from **`fn.Map`** into `.With(items...)`.
+- **`Fragment`** — groups siblings with **no layout or DOM host** (React `Fragment` semantics). Use when a single `Component` value must contain several roots (including inside a compound slot field).
+- **Compound widgets (field-only slots)** — shadcn/Radix-style widgets (`Dialog`, `Tabs`, …) expose each region as an **exported struct field** typed **`Component`** (or a widget-specific item slice such as **`[]TabItem`**). Authors do **not** use separate Go types that mirror Radix parts (`DialogTrigger`, `DialogContent`, …). Slot payload is **not** passed via `.With` on the compound. The render tree carries regions in **`Node.Slots`** (wire keys such as `trigger`, `content`); the JS registry maps slot names to internal React structure.
 - **Text** — leaf copy via **`Text{Text: "hello"}`** (plus **`Muted`**, **`Strikethrough`**, **`Class`**, …); other widgets may use a **`Text` field** (e.g. `Heading{Text: "…"}`). Labels on buttons use **`.With(Text{Text: "…"})`**.
 - **`.Or(...)`** — fallback children when `.With` would otherwise be empty (e.g. dynamic list with zero items). Typed on each wrapper (same return type as `.With`); at render time, if there are no primary children, fallbacks are rendered instead.
 - **`If(cond, …func() Component)`** (package **`ui`**, dot-imported in apps) — lazy conditional branches; one branch and false yields no node; two branches select then/else.
 - **`Key`** — stable string on **`BaseComponent`** (promoted on widgets); required for repeated siblings built from lists.
 - **Layout primitives** — `Row`, `Column`, `Container`, `Card`, … express structure without HTML tag names.
-- **Generated shadcn types** — `Button`, `Input`, `Checkbox`, … with typed props (`Variant`, `Size`, …).
-- **Escape hatches** — `Class`, `Style`, `Attrs` on `BaseComponent` for the rare Tailwind tweak; not the default path.
+- **Generated shadcn types** — `Button`, `Input`, `Checkbox`, … with typed props (`Variant`, `Size`, …). **Compounds** (`Dialog`, `Sheet`, …) are **`*.gen.go` like leaves**: codegen analyzes each shadcn `.tsx` export graph (root + prefixed parts → one Go struct with slot fields; strip the prefix for field names). Optional per-file overrides only when heuristics fail (e.g. complex Select/Tabs). No hand-maintained catalog compounds in `ui/`.
+- **Escape hatches** — `Class`, `Style`, `Attrs` on **`WidgetMeta`**, embedded on layout/leaves via `BaseComponent`; generated compounds embed **`WidgetMeta` only** (no `.With`) and use **`RenderComponentSlot` / `PutSlot` / `SlotKeyFromField`** in generated `Render` methods.
 
 ### Custom components
 
@@ -128,8 +130,9 @@ shadcn installs **source** `.tsx` into the repo, which makes AST-based generatio
 | `React.ReactNode` | children via `.With(...)` / nested `Component` |
 | `(e: MouseEvent) => void` | `func(ctx ui.Context)` or `func(ctx ui.Context, data map[string]any)` |
 | Complex 3rd-party props | narrow in JS wrapper; Go sees clean fields |
+| Root + prefixed part exports (e.g. `Dialog`, `DialogTrigger`, `DialogContent`) | one **`Dialog` struct** in `dialog.gen.go`: scalar props from root; **`Trigger`**, **`Content`** as `Component` fields → `Node.Slots`; embed **`WidgetMeta`** only; registry mapping generated from the same export analysis |
 
-Generated files are **`*.gen.go`**; manual edits live in separate files or documented extension points.
+Generated files are **`*.gen.go`**; manual edits live in separate files or documented extension points. **Catalog compounds are never hand-written** in `ui/`—only framework primitives (`Fragment`, slot helpers, `WidgetMeta` / `BaseComponent`).
 
 ---
 
