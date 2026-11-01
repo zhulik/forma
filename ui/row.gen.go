@@ -19,8 +19,13 @@ type Row struct {
 	Border  bool
 }
 
-func (r Row) With(children ...any) Row {
+func (r Row) With(children ...Component) Row {
 	r.BaseComponent = r.BaseComponent.With(children...)
+	return r
+}
+
+func (r Row) Or(fallback ...Component) Row {
+	r.BaseComponent = r.BaseComponent.Or(fallback...)
 	return r
 }
 

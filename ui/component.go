@@ -11,6 +11,8 @@ type Component interface {
 }
 
 type BaseComponent struct {
+	Key string `js:"-"`
+
 	// Top-level escape hatches
 	Class string            `js:"-"`
 	Style map[string]string `js:"-"`
@@ -21,14 +23,14 @@ type BaseComponent struct {
 	fallback []Component
 }
 
-func (c BaseComponent) With(children ...any) BaseComponent {
-	c.children = append(c.children, toComponents(children)...)
+func (c BaseComponent) With(children ...Component) BaseComponent {
+	c.children = append(c.children, children...)
 
 	return c
 }
 
-func (c BaseComponent) Or(fallback ...any) BaseComponent {
-	c.fallback = append(c.fallback, toComponents(fallback)...)
+func (c BaseComponent) Or(fallback ...Component) BaseComponent {
+	c.fallback = append(c.fallback, fallback...)
 
 	return c
 }
@@ -36,23 +38,11 @@ func (c BaseComponent) Or(fallback ...any) BaseComponent {
 func (c BaseComponent) Render(ctx context.Context) *Node {
 	return &Node{
 		Type:     "BaseComponent",
+		Key:      c.Key,
 		Class:    c.Class,
 		Props:    c,
 		Children: renderChildren(ctx, c.children, c.fallback),
 	}
-}
-
-func toComponents(items []any) []Component {
-	return fn.Map(items, func(item any) Component {
-		switch v := item.(type) {
-		case Component:
-			return v
-		case string:
-			return Text{Text: v}
-		default:
-			panic("unknown type")
-		}
-	})
 }
 
 func renderChildren(ctx context.Context, children []Component, fallback []Component) []*Node {
@@ -60,7 +50,9 @@ func renderChildren(ctx context.Context, children []Component, fallback []Compon
 		children = fallback
 	}
 
-	return fn.Map(children, func(child Component) *Node {
-		return child.Render(ctx)
+	return fn.FilterMap(children, func(child Component) (*Node, bool) {
+		node := child.Render(ctx)
+
+		return node, node != nil
 	})
 }

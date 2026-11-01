@@ -7,8 +7,13 @@ type Card struct {
 	Padding int
 }
 
-func (c Card) With(children ...any) Card {
+func (c Card) With(children ...Component) Card {
 	c.BaseComponent = c.BaseComponent.With(children...)
+	return c
+}
+
+func (c Card) Or(fallback ...Component) Card {
+	c.BaseComponent = c.BaseComponent.Or(fallback...)
 	return c
 }
 

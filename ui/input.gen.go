@@ -9,8 +9,13 @@ type Input struct {
 	OnChange    func(ctx Context, val string)
 }
 
-func (i Input) With(children ...any) Input {
+func (i Input) With(children ...Component) Input {
 	i.BaseComponent = i.BaseComponent.With(children...)
+	return i
+}
+
+func (i Input) Or(fallback ...Component) Input {
+	i.BaseComponent = i.BaseComponent.Or(fallback...)
 	return i
 }
 

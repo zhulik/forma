@@ -33,7 +33,7 @@ Work proceeds in **strict order**: DSL → user documentation → implementation
 | Phase | Scope | OpenSpec / deliverables | Status |
 |-------|--------|-------------------------|--------|
 | **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; tests deferred | **`forma-dev-tooling`** (archive after apply) | **Done** |
-| **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches; evolve `main.go` as reference; stub `ui` types only | Change e.g. **`forma-ui-dsl`**: proposal, specs (`ui-dsl`), design, tasks; may add `examples/` variants | **Next** |
+| **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches; evolve `main.go` as reference; stub `ui` types only | **`forma-ui-dsl`** archived → `openspec/specs/ui-dsl/` | **Done** |
 | **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `UIMount` / `ctx.RefreshUI()`, dot imports, `fn`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | Change e.g. **`forma-user-docs`**: specs for doc completeness OR doc-only tasks; publish under `doc/user/` (or site later) | Planned |
 | **P3a** | **Codegen pipeline** — ts-morph (or equivalent) from shadcn TSX → `ui/*.gen.go`; CI check for drift | **`forma-ui-codegen`** | Planned |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |

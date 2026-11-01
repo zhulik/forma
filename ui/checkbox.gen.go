@@ -8,8 +8,13 @@ type Checkbox struct {
 	OnCheckedChange func(ctx Context, checked bool)
 }
 
-func (c Checkbox) With(children ...any) Checkbox {
+func (c Checkbox) With(children ...Component) Checkbox {
 	c.BaseComponent = c.BaseComponent.With(children...)
+	return c
+}
+
+func (c Checkbox) Or(fallback ...Component) Checkbox {
+	c.BaseComponent = c.BaseComponent.Or(fallback...)
 	return c
 }
 

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strconv"
+
 	. "github.com/zhulik/forma/fn" //nolint:revive,staticcheck // DSL
 	. "github.com/zhulik/forma/ui" //nolint:revive,staticcheck // DSL
 )
@@ -48,6 +51,13 @@ func TodoApp() Component {
 					Text:  "My Tasks",
 				},
 
+				If(len(state.Todos) > 0, func() Component {
+					return Text{
+						Text:  fmt.Sprintf("%d task(s)", len(state.Todos)),
+						Muted: true,
+					}
+				}),
+
 				// Input Row
 				Row{
 					Gap: 2,
@@ -56,14 +66,15 @@ func TodoApp() Component {
 						Placeholder: "What needs to be done?",
 						Value:       state.InputValue,
 						OnChange: func(ctx Context, val string) {
-							state.InputValue = val
-							ctx.RefreshUI()
+							ctx.Update(func() {
+								state.InputValue = val
+							})
 						},
 					},
 					Button{
 						Variant: "default", // Typed prop
 						OnClick: handleAddTodo,
-					}.With("Add Task"),
+					}.With(Text{Text: "Add Task"}),
 				),
 
 				// Dynamic Task List
@@ -73,8 +84,9 @@ func TodoApp() Component {
 					Or(
 						Text{
 							Class: "text-center py-6",
+							Text:  "No tasks yet. Enjoy your day!",
 							Muted: true,
-						}.With("No tasks yet. Enjoy your day!"),
+						},
 					),
 			),
 		),
@@ -83,9 +95,10 @@ func TodoApp() Component {
 
 // --- Dynamic List Renderer ---
 
-func renderTodoList() []any {
-	return Map(state.Todos, func(todo *Todo) any {
+func renderTodoList() []Component {
+	return Map(state.Todos, func(todo *Todo) Component {
 		return Row{
+			Key:     strconv.Itoa(todo.ID),
 			Align:   Center,
 			Justify: Between,
 			Padding: 3,
@@ -98,24 +111,27 @@ func renderTodoList() []any {
 				Checkbox{
 					Checked: todo.Done,
 					OnCheckedChange: func(ctx Context, checked bool) {
-						todo.Done = checked
-						ctx.RefreshUI()
+						ctx.Update(func() {
+							todo.Done = checked
+						})
 					},
 				},
 				Text{
-					Strikethrough: todo.Done,
+					Text:          todo.Text,
 					Muted:         todo.Done,
-				}.With(todo.Text),
+					Strikethrough: todo.Done,
+				},
 			),
 
 			Button{
 				Variant: "ghost",
 				Size:    "icon",
 				OnClick: func(ctx Context) {
-					deleteTodo(todo.ID)
-					ctx.RefreshUI()
+					ctx.Update(func() {
+						deleteTodo(todo.ID)
+					})
 				},
-			}.With("✕"),
+			}.With(Text{Text: "✕"}),
 		)
 	})
 }
@@ -127,15 +143,15 @@ func handleAddTodo(ctx Context) {
 		return
 	}
 
-	state.Todos = append(state.Todos, &Todo{
-		ID:   state.nextID,
-		Text: state.InputValue,
-		Done: false,
+	ctx.Update(func() {
+		state.Todos = append(state.Todos, &Todo{
+			ID:   state.nextID,
+			Text: state.InputValue,
+			Done: false,
+		})
+		state.nextID++
+		state.InputValue = ""
 	})
-	state.nextID++
-	state.InputValue = ""
-
-	ctx.RefreshUI()
 }
 
 func deleteTodo(id int) {

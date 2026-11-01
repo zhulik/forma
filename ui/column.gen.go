@@ -7,8 +7,13 @@ type Column struct {
 	Gap int
 }
 
-func (c Column) With(children ...any) Column {
+func (c Column) With(children ...Component) Column {
 	c.BaseComponent = c.BaseComponent.With(children...)
+	return c
+}
+
+func (c Column) Or(fallback ...Component) Column {
+	c.BaseComponent = c.BaseComponent.Or(fallback...)
 	return c
 }
 

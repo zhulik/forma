@@ -9,8 +9,13 @@ type Container struct {
 	MarginY  int
 }
 
-func (c Container) With(children ...any) Container {
+func (c Container) With(children ...Component) Container {
 	c.BaseComponent = c.BaseComponent.With(children...)
+	return c
+}
+
+func (c Container) Or(fallback ...Component) Container {
+	c.BaseComponent = c.BaseComponent.Or(fallback...)
 	return c
 }
 

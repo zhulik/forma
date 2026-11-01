@@ -19,3 +19,15 @@ func Filter[T any](input []T, f func(T) bool) []T {
 
 	return result
 }
+
+func FilterMap[I any, O any](input []I, f func(I) (O, bool)) []O {
+	result := make([]O, 0, len(input))
+	for _, item := range input {
+		out, ok := f(item)
+		if ok {
+			result = append(result, out)
+		}
+	}
+
+	return result
+}

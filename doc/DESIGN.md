@@ -65,8 +65,8 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 ### Core APIs
 
 - **`UIMount(elementID, root Component)`** — attach the app to a DOM mount point once (package `ui`).
-- **`ui.Context`** — passed to event handlers; embeds `context.Context` and adds **`RefreshUI()`** so handlers rebuild the tree after mutating app state without a separate global refresh call. The runtime supplies a concrete implementation; authors depend on the interface only. Extra values (logging, tracing, request scope) can be added on the same type later without changing handler signatures across the codebase.
-- **`Component` interface** — `Render(ctx context.Context) *Node` (stdlib context at the render boundary; handler-facing **`ui.Context`** is for interactions).
+- **`ui.Context`** — for **event and interaction callbacks only**; embeds `context.Context`, exposes **`RefreshUI()`**, and **`Update(fn func())`** (runs `fn`, then refreshes once). The runtime supplies a concrete implementation; authors depend on the interface only. **Do not** use `ui.Context` on `Component.Render` or other render paths.
+- **`Component` interface** — `Render(ctx context.Context) *Node` (stdlib **`context.Context`** at the render boundary).
 
 ### Imports and fluency
 
@@ -74,14 +74,17 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 ### Functional bricks (`fn`)
 
-- Package **`github.com/zhulik/forma/fn`** holds small, generic helpers (`Map`, `Filter`, …) used when building trees and updating app state.
-- forma **uses `fn` internally** (e.g. mapping children to nodes); authors should reuse the same helpers instead of ad-hoc loops so agent-generated code stays uniform and readable.
+- Package **`github.com/zhulik/forma/fn`** holds **generic** helpers only (`Map`, `Filter`, …) — not forma-specific UI control flow.
+- Authors reuse **`fn.Map`** / **`fn.Filter`** for lists and state; forma uses `fn` internally where mapping helps.
 - Prefer **`fn.Map`** when turning slices into `.With(...)` arguments (see `renderTodoList` in [`main.go`](../main.go)).
 
 ### Composition
 
-- **Struct literals + `.With(...)`** — primary children as components or strings; value receivers keep trees immutable per build. Accepts `...any` so splatted slices from `fn.Map` fit naturally.
-- **`.Or(...)`** — fallback children when `.With` would otherwise be empty (e.g. dynamic list with zero items). Implemented on `BaseComponent` and promoted on generated wrappers; at render time, if there are no primary children, fallbacks are rendered instead.
+- **Struct literals + `.With(...)`** — primary children as **`Component` values only** (no bare strings); value receivers keep trees immutable per build. Splat `[]Component` from **`fn.Map`** into `.With(items...)`.
+- **Text** — leaf copy via **`Text{Text: "hello"}`** (plus **`Muted`**, **`Strikethrough`**, **`Class`**, …); other widgets may use a **`Text` field** (e.g. `Heading{Text: "…"}`). Labels on buttons use **`.With(Text{Text: "…"})`**.
+- **`.Or(...)`** — fallback children when `.With` would otherwise be empty (e.g. dynamic list with zero items). Typed on each wrapper (same return type as `.With`); at render time, if there are no primary children, fallbacks are rendered instead.
+- **`If(cond, …func() Component)`** (package **`ui`**, dot-imported in apps) — lazy conditional branches; one branch and false yields no node; two branches select then/else.
+- **`Key`** — stable string on **`BaseComponent`** (promoted on widgets); required for repeated siblings built from lists.
 - **Layout primitives** — `Row`, `Column`, `Container`, `Card`, … express structure without HTML tag names.
 - **Generated shadcn types** — `Button`, `Input`, `Checkbox`, … with typed props (`Variant`, `Size`, …).
 - **Escape hatches** — `Class`, `Style`, `Attrs` on `BaseComponent` for the rare Tailwind tweak; not the default path.
@@ -95,7 +98,7 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 - Handlers are Go functions; **React never passes SyntheticEvent into Go**.
 - The host extracts primitive payloads (string, bool, `map[string]any`) and invokes the Go callback.
-- **`ui.Context`** is the first parameter on callbacks (`func(ctx Context)`, `func(ctx Context, val string)`, …). It carries cancellation via the embedded stdlib context and **`RefreshUI()`** after local state changes. When a subtree unmounts, work started from that subtree should stop (HTTP, timers, goroutines). Exact scoping is specified in OpenSpec (`ui-dsl` / runtime changes).
+- **`ui.Context`** is the first parameter on callbacks (`func(ctx Context)`, `func(ctx Context, val string)`, …). Prefer **`ctx.Update(func() { … })`** for synchronous state mutations that should refresh the UI. When a subtree unmounts, work started from that subtree should stop (HTTP, timers, goroutines). Exact scoping is specified in OpenSpec (`ui-dsl` / runtime changes).
 
 ### State and reactivity (Elm-style)
 

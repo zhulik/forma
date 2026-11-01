@@ -44,8 +44,9 @@ context: |
     for fallbacks when primary children are empty; implement ui.Component with
     Render(ctx context.Context) *Node
   - ui.Context embeds context.Context for extensibility (cancellation today; values later)
-  - String children via .With("text"); layout helpers (Row, Column, Container, …) are
-    first-class, not raw div soup
+  - Text leaf copy via Text{Text: "…"}; With/Or accept Component only; layout helpers
+    (Row, Column, Container, …) are first-class, not raw div soup
+  - ui.If for lazy conditional branches; fn holds Map, Filter, FilterMap (generic only)
   - Typed props on generated shadcn wrappers (Variant, Size, …); escape hatches: Class,
     Style, Attrs on BaseComponent
   - App state: plain Go structs/vars owned by the app; no React state for business logic

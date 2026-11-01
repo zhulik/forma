@@ -8,8 +8,13 @@ type Heading struct {
 	Text  string
 }
 
-func (h Heading) With(children ...any) Heading {
+func (h Heading) With(children ...Component) Heading {
 	h.BaseComponent = h.BaseComponent.With(children...)
+	return h
+}
+
+func (h Heading) Or(fallback ...Component) Heading {
+	h.BaseComponent = h.BaseComponent.Or(fallback...)
 	return h
 }
 

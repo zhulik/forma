@@ -4,19 +4,28 @@ import "context"
 
 type Text struct {
 	BaseComponent
+
 	Text          string
 	Muted         bool
 	Strikethrough bool
 }
 
-func (t Text) With(children ...any) Text {
+func (t Text) With(children ...Component) Text {
 	t.BaseComponent = t.BaseComponent.With(children...)
+
 	return t
 }
 
-func (b Text) Render(ctx context.Context) *Node {
-	node := b.BaseComponent.Render(ctx)
+func (t Text) Or(fallback ...Component) Text {
+	t.BaseComponent = t.BaseComponent.Or(fallback...)
+
+	return t
+}
+
+func (t Text) Render(ctx context.Context) *Node {
+	node := t.BaseComponent.Render(ctx)
 	node.Type = "Text"
-	node.Props = b
+	node.Props = t
+
 	return node
 }

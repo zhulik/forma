@@ -9,8 +9,13 @@ type Button struct {
 	OnClick func(ctx Context)
 }
 
-func (b Button) With(children ...any) Button {
+func (b Button) With(children ...Component) Button {
 	b.BaseComponent = b.BaseComponent.With(children...)
+	return b
+}
+
+func (b Button) Or(fallback ...Component) Button {
+	b.BaseComponent = b.BaseComponent.Or(fallback...)
 	return b
 }
 
