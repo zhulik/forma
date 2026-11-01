@@ -1,0 +1,18 @@
+package main
+
+import (
+	. "github.com/zhulik/forma/ui" //nolint:revive,staticcheck // DSL
+)
+
+func main() {
+	UIMount("{{ .Mount }}", App())
+}
+
+func App() Component {
+	return Container{}.With(
+		Heading{
+			Level: 1,
+			Text:  "Hello from forma",
+		},
+	)
+}

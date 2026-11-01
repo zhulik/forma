@@ -1,0 +1,46 @@
+---
+description: forma CLI (cmd/forma) architecture and conventions
+globs: cmd/forma/**/*
+alwaysApply: false
+---
+
+# forma CLI architecture
+
+Framework: **urfave/cli/v3**. Root command in `internal/cli`; `main` configures logging and runs the root command. Nested Go module: `cmd/forma/go.mod`.
+
+## Layout
+
+```
+cmd/forma/
+  main.go
+  go.mod
+  templates/scaffolds/<name>/   # embedded; every file ends in .tmpl
+  internal/cli/                 # root + subcommands
+  internal/cli/app/             # pal Run wrapper
+  internal/cli/subcommands/init/  # package initcmd
+  internal/templates/           # (templates live in cmd/forma/templates package)
+  pkg/cmdexec/
+```
+
+## Pal
+
+Subcommand work runs through `app.Run` with explicit `pal.ServiceDef` lists (no global registration). Init uses `deps.Services(pal.Provide(&runner{…}))…`; synccmd inlines `gotool.Provide(), synccmd.Provide(), pal.Provide(…)` to avoid an import cycle with `deps`. Pass only CLI-bound fields on the runner. Cross-package DI interfaces live in `internal/core/interfaces.go`. Use `InjectSlog()` via `app.Run`. Version subcommand does not use pal.
+
+## Init
+
+- Full init: **empty directory only**; writes **in place** (partial tree on error is acceptable).
+- `--only-config`: write `forma.yaml` if missing; fail if present; no `go mod init`.
+- Templates: `text/template`, default `--template minimal`.
+- Stub sync after full init: `go mod edit -require` + optional `FORMA_REPLACE` + `go mod tidy`.
+
+## External commands
+
+Use `pkg/cmdexec.Run` for `go` with live stdio.
+
+## Exit codes
+
+0 success, 1 any error.
+
+## Tests
+
+Prefer external `*_test` packages for CLI tests under `internal/cli`. Integration tests build the real binary as a subprocess.

@@ -4,7 +4,7 @@
 
 | Tool | Why |
 |------|-----|
-| **Go** | Application code and (later) the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. |
+| **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. |
 | **Node.js** | Host app, shadcn sources, and codegen (once P3 lands). |
 | **GopherJS** | Compile Go to JavaScript for the browser loop (planned P3c). |
 
@@ -12,10 +12,16 @@ Optional: [asdf](https://asdf-vm.com/) with `.tool-versions` for pinned Go, Node
 
 ## Install the forma CLI
 
-> **Planned.** The command below is the target install path. The binary is not in this repository yet; see ROADMAP P3 and the `forma-cli` OpenSpec capability.
+From a clone of this repository (until the first release tag is published):
 
 ```bash
 go install github.com/zhulik/forma/cmd/forma@latest
+```
+
+Or build from source:
+
+```bash
+cd cmd/forma && go build -o forma .
 ```
 
 Verify:
@@ -26,34 +32,48 @@ forma version
 
 ## Create your first app
 
-> **Planned** until `forma init` ships. This is the intended three-step flow after the CLI exists.
-
 ```bash
 mkdir myapp && cd myapp
 forma init github.com/you/myapp
-forma dev
 ```
 
-What **`forma init`** will do:
+What **`forma init`** does today:
 
-1. **`go mod init`** with your module path (no git remote setup).
-2. Write a minimal scaffold: `main.go`, `forma.yaml`, `host/`, default imports of `github.com/zhulik/forma/ui` and `fn`.
-3. Run **`forma sync`** so host deps, shadcn sources, generated `internal/ui` bindings, registry, and **`go mod tidy`** are applied.
+1. Requires an **empty** directory (or creates one with `-d`).
+2. **`go mod init`** with your module path (no git remote setup).
+3. Applies the embedded **`minimal`** template: `main.go`, `forma.yaml`, and a hello layout using `github.com/zhulik/forma/ui`.
+4. Runs **stub **`forma sync`**: adds a `require` on the forma library and **`go mod tidy`**. Host, shadcn, and codegen steps come in P3.
 
-Use your real module path (e.g. `github.com/you/myapp`), not a placeholder—you will import it from generated code under `internal/ui`.
+Use your real module path (e.g. `github.com/you/myapp`), not a placeholder.
 
-## Learn the DSL today (no CLI)
+**Local forma checkout:** before the library is on the public module proxy, set **`FORMA_REPLACE`** to the absolute path of the forma repo when running init (CI in this repository does this automatically):
 
-While the CLI and browser loop are in progress:
+```bash
+FORMA_REPLACE=/path/to/forma forma init github.com/you/myapp
+```
 
-1. Clone or browse [github.com/zhulik/forma](https://github.com/zhulik/forma).
-2. Read [`main.go`](../../main.go) (todo demo).
-3. Run `task test` and `task lint` from the repo root.
+**Config only:** in an existing tree, generate **`forma.yaml`** without touching Go sources:
 
-That exercises the **authoring model** only; `UIMount` in this repo is still a stub until P3.
+```bash
+forma init --only-config github.com/you/myapp
+```
+
+Fails if **`forma.yaml`** already exists. See [Manual setup](manual-setup.md) for the equivalent hand-written steps.
+
+**Browser loop:** **`forma dev`** is not available yet (ROADMAP P3d).
+
+## Learn the DSL today (no new app)
+
+You can also learn from this repository:
+
+1. Read [`main.go`](../../main.go) (todo demo).
+2. Run `task test` and `task lint` from the repo root.
+
+That exercises the **authoring model**; `UIMount` here is still a stub until P3.
 
 ## Next steps
 
 - [CLI reference](cli.md)
+- [Manual setup](manual-setup.md)
 - [forma.yaml](forma-yaml.md)
 - [Writing UI](writing-ui.md)

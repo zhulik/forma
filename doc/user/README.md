@@ -14,17 +14,18 @@ Contributors: see also OpenSpec capability **`ui-docs`** and `openspec/config.ya
 |------|--------|
 | UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`main.go`](../../main.go), [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
 | Author guide (this tree) | **Available** |
-| `forma` CLI (`init`, `add`, `sync`, `dev`) | **Planned** — [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md) |
+| `forma` CLI (`init`, stub `sync`, `version`) | **Partial** — [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md); `add` / full `sync` / `dev` planned |
 | Browser dev loop, GopherJS runtime, host | **Planned** — ROADMAP P3 |
 | Codegen from shadcn TSX | **Planned** — ROADMAP P3a |
 
-Until the CLI ships, use this repo to learn the **authoring model**. When the CLI lands, follow [Install](install.md) and [CLI reference](cli.md).
+Use [Install](install.md) and [CLI reference](cli.md) for new apps, or [Manual setup](manual-setup.md) without the CLI.
 
 ## Guide map
 
 | Page | Contents |
 |------|----------|
 | [Install](install.md) | Toolchain, installing the CLI, first project |
+| [Manual setup](manual-setup.md) | Create a project without `forma init` |
 | [CLI reference](cli.md) | `init`, `add`, `sync`, `dev` |
 | [forma.yaml](forma-yaml.md) | Project config and defaults |
 | [Project layout](project-layout.md) | Directories, imports, this repo vs your app |

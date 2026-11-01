@@ -1,0 +1,60 @@
+version: "2"
+
+linters:
+  enable:
+    - gosec
+    - misspell
+    - revive
+    - unconvert
+    - unparam
+    - whitespace
+    - paralleltest
+    - testpackage
+  settings:
+    gosec:
+      excludes:
+        - G104
+    gomoddirectives:
+      replace-allow-list:
+        - github.com/zhulik/forma
+    testpackage:
+      skip-regexp: "^$"
+      allow-packages: []
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - gosec
+        path: _test\.go
+      - linters:
+          - paralleltest
+        path: internal/cli/subcommands/(init|sync)/.*_test\.go
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  fix: false
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/zhulik/forma
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

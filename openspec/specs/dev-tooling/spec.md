@@ -52,6 +52,15 @@ The repository SHALL run, on every push, the same generate check, static analysi
 - **THEN** automation runs generate verification, static analysis, and fix verification
 - **AND** the workflow fails if any step fails
 
+### Requirement: Init scaffold smoke check in automation
+
+The project SHALL verify in continuous integration that building the forma CLI and running full init against an empty directory produces a Go module that compiles with `go build` for the scaffolded application entrypoint.
+
+#### Scenario: CI init smoke
+
+- **WHEN** automation runs on a clean checkout after CLI scaffold changes
+- **THEN** it builds the forma CLI, runs init with a test module path in a temporary empty directory, and succeeds compiling the generated application without manual fixes
+
 ### Requirement: Agent-oriented Go rules are present
 
 The repository SHALL include Cursor rules covering early-stage compatibility policy, Go error handling, testing conventions (for when tests are added later), and file/type organization so automated edits follow the same standards as sister zhulik Go projects.

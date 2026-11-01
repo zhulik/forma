@@ -40,3 +40,6 @@ jobs:
 
       - name: Fix and verify committed
         run: task check-fix
+
+      - name: Init scaffold smoke
+        run: task check-init-scaffold
