@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** Greenfield with P0 dev tooling in place ([README.md](../README.md)). [`main.go`](../main.go) is the DSL reference demo (dot imports, [`fn/`](../fn/), `.Or` fallbacks, `ui.Context`); [`ui/`](../ui/) has stub `UIMount`/`RefreshUI` and hand-written `*.gen.go` placeholders. No working GopherJS bundle or React host in-repo yet.
+**Current status:** **P0** (dev tooling) and **P1** (UI DSL v1) are complete. Canonical specs live in [`openspec/specs/dev-tooling/`](../openspec/specs/dev-tooling/spec.md) and [`openspec/specs/ui-dsl/`](../openspec/specs/ui-dsl/spec.md) (Fragment, field-only compound slots, typed `.Or`, keys, `Context.Update`, etc.). [`main.go`](../main.go) is the reference todo demo; [`ui/`](../ui/) implements DSL types plus stub `UIMount`/`RefreshUI` and hand-written `*.gen.go` stand-ins for a future codegen pass. [`task test`](../Taskfile.yaml) covers DSL unit tests (e.g. slots). **Next:** P2 user documentation. No GopherJS bundle or React host in-repo yet.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md)
 
@@ -32,9 +32,9 @@ Work proceeds in **strict order**: DSL → user documentation → implementation
 
 | Phase | Scope | OpenSpec / deliverables | Status |
 |-------|--------|-------------------------|--------|
-| **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; tests deferred | **`forma-dev-tooling`** (archive after apply) | **Done** |
-| **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; evolve `main.go` as reference; stub `ui` types only | **`forma-ui-dsl`**, **`forma-fragment-slots`** → `openspec/specs/ui-dsl/` | **Done** |
-| **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `UIMount` / `ctx.RefreshUI()`, dot imports, `fn`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | Change e.g. **`forma-user-docs`**: specs for doc completeness OR doc-only tasks; publish under `doc/user/` (or site later) | Planned |
+| **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; `task test` wired | **`forma-dev-tooling`** → `openspec/specs/dev-tooling/` | **Done** |
+| **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; `main.go` reference; stub `ui` runtime | **`forma-ui-dsl`**, **`forma-fragment-slots`** (archived) → `openspec/specs/ui-dsl/` | **Done** |
+| **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `UIMount` / `ctx.RefreshUI()`, dot imports, `fn`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | **`forma-user-docs`** (next OpenSpec change): doc completeness spec and/or doc-only tasks; publish under `doc/user/` (or site later) | **Next** |
 | **P3a** | **Codegen pipeline** — ts-morph (or equivalent) from shadcn TSX → `ui/*.gen.go`; CI check for drift | **`forma-ui-codegen`** | Planned |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |
 | **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** | Planned |
@@ -58,28 +58,30 @@ P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
 ## OpenSpec workflow
 
 - **Schema:** `spec-driven` (see [`openspec/config.yaml`](../openspec/config.yaml)).
-- **Main specs home:** `openspec/specs/` — populated when changes archive (e.g. `ui-dsl`, `ui-runtime`, `ui-codegen`).
+- **Main specs home:** `openspec/specs/` — **`dev-tooling`**, **`ui-dsl`** today; more capabilities (e.g. `ui-runtime`, `ui-codegen`) land when P3+ changes archive.
 - **Active work:** `openspec/changes/<change-name>/` with `proposal.md`, `specs/.../spec.md`, `design.md`, `tasks.md`.
 - **Archive:** completed changes move to `openspec/changes/archive/`; sync capabilities to `openspec/specs/`.
 
-### Suggested first changes
+### Suggested changes (by phase)
 
-| Order | Change name | Purpose |
-|-------|-------------|---------|
-| 1 | `forma-ui-dsl` | Lock DSL behavior; extend `main.go`; define `Component`, `Node`, `Context`, `.Or`, `fn`, events |
-| 2 | `forma-user-docs` | Author-facing guide structure + content tasks |
-| 3 | `forma-ui-codegen` | Generator + first real generated components |
-| 4 | `forma-react-host` | Static host app + registry |
-| 5 | `forma-gopherjs-runtime` | Wire Go to host |
-| 6 | `forma-dev-experience` | Taskfile/scripts; demo runs in browser |
+| Order | Change name | Purpose | Status |
+|-------|-------------|---------|--------|
+| 1 | `forma-dev-tooling` | Lint, Taskfile, CI, Cursor rules | **Done** (archived) |
+| 2 | `forma-ui-dsl` | Lock DSL behavior; `Component`, `Node`, `Context`, `.Or`, `fn`, events | **Done** (archived) |
+| 3 | `forma-fragment-slots` | Fragment + field-only slots; tree `Slots` map | **Done** (archived) |
+| 4 | `forma-user-docs` | Author-facing guide structure + content tasks | **Next** |
+| 5 | `forma-ui-codegen` | Generator + first real generated components | Planned |
+| 6 | `forma-react-host` | Static host app + registry | Planned |
+| 7 | `forma-gopherjs-runtime` | Wire Go to host | Planned |
+| 8 | `forma-dev-experience` | Taskfile/scripts; demo runs in browser | Planned |
 
 Proposals must reference **ROADMAP phase** (P1–P5) in the Impact section.
 
 ---
 
-## P1 — DSL focus (immediate)
+## P1 — DSL focus (complete)
 
-Deliverables authors and agents can rely on **before** runtime exists:
+Deliverables authors and agents can rely on **before** runtime exists (implemented and specified in `openspec/specs/ui-dsl/`):
 
 - **`UIMount` / `RefreshUI`** contract and when handlers must refresh.
 - **Imports:** dot-import `ui` and `fn` in apps; `fn.Map` / `fn.Filter` for lists and state.
