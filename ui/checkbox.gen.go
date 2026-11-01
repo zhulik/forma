@@ -5,7 +5,7 @@ import "context"
 type Checkbox struct {
 	BaseComponent
 	Checked         bool
-	OnCheckedChange func(ctx context.Context, checked bool)
+	OnCheckedChange func(ctx Context, checked bool)
 }
 
 func (c Checkbox) With(children ...any) Checkbox {

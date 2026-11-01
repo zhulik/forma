@@ -37,7 +37,7 @@ Three cooperating parts:
 ┌─────────────────────────────────────────────────────────┐
 │  Go application (GopherJS → JS)                          │
 │  • App state (structs, vars)                             │
-│  • ui.Mount / ui.Refresh                               │
+│  • ui.UIMount; handlers call ctx.RefreshUI()             │
 │  • Component tree via Render(ctx) → Node                 │
 └───────────────────────────┬─────────────────────────────┘
                             │ structs, func callbacks, tree
@@ -64,13 +64,24 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 ### Core APIs
 
-- **`ui.Mount(elementID, root Component)`** — attach the app to a DOM mount point once.
-- **`ui.Refresh()`** — after mutating app state, rebuild the tree and push it to the host.
-- **`Component` interface** — `Render(ctx context.Context) *Node`.
+- **`UIMount(elementID, root Component)`** — attach the app to a DOM mount point once (package `ui`).
+- **`ui.Context`** — passed to event handlers; embeds `context.Context` and adds **`RefreshUI()`** so handlers rebuild the tree after mutating app state without a separate global refresh call. The runtime supplies a concrete implementation; authors depend on the interface only. Extra values (logging, tracing, request scope) can be added on the same type later without changing handler signatures across the codebase.
+- **`Component` interface** — `Render(ctx context.Context) *Node` (stdlib context at the render boundary; handler-facing **`ui.Context`** is for interactions).
+
+### Imports and fluency
+
+- **Dot imports** for `ui` and `fn` are encouraged in app entrypoints and screen packages so trees read like a DSL (`Container{}.With(Row{…})`, `Map(todos, …)`). Use `//nolint:revive,staticcheck // DSL` where linters flag dot imports. Library packages that re-export forma should use normal imports.
+
+### Functional bricks (`fn`)
+
+- Package **`github.com/zhulik/forma/fn`** holds small, generic helpers (`Map`, `Filter`, …) used when building trees and updating app state.
+- forma **uses `fn` internally** (e.g. mapping children to nodes); authors should reuse the same helpers instead of ad-hoc loops so agent-generated code stays uniform and readable.
+- Prefer **`fn.Map`** when turning slices into `.With(...)` arguments (see `renderTodoList` in [`main.go`](../main.go)).
 
 ### Composition
 
-- **Struct literals + `.With(...)`** — children as components or strings; value receivers keep trees immutable per build.
+- **Struct literals + `.With(...)`** — primary children as components or strings; value receivers keep trees immutable per build. Accepts `...any` so splatted slices from `fn.Map` fit naturally.
+- **`.Or(...)`** — fallback children when `.With` would otherwise be empty (e.g. dynamic list with zero items). Implemented on `BaseComponent` and promoted on generated wrappers; at render time, if there are no primary children, fallbacks are rendered instead.
 - **Layout primitives** — `Row`, `Column`, `Container`, `Card`, … express structure without HTML tag names.
 - **Generated shadcn types** — `Button`, `Input`, `Checkbox`, … with typed props (`Variant`, `Size`, …).
 - **Escape hatches** — `Class`, `Style`, `Attrs` on `BaseComponent` for the rare Tailwind tweak; not the default path.
@@ -80,16 +91,16 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 - **In Go:** functions or structs that return `Component` by composing existing nodes (e.g. `UserCard(user User) ui.Component`).
 - **In JS:** thin `.tsx` wrappers for third-party React libs, registered in `ComponentRegistry`, exposed to Go via a generated or hand-written struct.
 
-### Events and `context.Context`
+### Events and `ui.Context`
 
 - Handlers are Go functions; **React never passes SyntheticEvent into Go**.
 - The host extracts primitive payloads (string, bool, `map[string]any`) and invokes the Go callback.
-- **`context.Context`** on handlers supports cancellation: when a subtree unmounts, work started from that subtree should stop (HTTP, timers, goroutines). Exact scoping is specified in OpenSpec (`ui-dsl` / runtime changes).
+- **`ui.Context`** is the first parameter on callbacks (`func(ctx Context)`, `func(ctx Context, val string)`, …). It carries cancellation via the embedded stdlib context and **`RefreshUI()`** after local state changes. When a subtree unmounts, work started from that subtree should stop (HTTP, timers, goroutines). Exact scoping is specified in OpenSpec (`ui-dsl` / runtime changes).
 
 ### State and reactivity (Elm-style)
 
 1. Application state lives in **Go** (structs, slices, maps)—not in React `useState` for domain data.
-2. UI is a **pure function of state**: `Refresh` rebuilds a lightweight tree from current state.
+2. UI is a **pure function of state**: `RefreshUI` rebuilds a lightweight tree from current state.
 3. React **diffs** the new tree against its virtual DOM; the browser is not blindly repainted.
 
 **Text inputs:** typing every keystroke through Go + full refresh can cause focus/cursor issues. The spec allows **controlled hybrid** behavior: React may hold ephemeral input state locally; Go receives updates on `onBlur`, submit, or debounced `onChange`—documented per component in user guide.
@@ -99,7 +110,7 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 ### Async
 
 - Use normal **goroutines** and **`net/http`** (GopherJS maps them to async JS).
-- After async work, mutate Go state and call **`Refresh()`** (often from the goroutine, respecting `ctx` cancellation).
+- After async work, mutate Go state and call **`ctx.RefreshUI()`** on the handler context (often from the goroutine, respecting cancellation on the embedded context).
 
 ---
 
@@ -112,7 +123,7 @@ shadcn installs **source** `.tsx` into the repo, which makes AST-based generatio
 | `string`, `boolean`, `number` | `string`, `bool`, `float64` |
 | Union literals `"default" \| "ghost"` | `string` + optional `const` block |
 | `React.ReactNode` | children via `.With(...)` / nested `Component` |
-| `(e: MouseEvent) => void` | `func(ctx context.Context)` or `func(ctx context.Context, data map[string]any)` |
+| `(e: MouseEvent) => void` | `func(ctx ui.Context)` or `func(ctx ui.Context, data map[string]any)` |
 | Complex 3rd-party props | narrow in JS wrapper; Go sees clean fields |
 
 Generated files are **`*.gen.go`**; manual edits live in separate files or documented extension points.
@@ -135,11 +146,11 @@ Go stays free of DOM types; the wrapper converts vendor events to plain data bef
 
 ### Day-to-day flow
 
-1. **Create a Go module** that imports `github.com/zhulik/forma/ui`.
+1. **Create a Go module** that depends on `github.com/zhulik/forma/ui` and `github.com/zhulik/forma/fn`.
 2. **Define app state** as ordinary Go types.
-3. **Implement `func MyApp() ui.Component`** (or equivalent root) using layout + shadcn components.
-4. **`ui.Mount("app-root", MyApp())`** from `main`.
-5. On user actions or async completion: **update state → `ui.Refresh()`**.
+3. **Implement `func MyApp() Component`** using dot-imported layout + shadcn types (see [`main.go`](../main.go)).
+4. **`UIMount("app-root", MyApp())`** from `main`.
+5. On user actions or async completion: **update state → `ctx.RefreshUI()`** in handlers (or the context the runtime provides for that scope).
 
 ### Adding shadcn components
 
@@ -168,10 +179,11 @@ Same Go + host bundle, served inside a **native system webview** (not Electron).
 
 [`main.go`](../main.go) demonstrates:
 
+- Dot imports of `ui` and `fn` for a dense authoring surface
 - Global app state and CRUD handlers
 - Nested layout and generated widgets
-- Dynamic list rendering
-- `context.Context` on change handlers
+- Dynamic list rendering with **`fn.Map`** and **`.Or(...)`** empty-state fallback
+- **`ui.Context`** on handlers (`RefreshUI` after mutations)
 - `Class` escape hatch alongside typed props
 
-The `ui` package today implements **types and stub** `Mount`/`Refresh`; runtime behavior is defined in OpenSpec and built in roadmap phase P3.
+The `ui` package today implements **types and stub** `UIMount`/`RefreshUI`; runtime behavior is defined in OpenSpec and built in roadmap phase P3.

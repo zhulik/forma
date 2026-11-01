@@ -33,12 +33,17 @@ context: |
     and func callbacks to JS without JSON serialization on the hot path
   - Codegen: deterministic Go structs from local shadcn .tsx (ts-morph or equivalent);
     emit ui/*.gen.go; union props → string + optional const block; React events → sanitized
-    Go callbacks (context.Context first arg where applicable)
+    Go callbacks (ui.Context first arg where applicable)
 
   DSL conventions (from demo — evolve via OpenSpec, do not silently diverge):
-  - ui.Mount(rootElementID, rootComponent); ui.Refresh() after state mutation
-  - Components are Go structs with value-receiver .With(...) for children; implement
-    ui.Component with Render(ctx) *Node
+  - Dot-import ui and fn in app code for fluency (nolint revive/staticcheck where needed)
+  - UIMount(rootElementID, rootComponent); event handlers take ui.Context and call
+    ctx.RefreshUI() after state mutation
+  - Package fn: Map, Filter, … — forma uses it internally; authors reuse for lists/state
+  - Components are Go structs with value-receiver .With(...) for children and .Or(...)
+    for fallbacks when primary children are empty; implement ui.Component with
+    Render(ctx context.Context) *Node
+  - ui.Context embeds context.Context for extensibility (cancellation today; values later)
   - String children via .With("text"); layout helpers (Row, Column, Container, …) are
     first-class, not raw div soup
   - Typed props on generated shadcn wrappers (Variant, Size, …); escape hatches: Class,
@@ -64,7 +69,8 @@ rules:
       unless the proposal is explicitly P1/P2 only
   specs:
     - Behavior contracts (SHALL/MUST + scenarios); no import paths or framework choices
-    - DSL semantics (Mount, Refresh, composition, events, keys, controlled inputs) belong
+    - DSL semantics (UIMount, RefreshUI, With/Or, fn, ui.Context, events, keys,
+      controlled inputs) belong
       in specs when they affect authors
     - Distinguish author-facing DSL from host/runtime behavior when they differ
   design:

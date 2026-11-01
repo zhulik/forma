@@ -1,9 +1,5 @@
 package ui
 
-func Refresh() {
-
-}
-
-func Mount(string, Component) {
+func UIMount(string, Component) { //nolint:revive // exported naming
 
 }

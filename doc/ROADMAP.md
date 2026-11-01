@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** Greenfield with P0 dev tooling in place ([README.md](../README.md)). [`main.go`](../main.go) is the DSL reference demo; [`ui/`](../ui/) has stub `Mount`/`Refresh` and placeholder `*.gen.go` files. No working GopherJS bundle or React host in-repo yet.
+**Current status:** Greenfield with P0 dev tooling in place ([README.md](../README.md)). [`main.go`](../main.go) is the DSL reference demo (dot imports, [`fn/`](../fn/), `.Or` fallbacks, `ui.Context`); [`ui/`](../ui/) has stub `UIMount`/`RefreshUI` and hand-written `*.gen.go` placeholders. No working GopherJS bundle or React host in-repo yet.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md)
 
@@ -34,10 +34,10 @@ Work proceeds in **strict order**: DSL → user documentation → implementation
 |-------|--------|-------------------------|--------|
 | **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; tests deferred | **`forma-dev-tooling`** (archive after apply) | **Done** |
 | **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches; evolve `main.go` as reference; stub `ui` types only | Change e.g. **`forma-ui-dsl`**: proposal, specs (`ui-dsl`), design, tasks; may add `examples/` variants | **Next** |
-| **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `Mount`/`Refresh`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | Change e.g. **`forma-user-docs`**: specs for doc completeness OR doc-only tasks; publish under `doc/user/` (or site later) | Planned |
+| **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `UIMount` / `ctx.RefreshUI()`, dot imports, `fn`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | Change e.g. **`forma-user-docs`**: specs for doc completeness OR doc-only tasks; publish under `doc/user/` (or site later) | Planned |
 | **P3a** | **Codegen pipeline** — ts-morph (or equivalent) from shadcn TSX → `ui/*.gen.go`; CI check for drift | **`forma-ui-codegen`** | Planned |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |
-| **P3c** | **GopherJS runtime** — real `Mount`/`Refresh`, tree crossing, callback dispatch, `context` propagation | **`forma-gopherjs-runtime`** | Planned |
+| **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** | Planned |
 | **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | Planned |
 | **P4** | **Desktop packaging** — native webview wrapper, same bundle | **`forma-desktop`** | Deferred |
 | **P5** | **Breadth** — more shadcn widgets, 3rd-party recipes (maps, payments), performance notes | Multiple small changes | Deferred |
@@ -66,7 +66,7 @@ P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
 
 | Order | Change name | Purpose |
 |-------|-------------|---------|
-| 1 | `forma-ui-dsl` | Lock DSL behavior; extend `main.go`; define `Component`, `Node`, `Refresh`, events |
+| 1 | `forma-ui-dsl` | Lock DSL behavior; extend `main.go`; define `Component`, `Node`, `Context`, `.Or`, `fn`, events |
 | 2 | `forma-user-docs` | Author-facing guide structure + content tasks |
 | 3 | `forma-ui-codegen` | Generator + first real generated components |
 | 4 | `forma-react-host` | Static host app + registry |
@@ -81,10 +81,11 @@ Proposals must reference **ROADMAP phase** (P1–P5) in the Impact section.
 
 Deliverables authors and agents can rely on **before** runtime exists:
 
-- **Mount / Refresh** contract and when to call `Refresh`.
-- **Component** composition: `.With`, string children, splatting dynamic slices (see `renderTodoList` in `main.go`).
+- **`UIMount` / `RefreshUI`** contract and when handlers must refresh.
+- **Imports:** dot-import `ui` and `fn` in apps; `fn.Map` / `fn.Filter` for lists and state.
+- **Component** composition: `.With`, **`.Or`** fallbacks, string children, splatting dynamic slices (see `renderTodoList` in `main.go`).
 - **Layout vs leaf** components; naming and prop conventions for generated shadcn types.
-- **Events:** `context.Context` first parameter; no DOM types in Go API.
+- **Events:** `ui.Context` on handlers; no DOM types in Go API.
 - **Lists:** keys; **inputs:** controlled vs deferred sync policy.
 - **Escape hatches:** `Class`, `Style`, `Attrs` — documented limits.
 - **Open questions** captured in design (not left implicit): optional vs required props, variant typing strictness, custom component naming.
@@ -101,7 +102,7 @@ Topics (minimum):
 
 1. Prerequisites and repo layout (Go app + `host/` or equivalent).
 2. Creating an app from scratch (clone template → `main.go` → mount id in `index.html`).
-3. State + `Refresh` pattern; async goroutines.
+3. State + `ctx.RefreshUI()` pattern; async goroutines.
 4. Adding a shadcn component (CLI → registry → codegen → Go usage).
 5. Custom composite components in Go; custom JS wrapper for a npm React lib.
 6. Debugging (tree not updating, callback not firing, input focus).
@@ -127,7 +128,7 @@ Implementation is **downstream** of P1 + P2:
 | Item | Notes |
 |------|--------|
 | SSR / hydration | See DESIGN.md; only if product requires SEO |
-| Signal-based fine-grained updates | Alternative to full-tree Refresh; breaks simple mental model |
+| Signal-based fine-grained updates | Alternative to full-tree RefreshUI; breaks simple mental model |
 | Desktop webview | P4 |
 | Official CLI (`forma init`) | After dev loop stable |
 | Agent-specific prompts/skills | Optional; after DSL + docs stable |

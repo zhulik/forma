@@ -6,7 +6,7 @@ type Button struct {
 	BaseComponent
 	Variant string
 	Size    string
-	OnClick func(ctx context.Context)
+	OnClick func(ctx Context)
 }
 
 func (b Button) With(children ...any) Button {

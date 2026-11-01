@@ -6,7 +6,7 @@ type Input struct {
 	BaseComponent
 	Placeholder string
 	Value       string
-	OnChange    func(ctx context.Context, val string)
+	OnChange    func(ctx Context, val string)
 }
 
 func (i Input) With(children ...any) Input {

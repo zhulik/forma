@@ -2,7 +2,7 @@
 
 Go-native UI framework (in development): compose semantic widgets in Go; a React + shadcn host renders them. See [doc/DESIGN.md](doc/DESIGN.md) and [doc/ROADMAP.md](doc/ROADMAP.md).
 
-The reference DSL demo is [main.go](main.go).
+The reference DSL demo is [main.go](main.go) (dot-imported [`ui`](ui/) and [`fn`](fn/), `.With` / `.Or`, `ui.Context`).
 
 ## Development
 

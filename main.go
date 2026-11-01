@@ -1,9 +1,8 @@
 package main
 
 import (
-	"context"
-
-	"github.com/zhulik/forma/ui"
+	. "github.com/zhulik/forma/fn" //nolint:revive,staticcheck // DSL
+	. "github.com/zhulik/forma/ui" //nolint:revive,staticcheck // DSL
 )
 
 // --- Application State ---
@@ -26,52 +25,57 @@ var state = &AppState{ //nolint:gochecknoglobals // demo app root state
 }
 
 func main() {
-	ui.Mount("app-root", TodoApp())
+	UIMount("app-root", TodoApp())
 }
 
 // --- Root Component ---
 
-func TodoApp() ui.Component {
-	return ui.Container{
+func TodoApp() Component {
+	return Container{
 		MaxWidth: "md",
 		MarginX:  "auto",
 		MarginY:  10,
 	}.With(
-		ui.Card{
+		Card{
 			Class:   "shadow-xl border-slate-200", // Escape hatch alongside props!
 			Padding: 6,
 		}.With(
-			ui.Column{
+			Column{
 				Gap: 6,
 			}.With(
-				ui.Heading{
+				Heading{
 					Level: 2,
 					Text:  "My Tasks",
 				},
 
 				// Input Row
-				ui.Row{
+				Row{
 					Gap: 2,
 				}.With(
-					ui.Input{
+					Input{
 						Placeholder: "What needs to be done?",
 						Value:       state.InputValue,
-						OnChange: func(ctx context.Context, val string) {
-							_ = ctx
+						OnChange: func(ctx Context, val string) {
 							state.InputValue = val
-							ui.Refresh()
+							ctx.RefreshUI()
 						},
 					},
-					ui.Button{
+					Button{
 						Variant: "default", // Typed prop
 						OnClick: handleAddTodo,
 					}.With("Add Task"),
 				),
 
 				// Dynamic Task List
-				ui.Column{
+				Column{
 					Gap: 3,
-				}.With(renderTodoList()...),
+				}.With(renderTodoList()...).
+					Or(
+						Text{
+							Class: "text-center py-6",
+							Muted: true,
+						}.With("No tasks yet. Enjoy your day!"),
+					),
 			),
 		),
 	)
@@ -80,64 +84,45 @@ func TodoApp() ui.Component {
 // --- Dynamic List Renderer ---
 
 func renderTodoList() []any {
-	if len(state.Todos) == 0 {
-		return []any{
-			ui.Text{
-				Class: "text-center py-6",
-				Muted: true,
-			}.With("No tasks yet. Enjoy your day!"),
-		}
-	}
-
-	var list []any
-	for _, t := range state.Todos {
-		todo := t // Capture loop variable
-
-		row := ui.Row{
-			Align:   ui.Center,
-			Justify: ui.Between,
+	return Map(state.Todos, func(todo *Todo) any {
+		return Row{
+			Align:   Center,
+			Justify: Between,
 			Padding: 3,
 			Border:  true,
 		}.With(
-			ui.Row{
-				Align: ui.Center,
+			Row{
+				Align: Center,
 				Gap:   3,
 			}.With(
-				ui.Checkbox{
+				Checkbox{
 					Checked: todo.Done,
-					OnCheckedChange: func(ctx context.Context, checked bool) {
-						_ = ctx
+					OnCheckedChange: func(ctx Context, checked bool) {
 						todo.Done = checked
-						ui.Refresh()
+						ctx.RefreshUI()
 					},
 				},
-				ui.Text{
+				Text{
 					Strikethrough: todo.Done,
 					Muted:         todo.Done,
 				}.With(todo.Text),
 			),
 
-			ui.Button{
+			Button{
 				Variant: "ghost",
 				Size:    "icon",
-				OnClick: func(ctx context.Context) {
-					_ = ctx
+				OnClick: func(ctx Context) {
 					deleteTodo(todo.ID)
-					ui.Refresh()
+					ctx.RefreshUI()
 				},
 			}.With("✕"),
 		)
-
-		list = append(list, row)
-	}
-
-	return list
+	})
 }
 
 // --- Business Logic ---
 
-func handleAddTodo(ctx context.Context) {
-	_ = ctx
+func handleAddTodo(ctx Context) {
 	if state.InputValue == "" {
 		return
 	}
@@ -150,15 +135,11 @@ func handleAddTodo(ctx context.Context) {
 	state.nextID++
 	state.InputValue = ""
 
-	ui.Refresh()
+	ctx.RefreshUI()
 }
 
 func deleteTodo(id int) {
-	var updated []*Todo
-	for _, t := range state.Todos {
-		if t.ID != id {
-			updated = append(updated, t)
-		}
-	}
-	state.Todos = updated
+	state.Todos = Filter(state.Todos, func(t *Todo) bool {
+		return t.ID != id
+	})
 }
