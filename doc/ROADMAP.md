@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0** (dev tooling) and **P1** (UI DSL v1) are complete. Canonical specs live in [`openspec/specs/dev-tooling/`](../openspec/specs/dev-tooling/spec.md) and [`openspec/specs/ui-dsl/`](../openspec/specs/ui-dsl/spec.md) (Fragment, field-only compound slots, typed `.Or`, keys, `Context.Update`, etc.). [`main.go`](../main.go) is the reference todo demo; [`ui/`](../ui/) implements DSL types plus stub `UIMount`/`RefreshUI` and hand-written `*.gen.go` stand-ins for a future codegen pass. [`task test`](../Taskfile.yaml) covers DSL unit tests (e.g. slots). **Next:** P2 user documentation. No GopherJS bundle or React host in-repo yet.
+**Current status:** **P0–P2** complete for specs and author docs. Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md); author guide [`doc/user/`](user/README.md); **`forma-cli`** contract lands in `openspec/specs/` when **`forma-user-docs`** archives. [`main.go`](../main.go) is the reference todo demo; stub runtime and no `cmd/forma` yet. **Next:** P3 (codegen, host, GopherJS, CLI binary, dev loop).
 
 **Canonical design:** [DESIGN.md](./DESIGN.md)
 
@@ -34,7 +34,7 @@ Work proceeds in **strict order**: DSL → user documentation → implementation
 |-------|--------|-------------------------|--------|
 | **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; `task test` wired | **`forma-dev-tooling`** → `openspec/specs/dev-tooling/` | **Done** |
 | **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; `main.go` reference; stub `ui` runtime | **`forma-ui-dsl`**, **`forma-fragment-slots`** (archived) → `openspec/specs/ui-dsl/` | **Done** |
-| **P2** | **User documentation** — install toolchain (Go, Node, GopherJS, host app), project layout, `UIMount` / `ctx.RefreshUI()`, dot imports, `fn`, state pattern, codegen workflow, adding shadcn components, custom Go/JS components, troubleshooting | **`forma-user-docs`** (next OpenSpec change): doc completeness spec and/or doc-only tasks; publish under `doc/user/` (or site later) | **Next** |
+| **P2** | **User documentation** — CLI-first install (`forma init` / `add` / `sync`), `forma.yaml`, project layout, writing UI, components, advanced, troubleshooting; docs-first policy | **`forma-user-docs`** → `doc/user/`, OpenSpec **`ui-docs`** + **`forma-cli`** (contract) | **Done** (guide + specs; CLI binary deferred) |
 | **P3a** | **Codegen pipeline** — ts-morph (or equivalent) from shadcn TSX → `ui/*.gen.go`; CI check for drift | **`forma-ui-codegen`** | Planned |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |
 | **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** | Planned |
@@ -69,7 +69,7 @@ P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
 | 1 | `forma-dev-tooling` | Lint, Taskfile, CI, Cursor rules | **Done** (archived) |
 | 2 | `forma-ui-dsl` | Lock DSL behavior; `Component`, `Node`, `Context`, `.Or`, `fn`, events | **Done** (archived) |
 | 3 | `forma-fragment-slots` | Fragment + field-only slots; tree `Slots` map | **Done** (archived) |
-| 4 | `forma-user-docs` | Author-facing guide structure + content tasks | **Next** |
+| 4 | `forma-user-docs` | Author guide under `doc/user/` + ui-docs / forma-cli specs | **Done** (archive pending) |
 | 5 | `forma-ui-codegen` | Generator + first real generated components | Planned |
 | 6 | `forma-react-host` | Static host app + registry | Planned |
 | 7 | `forma-gopherjs-runtime` | Wire Go to host | Planned |
@@ -132,7 +132,7 @@ Implementation is **downstream** of P1 + P2:
 | SSR / hydration | See DESIGN.md; only if product requires SEO |
 | Signal-based fine-grained updates | Alternative to full-tree RefreshUI; breaks simple mental model |
 | Desktop webview | P4 |
-| Official CLI (`forma init`) | After dev loop stable |
+| Official CLI binary (`cmd/forma`) | Spec in **`forma-cli`**; implement with P3 (after or alongside dev loop) |
 | Agent-specific prompts/skills | Optional; after DSL + docs stable |
 
 ---

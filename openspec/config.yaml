@@ -9,6 +9,7 @@ context: |
   dense DSL, strong types, minimal review surface.
 
   Canonical documents (read before proposing or implementing):
+  - doc/user/ — author guide (first-class; update when author UX changes)
   - doc/DESIGN.md — architecture, stack choices, user model, non-goals
   - doc/ROADMAP.md — phased delivery; OpenSpec changes must align unless a proposal
     explicitly revises the roadmap
@@ -68,6 +69,8 @@ rules:
       ui-docs) not internal package names alone
     - Do not start implementation-phase changes until DSL specs and user-doc outline exist
       unless the proposal is explicitly P1/P2 only
+    - Author-visible UX changes (CLI, forma.yaml, install/sync, documented DSL usage) must
+      update doc/user/ in the same change unless the proposal documents an explicit opt-out
   specs:
     - Behavior contracts (SHALL/MUST + scenarios); no import paths or framework choices
     - DSL semantics (UIMount, RefreshUI, With/Or, fn, ui.Context, events, keys,
@@ -86,6 +89,7 @@ rules:
     - "P1 tasks may update main.go and spec-only stubs; avoid building full host until P3"
     - "P2 tasks are documentation and examples, not production runtime"
     - "Link tasks to roadmap phase in PR text when useful"
+    - "When a task changes author-visible behavior, include doc/user/ updates in the same task list"
 
 operations:
   apply:

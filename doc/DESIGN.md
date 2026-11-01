@@ -150,20 +150,27 @@ Go stays free of DOM types; the wrapper converts vendor events to plain data bef
 
 ## How users work with forma
 
+Author-facing workflow and install steps live in **[doc/user/](user/README.md)** (first-class; update when author UX changes). Summary:
+
+### Onboarding (target)
+
+1. **`go install`** the **`forma`** CLI (when shipped).
+2. **`forma init <module>`** — `go mod init`, project scaffold, **`forma.yaml`**, run **`forma sync`**.
+3. **`forma dev`** — browser loop (P3d).
+
 ### Day-to-day flow
 
-1. **Create a Go module** that depends on `github.com/zhulik/forma/ui` and `github.com/zhulik/forma/fn`.
+1. **App module** depends on `github.com/zhulik/forma/ui` and `fn`; generated shadcn bindings live under **`internal/ui/`** by default (see **`forma.yaml`** `codegen.dir`).
 2. **Define app state** as ordinary Go types.
-3. **Implement `func MyApp() Component`** using dot-imported layout + shadcn types (see [`main.go`](../main.go)).
-4. **`UIMount("app-root", MyApp())`** from `main`.
-5. On user actions or async completion: **update state → `ctx.RefreshUI()`** in handlers (or the context the runtime provides for that scope).
+3. **Implement `func MyApp() Component`** using dot-imported layout + generated widgets (see [`main.go`](../main.go) in this repo).
+4. **`UIMount(mountID, MyApp())`** — mount id matches **`forma.yaml`** `ui.mount` and host HTML.
+5. On user actions or async completion: **update state → `ctx.RefreshUI()`** or **`ctx.Update`**.
 
 ### Adding shadcn components
 
-1. Install component via shadcn CLI into the host app's `components/ui/`.
-2. Register the component in the **JS registry**.
-3. Run **codegen** to emit/update `ui/<name>.gen.go`.
-4. Use the new type in Go immediately.
+1. **`forma add <component>`** — updates **`forma.yaml`** and runs **`forma sync`**.
+2. **Sync** installs host deps, materializes shadcn TSX, runs **codegen** into the configured dir, updates the **JS registry**, and **`go mod tidy`**.
+3. Use the new Go type from your generated package.
 
 ### Desktop (later)
 
