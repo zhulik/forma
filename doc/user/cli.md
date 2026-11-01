@@ -43,11 +43,11 @@ Full init:
 
 ## forma sync
 
-**Today (stub):** reads **`forma.yaml`**, adds **`require github.com/zhulik/forma`**, optional replace from **`FORMA_REPLACE`**, runs **`go mod tidy`**. Host install, shadcn sources, codegen, and registry update are **planned** (P3).
+**Today (stub):** reads **`forma.yaml`**, adds **`require github.com/zhulik/forma`**, optional replace from **`FORMA_REPLACE`**, runs **`go mod tidy`**. Web tree install, shadcn sources, codegen, and registry update are **planned** (P3).
 
 **Target (full sync):**
 
-1. Install or update host dependencies under `host.path`.
+1. Install or update npm dependencies under `web.path`.
 2. Materialize shadcn sources per `ui.components`.
 3. Codegen into `codegen.dir`.
 4. Update the host component registry.

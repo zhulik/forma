@@ -28,8 +28,8 @@ codegen:
   dir: internal/ui
   package: ui
 
-host:
-  path: host
+web:
+  path: web
 ```
 
 ## 3. Minimal main.go

@@ -17,7 +17,7 @@ const flagDirectory = "directory"
 func New() *cli.Command {
 	return &cli.Command{
 		Name:  "sync",
-		Usage: "reconcile project with forma.yaml (stub: Go module only until host ships)",
+		Usage: "reconcile project with forma.yaml (stub: Go module only until web tree ships)",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    flagDirectory,

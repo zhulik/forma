@@ -18,8 +18,8 @@ codegen:
   dir: internal/ui
   package: ui
 
-host:
-  path: host
+web:
+  path: web
 ```
 
 ## Fields
@@ -30,7 +30,7 @@ Go module path. Set by **`forma init`**; should match `go.mod`.
 
 ### `ui.mount`
 
-DOM element id passed to **`UIMount`**. Must match the mount node in the host `index.html` (or equivalent).
+DOM element id passed to **`UIMount`**. Must match the mount node in **`web/index.html`** (or equivalent).
 
 ### `ui.components`
 
@@ -47,9 +47,9 @@ Directory for generated `*.gen.go` widget bindings.
 
 Go package name for generated files (usually `ui`). Import path is `<module>/internal/ui`, not to be confused with **`github.com/zhulik/forma/ui`** (framework primitives: `Component`, `Context`, layout helpers, `UIMount`).
 
-### `host.path`
+### `web.path`
 
-Root of the Vite + React + shadcn host (default `host/`). The CLI manages shadcn config under this tree; authors rarely run `npx shadcn` directly.
+Root of the Vite + React + shadcn web tree (default **`web/`**). The CLI manages shadcn config under this directory; authors rarely run `npx shadcn` directly.
 
 ## Future fields
 

@@ -10,7 +10,7 @@ type GoModRunner interface {
 	ModTidy(ctx context.Context, dir string) error
 }
 
-// ProjectSyncer reconciles on-disk project state with forma.yaml (stub until host/codegen).
+// ProjectSyncer reconciles on-disk project state with forma.yaml (stub until web tree/codegen).
 type ProjectSyncer interface {
 	Sync(ctx context.Context, dir, formaReplace string) error
 }

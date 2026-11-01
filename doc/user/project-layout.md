@@ -14,7 +14,7 @@ myapp/
     ui/                # generated *.gen.go (default codegen.dir)
       button.gen.go
       ...
-  host/                # React + shadcn + Vite (host.path)
+  web/                 # React + shadcn + Vite (web.path)
     package.json
     components/ui/     # shadcn TSX sources (committed)
     ...
@@ -36,7 +36,7 @@ The forma repo is **not** a typical user app today:
 
 - **`ui/`** at repo root = framework DSL + **hand-written** `*.gen.go` stubs for development until P3a codegen.
 - **`main.go`** = reference todo demo at repo root.
-- No **`host/`** or **`forma.yaml`** yet.
+- No **`web/`** or **`forma.yaml`** yet.
 
 When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source; examples may move under `examples/` later.
 
@@ -46,10 +46,10 @@ Commit:
 
 - `forma.yaml`, `go.mod`, `go.sum`
 - `main.go` and your app packages
-- `host/` sources including shadcn **`components/ui/*.tsx`**
+- `web/` sources including shadcn **`components/ui/*.tsx`**
 - Generated **`internal/ui/*.gen.go`**
 
-Do not commit `host/node_modules/`. After **`forma sync`**, review diffs before commit—sync may add or update generated files and lockfiles.
+Do not commit `web/node_modules/`. After **`forma sync`**, review diffs before commit—sync may add or update generated files and lockfiles.
 
 ## Related
 

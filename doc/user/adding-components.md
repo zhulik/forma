@@ -10,7 +10,7 @@ forma add dialog
 
 1. Adds `dialog` to **`ui.components`** in `forma.yaml`.
 2. Runs **`forma sync`**, which:
-   - Installs or updates shadcn **source** under `host/…/components/ui/`
+   - Installs or updates shadcn **source** under `web/…/components/ui/`
    - Regenerates Go bindings in **`internal/ui/`** (or your `codegen.dir`)
    - Updates the host registry so the tree type `Dialog` renders correctly
 
@@ -21,9 +21,9 @@ You should not need to run **`npx shadcn add`** in the happy path.
 | Yes | No |
 |-----|-----|
 | Updated `forma.yaml` | `node_modules/` |
-| New or changed TSX under `host/` | |
+| New or changed TSX under `web/` | |
 | New or changed `internal/ui/*.gen.go` | |
-| Host lockfile if sync changed deps | |
+| Lockfile under `web/` if sync changed deps | |
 
 Generated Go is **committed** so CI can verify `forma sync` produces a clean tree (same idea as `task check-generate` in the framework repo).
 

@@ -22,11 +22,11 @@ The **`forma`** binary and **`forma dev`** are not shipped from this repository 
 - Ensure **`main.go`** (or scaffold) imports **`github.com/zhulik/forma/ui`** so tidy retains the framework module.
 - Run sync from project root with valid **`forma.yaml`**.
 
-## Host shows blank page
+## Browser shows blank page
 
-- **`ui.mount`** must match **`UIMount`** id and host HTML.
+- **`ui.mount`** must match **`UIMount`** id and the mount node in **`web/index.html`** (or your `web.path` HTML).
 - Registry must include every **Type** string your Go tree emits (sync should register generated widgets).
-- Check browser console for host errors (when host exists).
+- Check the browser console for JavaScript errors (when the web tree is built and served).
 
 ## Docs vs behavior mismatch
 

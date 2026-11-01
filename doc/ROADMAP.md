@@ -103,7 +103,7 @@ Target audience: Go developers who may never open the React host.
 
 Topics (minimum):
 
-1. Prerequisites and repo layout (Go app + `host/` or equivalent).
+1. Prerequisites and repo layout (Go app + `web/` or equivalent).
 2. Creating an app from scratch (clone template → `main.go` → mount id in `index.html`).
 3. State + `ctx.RefreshUI()` pattern; async goroutines.
 4. Adding a shadcn component (CLI → registry → codegen → Go usage).

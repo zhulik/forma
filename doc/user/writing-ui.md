@@ -16,7 +16,7 @@ func main() {
 }
 ```
 
-`app-root` must match `ui.mount` in **`forma.yaml`** and the host HTML mount element.
+`app-root` must match `ui.mount` in **`forma.yaml`** and the mount element in **`web/index.html`** (or your configured `web.path`).
 
 > **Today:** `UIMount` in the framework repo is a stub. Behavior is specified in **`ui-dsl`**; the browser bridge arrives in P3.
 

@@ -12,7 +12,7 @@ import (
 	"github.com/zhulik/forma/cmd/forma/internal/formaconfig"
 )
 
-// Service reconciles project module state (stub sync until host/codegen exist).
+// Service reconciles project module state (stub sync until web tree/codegen exist).
 type Service struct {
 	Logger      *slog.Logger
 	GoModRunner core.GoModRunner
@@ -32,7 +32,7 @@ func (s *Service) Sync(ctx context.Context, dir, formaReplace string) error {
 		return fmt.Errorf("stat %s: %w", formaconfig.FileName, err)
 	}
 
-	s.Logger.DebugContext(ctx, "sync stub: host and codegen steps skipped")
+	s.Logger.DebugContext(ctx, "sync stub: web tree and codegen steps skipped")
 
 	if err := s.GoModRunner.RequireForma(ctx, target); err != nil {
 		return fmt.Errorf("require forma library: %w", err)

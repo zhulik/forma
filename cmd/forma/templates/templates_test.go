@@ -22,6 +22,9 @@ func TestApply_Minimal(t *testing.T) {
 	require.NoError(t, templates.Apply(dir, "minimal", data))
 
 	require.FileExists(t, filepath.Join(dir, "forma.yaml"))
+	yaml, err := os.ReadFile(filepath.Join(dir, "forma.yaml"))
+	require.NoError(t, err)
+	require.Contains(t, string(yaml), "web:\n  path: web")
 	require.FileExists(t, filepath.Join(dir, "main.go"))
 
 	raw, err := os.ReadFile(filepath.Join(dir, "main.go"))

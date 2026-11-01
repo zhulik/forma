@@ -21,7 +21,7 @@ type runner struct {
 	ProjectSyncer core.ProjectSyncer
 }
 
-// Run reconciles module dependencies (stub sync until host/codegen exist).
+// Run reconciles module dependencies (stub sync until web tree/codegen exist).
 func Run(ctx context.Context, dir string) error {
 	return runViaPal(ctx, &runner{
 		Dir: dir,

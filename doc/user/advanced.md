@@ -24,7 +24,7 @@ Register a stable **`Type`** string in the host registry when the renderer must 
 
 Pattern (see [DESIGN.md](../DESIGN.md)):
 
-1. Thin **JS wrapper** in `host/` (refs, vendor events → plain data).
+1. Thin **JS wrapper** in `web/` (refs, vendor events → plain data).
 2. Entry in **ComponentRegistry**.
 3. Go struct with props + callbacks (hand-written or narrow codegen).
 

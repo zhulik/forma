@@ -163,13 +163,13 @@ Author-facing workflow and install steps live in **[doc/user/](user/README.md)**
 1. **App module** depends on `github.com/zhulik/forma/ui` and `fn`; generated shadcn bindings live under **`internal/ui/`** by default (see **`forma.yaml`** `codegen.dir`).
 2. **Define app state** as ordinary Go types.
 3. **Implement `func MyApp() Component`** using dot-imported layout + generated widgets (see [`main.go`](../main.go) in this repo).
-4. **`UIMount(mountID, MyApp())`** — mount id matches **`forma.yaml`** `ui.mount` and host HTML.
+4. **`UIMount(mountID, MyApp())`** — mount id matches **`forma.yaml`** `ui.mount` and the mount node in the web tree HTML.
 5. On user actions or async completion: **update state → `ctx.RefreshUI()`** or **`ctx.Update`**.
 
 ### Adding shadcn components
 
 1. **`forma add <component>`** — updates **`forma.yaml`** and runs **`forma sync`**.
-2. **Sync** installs host deps, materializes shadcn TSX, runs **codegen** into the configured dir, updates the **JS registry**, and **`go mod tidy`**.
+2. **Sync** installs web tree deps, materializes shadcn TSX under **`web.path`**, runs **codegen** into the configured dir, updates the **JS registry**, and **`go mod tidy`**.
 3. Use the new Go type from your generated package.
 
 ### Desktop (later)
