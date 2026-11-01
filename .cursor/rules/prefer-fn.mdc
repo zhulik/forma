@@ -1,0 +1,32 @@
+---
+description: Prefer github.com/zhulik/forma/fn over hand-written slice loops when equivalent
+globs: "**/*.go"
+alwaysApply: false
+---
+
+# Prefer `fn` over raw loops
+
+Before writing a `for` loop to transform or filter a slice, check whether **`github.com/zhulik/forma/fn`** already fits (`Map`, `Filter`, `FilterMap`, `Uniq`, `Associate`, …). Add a new exported helper in `fn/` when the same pattern appears more than once or is generally useful—do not add third-party collection libraries for this.
+
+## Do
+
+- Use existing `fn` helpers when semantics match.
+- Extend `fn` with a small, well-named function when no helper exists yet (keep the same callback style as `Map` / `Filter`: `func(T)`, not index args).
+- Keep loops when no `fn` helper applies (I/O walks, channels, index-heavy logic, table-driven tests).
+
+## Examples
+
+```go
+// BAD — manual dedupe + filter
+// ... append loop with seen map ...
+
+// GOOD
+names := fn.Uniq(fn.Filter(names, func(name string) bool { return name != "" }))
+```
+
+```go
+// GOOD — add to fn if missing, then use
+settings := fn.Associate(rows, func(r Row) (string, string) { return r.Key, r.Value })
+```
+
+Authors dot-import `fn` in UI code; library and CLI code may use a normal import.

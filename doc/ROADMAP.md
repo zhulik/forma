@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0–P2** complete for specs and author docs. **CLI scaffold in progress:** nested **`cmd/forma`** ships **`init`** (embedded **`minimal`** template), stub **`sync`**, and **`version`**; **`add`** / full **`sync`** / **`dev`** remain P3. Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md), [`forma-cli`](../openspec/specs/forma-cli/spec.md); author guide [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo; browser runtime still stub. **Next:** finish CLI breadth as needed, then P3a codegen → host → GopherJS → dev loop.
+**Current status:** **P0–P2** complete for specs and author docs. **CLI:** nested **`cmd/forma`** ships **`init`** (embedded **`minimal`** template + **`web/`** tree), **partial **`sync`** (npm + shadcn; codegen/registry stub), and **`version`**; **`add`** / full sync / **`dev`** remain P3. Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md), [`forma-cli`](../openspec/specs/forma-cli/spec.md); author guide [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo; browser runtime still stub. **Next:** finish CLI breadth as needed, then P3a codegen → host → GopherJS → dev loop.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md)
 

@@ -9,12 +9,15 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/zhulik/forma/cmd/forma/internal/testutil"
 )
 
 func TestInitSmoke_Subprocess(t *testing.T) { //nolint:paralleltest // subprocess + go mod; serial with other mod tests
 	if testing.Short() {
 		t.Skip("subprocess")
 	}
+	testutil.RequireNpm(t)
 
 	_, file, _, ok := runtime.Caller(0)
 	require.True(t, ok)

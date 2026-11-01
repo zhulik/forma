@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"text/template"
+
+	"github.com/zhulik/forma/fn"
 )
 
 //go:embed all:scaffolds
@@ -115,13 +117,9 @@ func Names() ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	names := make([]string, 0, len(entries))
-	for _, e := range entries {
-		if e.IsDir() {
-			names = append(names, e.Name())
-		}
-	}
-	return names, nil
+	return fn.FilterMap(entries, func(e fs.DirEntry) (string, bool) {
+		return e.Name(), e.IsDir()
+	}), nil
 }
 
 // PackageName derives the Go package name from a module path.

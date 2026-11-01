@@ -9,11 +9,6 @@ import (
 
 const FileName = "forma.yaml"
 
-// Project is the root forma.yaml shape (subset used by the CLI).
-type Project struct {
-	Module string `yaml:"module"`
-}
-
 // Load reads forma.yaml from dir.
 func Load(dir string) (Project, error) {
 	path := filepath.Join(dir, FileName)

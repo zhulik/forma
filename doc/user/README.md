@@ -14,7 +14,7 @@ Contributors: see also OpenSpec capability **`ui-docs`** and `openspec/config.ya
 |------|--------|
 | UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`main.go`](../../main.go), [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
 | Author guide (this tree) | **Available** |
-| `forma` CLI (`init`, stub `sync`, `version`) | **Partial** — [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md); `add` / full `sync` / `dev` planned |
+| `forma` CLI (`init`, partial `sync`, `version`) | **Partial** — web npm + shadcn via sync; [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md); `add` / codegen / registry / `dev` planned |
 | Browser dev loop, GopherJS runtime, host | **Planned** — ROADMAP P3 |
 | Codegen from shadcn TSX | **Planned** — ROADMAP P3a |
 

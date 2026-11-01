@@ -10,7 +10,13 @@ type GoModRunner interface {
 	ModTidy(ctx context.Context, dir string) error
 }
 
-// ProjectSyncer reconciles on-disk project state with forma.yaml (stub until web tree/codegen).
+// ProjectSyncer reconciles on-disk project state with forma.yaml.
 type ProjectSyncer interface {
 	Sync(ctx context.Context, dir, formaReplace string) error
+}
+
+// WebSyncRunner installs npm dependencies and materializes shadcn components under a web root.
+type WebSyncRunner interface {
+	NpmInstall(ctx context.Context, dir string) error
+	ShadcnAdd(ctx context.Context, dir string, components []string) error
 }

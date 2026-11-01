@@ -29,6 +29,10 @@ jobs:
 
       - uses: go-task/setup-task@v2
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Generate and verify committed
         run: task check-generate
 

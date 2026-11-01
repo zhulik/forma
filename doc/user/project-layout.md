@@ -2,7 +2,7 @@
 
 ## Your app (after forma init)
 
-Target layout once the CLI exists:
+Layout after **`forma init`** (sync runs npm + shadcn for declared components):
 
 ```
 myapp/

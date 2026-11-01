@@ -6,9 +6,9 @@ The forma CLI lives in **`cmd/forma/`** (nested Go module). Normative behavior i
 
 | Command | Status | Summary |
 |---------|--------|---------|
-| `forma init <module>` | **Available** | Empty dir, `minimal` template, stub `sync` |
+| `forma init <module>` | **Available** | Empty dir, `minimal` template, full `sync` (needs Node) |
 | `forma init --only-config <module>` | **Available** | Write `forma.yaml` if missing |
-| `forma sync` | **Stub** | Go module + forma `require` + `go mod tidy` only |
+| `forma sync` | **Partial** | npm + shadcn; Go codegen + JS registry planned |
 | `forma version` | **Available** | Print CLI version |
 | `forma add <component>` | Planned | Append component in `forma.yaml`, run `sync` |
 | `forma dev` | Planned | GopherJS watch + host dev server (P3d) |
@@ -34,7 +34,7 @@ Full init:
 
 - Target directory must be **empty** (only `.` and `..`).
 - Does **not** run `git init`.
-- Ends with **stub **`sync`**.
+- Ends with **`forma sync`** (npm, shadcn, Go module).
 
 `--only-config`:
 
@@ -43,15 +43,16 @@ Full init:
 
 ## forma sync
 
-**Today (stub):** reads **`forma.yaml`**, adds **`require github.com/zhulik/forma`**, optional replace from **`FORMA_REPLACE`**, runs **`go mod tidy`**. Web tree install, shadcn sources, codegen, and registry update are **planned** (P3).
+**Today (partial sync):**
 
-**Target (full sync):**
+1. Install npm dependencies under **`web.path`** (`npm install`).
+2. Materialize shadcn sources per **`ui.components`** (`shadcn add`, non-interactive).
+3. **Skipped (logged):** Go codegen into **`codegen.dir`**, JS component registry update.
+4. Add **`require github.com/zhulik/forma`**, optional replace from **`FORMA_REPLACE`**, **`go mod tidy`**.
 
-1. Install or update npm dependencies under `web.path`.
-2. Materialize shadcn sources per `ui.components`.
-3. Codegen into `codegen.dir`.
-4. Update the host component registry.
-5. `go mod tidy`.
+Requires **Node.js** and **`npm`** on PATH. Without them, sync fails with a clear error.
+
+**Planned (full sync):** steps 3–4 above become real; **`forma dev`** assumes sync has been run at least once.
 
 ## forma add
 

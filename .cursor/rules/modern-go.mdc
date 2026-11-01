@@ -9,7 +9,7 @@ alwaysApply: false
 Target the Go version in `go.mod`. Prefer current stdlib and language features over legacy idioms when they fit.
 
 - **One-shot init with a result:** `sync.OnceValues` / `sync.OnceFunc` when init needs no inputs; `xsync.OnceValues` when init needs the first caller's `context.Context`. Prefer these over `sync.Once` plus extra struct fields for cached values or errors.
-- **Collections:** `slices` and `maps` over hand-rolled sort/search/clone loops when equivalent.
+- **Collections:** `slices` and `maps` over hand-rolled sort/search/clone loops when equivalent; slice map/filter/dedupe via **`fn`** when a helper exists or belongs there (see **prefer-fn** rule).
 - **Compare / bounds:** `cmp`, built-in `min` / `max`, `clear` where they simplify the code.
 - **Errors:** sentinel + `errors.Is` / `errors.As`; `errors.Join` for multiple failures; avoid string-matching errors.
 - **Logging:** `log/slog` (already project standard); not the legacy `log` package for new code.

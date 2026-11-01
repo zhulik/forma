@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime/debug"
 	"time"
+
+	"github.com/zhulik/forma/fn"
 )
 
 const (
@@ -28,18 +30,12 @@ func FromBuildInfo(info *debug.BuildInfo, ok bool) string {
 		return v
 	}
 
-	var revision, vcsTime string
-	modified := false
-	for _, s := range info.Settings {
-		switch s.Key {
-		case "vcs.revision":
-			revision = s.Value
-		case "vcs.time":
-			vcsTime = s.Value
-		case "vcs.modified":
-			modified = s.Value == "true"
-		}
-	}
+	settings := fn.Associate(info.Settings, func(s debug.BuildSetting) (string, string) {
+		return s.Key, s.Value
+	})
+	revision := settings["vcs.revision"]
+	vcsTime := settings["vcs.time"]
+	modified := settings["vcs.modified"] == "true"
 
 	if revision == "" {
 		return "devel"

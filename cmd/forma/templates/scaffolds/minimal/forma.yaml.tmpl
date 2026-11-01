@@ -2,7 +2,10 @@ module: {{ .Module }}
 
 ui:
   mount: {{ .Mount }}
-  components: []
+  components:
+    - button
+    - input
+    - card
 
 codegen:
   dir: internal/ui

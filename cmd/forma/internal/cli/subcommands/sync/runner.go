@@ -10,6 +10,7 @@ import (
 	"github.com/zhulik/forma/cmd/forma/internal/cli/app"
 	"github.com/zhulik/forma/cmd/forma/internal/core"
 	"github.com/zhulik/forma/cmd/forma/internal/gotool"
+	"github.com/zhulik/forma/cmd/forma/internal/webtool"
 )
 
 // EnvFormaReplace is the environment variable for a local replace of the forma module (cmd only).
@@ -21,7 +22,7 @@ type runner struct {
 	ProjectSyncer core.ProjectSyncer
 }
 
-// Run reconciles module dependencies (stub sync until web tree/codegen exist).
+// Run reconciles project state from forma.yaml (web tree + Go module).
 func Run(ctx context.Context, dir string) error {
 	return runViaPal(ctx, &runner{
 		Dir: dir,
@@ -37,7 +38,7 @@ func RunWithReplace(ctx context.Context, dir, formaReplace string) error {
 }
 
 func runViaPal(ctx context.Context, r *runner) error {
-	return app.Run(ctx, gotool.Provide(), Provide(), pal.Provide(r))
+	return app.Run(ctx, gotool.Provide(), webtool.Provide(), Provide(), pal.Provide(r))
 }
 
 func (r *runner) Run(ctx context.Context) error {
