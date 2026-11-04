@@ -18,7 +18,7 @@ func main() {
 
 `app-root` must match `ui.mount` in **`forma.yaml`** and the mount element in **`web/index.html`** (or your configured `web.path`).
 
-> **Today:** `UIMount` in the framework repo is a stub. Behavior is specified in **`ui-dsl`**; the browser bridge arrives in P3.
+> **Today:** `UIMount` in the framework repo is a stub. The scaffold **React host** (P3b) can render a tree from a fixture; the GopherJS bridge that drives `UIMount` / `RefreshUI` is **P3c**, and **`forma dev`** is **P3d**.
 
 ## Dot imports
 

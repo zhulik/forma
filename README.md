@@ -19,4 +19,4 @@ task generate # go generate ./...
 task test     # go test -race ./... (no tests yet; wired for later)
 ```
 
-CI runs `check-generate`, lint, and `check-fix` on every push. Tests are deferred until there is behavior worth asserting.
+CI runs `check-generate`, lint, and `check-fix` on every push. The scaffold React host (P3b) ships under `web/src/host/` after `forma init`; the live Go↔browser bridge and `forma dev` remain planned (P3c–P3d).

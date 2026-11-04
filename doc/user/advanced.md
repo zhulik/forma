@@ -18,17 +18,27 @@ Framework types (`Component`, `Context`, layout) stay in **`github.com/zhulik/fo
 
 Any struct that implements **`Component`** (`Render(context.Context) *Node`) can appear in the tree. Use layout helpers (`Row`, `Column`, `Fragment`, …) and compose without shadcn.
 
-Register a stable **`Type`** string in the host registry when the renderer must map to a custom React wrapper (P3 host docs).
+Register a stable **`Type`** string in the host registry when the renderer must map to a custom React wrapper (see below).
 
-## Third-party React libraries
+## Custom / third-party registry entries
 
-Pattern (see [DESIGN.md](../DESIGN.md)):
+The host merges registries in this order (later keys win):
 
-1. Thin **JS wrapper** in `web/` (refs, vendor events → plain data).
-2. Entry in **ComponentRegistry**.
-3. Go struct with props + callbacks (hand-written or narrow codegen).
+1. **Builtins** — framework types (`Fragment`, `Text`, `Row`, …) under `web/src/host/`
+2. **Generated** — `web/src/registry.gen.ts` (codegen-owned; never hand-edit)
+3. **Custom** — `web/src/registry.custom.ts` (hand-written merges)
 
-Go never imports DOM types; the wrapper calls back into Go with sanitized payloads.
+To add a third-party React wrapper:
+
+1. Write a thin **JS wrapper** in `web/` that sanitizes vendor events to plain data (or rely on the host prop-wiring sanitizers).
+2. Export an entry from **`registry.custom.ts`** with the same shape as generated entries (`{ component, slots? }`).
+3. Expose a Go struct with props + callbacks (hand-written or via codegen for shadcn files).
+
+`main.tsx` already merges `customRegistry` last. Do **not** patch `registry.gen.ts`.
+
+## Text-input hybrid policy
+
+For **`Input`** (and similar string fields), the host keeps ephemeral React state while the field is focused so typing survives tree refreshes. Domain state still lives in Go: the sanitized **`OnChange`** callback receives a plain string. When the field is unfocused, the displayed value syncs from the tree’s value prop. See [Troubleshooting](troubleshooting.md) if caret jumps persist.
 
 ## Edit shadcn TSX
 

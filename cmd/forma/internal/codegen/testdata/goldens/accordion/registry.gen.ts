@@ -13,9 +13,9 @@ export const registry: Record<string, RegistryEntry> = {
   "Accordion": {
     component: Accordion,
     slots: {
-      "Content": AccordionContent,
-      "Item": AccordionItem,
-      "Trigger": AccordionTrigger,
+      "content": AccordionContent,
+      "item": AccordionItem,
+      "trigger": AccordionTrigger,
     },
   },
 };

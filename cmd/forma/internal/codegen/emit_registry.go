@@ -32,7 +32,7 @@ export const registry: Record<string, RegistryEntry> = {
     component: {{.Component}},
     slots: {
 {{- range .Slots}}
-      {{printf "%q" .Field}}: {{.ExportName}},
+      {{printf "%q" .WireKey}}: {{.ExportName}},
 {{- end}}
     },
   },
