@@ -49,22 +49,22 @@ func AnalyzeComponentsDir(componentsDir string) ([]Widget, error) {
 		return nil, fmt.Errorf("set TSX language: %w", err)
 	}
 
-	var widgets []Widget
-	for _, path := range entries {
+	widgets, err := fn.FilterMapErr(entries, func(path string) (Widget, bool, error) {
 		src, err := os.ReadFile(path)
 		if err != nil {
-			return nil, fmt.Errorf("read %s: %w", path, err)
+			return Widget{}, false, fmt.Errorf("read %s: %w", path, err)
 		}
 		tree := parser.Parse(src, nil)
 		if tree == nil {
-			return nil, fmt.Errorf("parse %s: nil tree", path)
+			return Widget{}, false, fmt.Errorf("parse %s: nil tree", path)
 		}
 		root := tree.RootNode()
 		w, ok := analyzeSource(path, src, root)
 		tree.Close()
-		if ok {
-			widgets = append(widgets, w)
-		}
+		return w, ok, nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	slices.SortFunc(widgets, func(a, b Widget) int {
 		return strings.Compare(a.FileBase, b.FileBase)

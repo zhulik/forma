@@ -3,6 +3,8 @@ package ident
 import (
 	"strings"
 	"unicode"
+
+	"github.com/zhulik/forma/fn"
 )
 
 // ToPascal converts kebab-case or snake_case into PascalCase.
@@ -10,17 +12,18 @@ func ToPascal(kebabOrSnake string) string {
 	parts := strings.FieldsFunc(kebabOrSnake, func(r rune) bool {
 		return r == '-' || r == '_'
 	})
-	var b strings.Builder
-	for _, p := range parts {
-		if p == "" {
-			continue
-		}
-		b.WriteString(strings.ToUpper(p[:1]))
-		if len(p) > 1 {
-			b.WriteString(p[1:])
-		}
+	return strings.Join(fn.Map(fn.Filter(parts, nonEmpty), capitalizePart), "")
+}
+
+func nonEmpty(p string) bool {
+	return p != ""
+}
+
+func capitalizePart(p string) string {
+	if len(p) == 1 {
+		return strings.ToUpper(p)
 	}
-	return b.String()
+	return strings.ToUpper(p[:1]) + p[1:]
 }
 
 // ToExportedGoName maps a TS/JS prop name to an exported Go field name.

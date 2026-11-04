@@ -91,3 +91,33 @@ func GroupBy[T any, K comparable](input []T, key func(T) K) map[K][]T {
 
 	return byKey
 }
+
+// MapErr maps each element; on the first error it returns nil and that error.
+func MapErr[I any, O any](input []I, f func(I) (O, error)) ([]O, error) {
+	output := make([]O, len(input))
+	for i, item := range input {
+		out, err := f(item)
+		if err != nil {
+			return nil, err
+		}
+		output[i] = out
+	}
+
+	return output, nil
+}
+
+// FilterMapErr maps each element with an optional keep flag; on the first error it returns nil and that error.
+func FilterMapErr[I any, O any](input []I, f func(I) (O, bool, error)) ([]O, error) {
+	result := make([]O, 0, len(input))
+	for _, item := range input {
+		out, ok, err := f(item)
+		if err != nil {
+			return nil, err
+		}
+		if ok {
+			result = append(result, out)
+		}
+	}
+
+	return result, nil
+}

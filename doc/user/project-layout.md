@@ -30,7 +30,7 @@ myapp/
 | Import | Role |
 |--------|------|
 | `github.com/zhulik/forma/ui` | Framework: `Component`, `Context`, `UIMount`, layout widgets, `Fragment`, … |
-| `github.com/zhulik/forma/fn` | `Map`, `Filter`, … for lists and transforms |
+| `github.com/zhulik/forma/fn` | `Map`, `Filter`, `MapErr`, `FilterMapErr`, map helpers (`MapValues`, `MapEntries`, …) for lists and transforms |
 | `your/module/internal/ui` | **Generated** shadcn bindings (`Button`, `Input`, …) |
 
 Application code often dot-imports framework `ui` and `fn` for a dense DSL (see [Writing UI](writing-ui.md)).

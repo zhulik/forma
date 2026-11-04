@@ -41,7 +41,9 @@ Generated widgets import from **`your/module/internal/ui`** (or your configured 
 - **Empty states:** `.Or(fallback...)` when primary children are empty.
 - **Text:** `Text{Text: "Hello"}` (not raw strings in `.With`).
 - **Conditionals:** `If(cond, func() Component { ... })`.
-- **Lists:** `fn.Map` over slices; set stable **`Key`** on repeated nodes (see `ui-dsl` spec).
+- **Lists:** `fn.Map` / `fn.Filter` (and related helpers) over slices; set stable **`Key`** on repeated nodes (see `ui-dsl` spec).
+- **Fallible collect:** `fn.MapErr` / `fn.FilterMapErr` when building a slice can fail (stop on first error).
+- **Maps:** `fn.MapValues`, `fn.MapEntries`, `fn.FilterEntries`, `fn.FilterMapEntries` (and `*Err` variants) for map transforms—not hand-written accumulate loops.
 
 ## Handlers and refresh
 

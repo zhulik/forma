@@ -57,6 +57,15 @@ Where documented behavior depends on work not yet shipped (browser dev loop, Gop
 - **WHEN** an author reads CLI or install documentation for codegen
 - **THEN** they see that `forma generate` does not require Node.js, while init, add, and sync still need Node for npm and shadcn
 
+### Requirement: Author guide covers functional helpers catalog
+
+The author guide SHALL document that the functional helper package supports slice transforms (`Map`, `Filter`, and related helpers), fallible collect helpers that stop on the first error, and map-entry transform helpers, at the same level of discoverability as existing `Map` / `Filter` mentions.
+
+#### Scenario: Author looks up fallible list helpers
+
+- **WHEN** an author reads writing-UI or project-layout material about `fn`
+- **THEN** they learn that fallible collect helpers and map transforms exist alongside the basic slice helpers
+
 ### Requirement: User documentation is first-class
 
 Any change that materially affects author experience (CLI commands, `forma.yaml` shape, project layout, DSL authoring rules exposed to users, install or sync workflow) SHALL update the author guide in the same delivery slice unless the change explicitly opts out in its proposal with a documented reason.
