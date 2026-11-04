@@ -53,7 +53,8 @@ func TestApply_Minimal(t *testing.T) {
 	mainTSX, err := os.ReadFile(filepath.Join(dir, "web", "src", "main.tsx"))
 	require.NoError(t, err)
 	require.Contains(t, string(mainTSX), `from "./registry.gen"`)
-	require.Contains(t, string(mainTSX), `FormaHost`)
+	require.Contains(t, string(mainTSX), `FormaBridgeHost`)
+	require.Contains(t, string(mainTSX), `registerFormaHost`)
 	require.Contains(t, string(mainTSX), `mergeRegistry`)
 
 	require.FileExists(t, filepath.Join(dir, "web", "src", "host", "index.ts"))

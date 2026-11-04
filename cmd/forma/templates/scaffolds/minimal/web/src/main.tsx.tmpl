@@ -1,4 +1,11 @@
-import { FormaHost, builtinRegistry, mergeRegistry, mountFormaHost } from "./host";
+import {
+  FormaBridgeHost,
+  builtinRegistry,
+  createFormaBridge,
+  mergeRegistry,
+  mountFormaHost,
+  registerFormaHost,
+} from "./host";
 import { customRegistry } from "./registry.custom";
 import { registry as generatedRegistry } from "./registry.gen";
 
@@ -8,10 +15,11 @@ const effectiveRegistry = mergeRegistry(
   customRegistry,
 );
 
-// P3c replaces null with the GopherJS-driven tree root.
-const tree = null;
+// Register before any GopherJS UIMount call (load the Go bundle after this module).
+const bridge = createFormaBridge();
+registerFormaHost(bridge);
 
 mountFormaHost(
   "{{ .Mount }}",
-  <FormaHost registry={effectiveRegistry} tree={tree} />,
+  <FormaBridgeHost registry={effectiveRegistry} bridge={bridge} />,
 );

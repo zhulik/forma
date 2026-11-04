@@ -1,3 +1,11 @@
+export {
+  createFormaBridge,
+  FORMA_HOST_GLOBAL,
+  registerFormaHost,
+  unregisterFormaHost,
+  type FormaHostBridge,
+} from "./bridge";
+export { FormaBridgeHost, type FormaBridgeHostProps } from "./bridge-host";
 export { builtinRegistry } from "./builtins";
 export { FormaHost, type FormaHostProps } from "./forma-host";
 export { HybridInput } from "./hybrid-input";

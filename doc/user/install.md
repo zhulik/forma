@@ -6,7 +6,7 @@
 |------|-----|
 | **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. Building the CLI needs **CGO** (a C toolchain) for tree-sitter. |
 | **Node.js** | Web tree (`npm install`, shadcn CLI during **`forma sync`** / **`forma add`** / **`forma init`**). Not required for **`forma generate`** alone. |
-| **GopherJS** | Compile Go to JavaScript for the browser loop (planned P3c). |
+| **GopherJS** | Compile Go to JavaScript for the browser (bridge available; **`forma dev`** watch loop is P3d). |
 
 Optional: [asdf](https://asdf-vm.com/) with `.tool-versions` for pinned Go, Node, and Task.
 
@@ -69,7 +69,7 @@ You can also learn from this repository:
 1. Read [`main.go`](../../main.go) (todo demo).
 2. Run `task test` and `task lint` from the repo root.
 
-That exercises the **authoring model**; `UIMount` here is still a stub until P3.
+That exercises the **authoring model**. Browser builds use the GopherJS bridge (`UIMount` → `formaHost.setTree`); native `go test` keeps a no-op stub. One-command **`forma dev`** remains P3d.
 
 ## Next steps
 
