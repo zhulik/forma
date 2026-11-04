@@ -26,4 +26,7 @@ mountFormaHost(
 
 // GoScript + Vite lib build writes web/public/app.js (ES module served as /app.js).
 // Host must be registered before this module runs UIMount via boot().
-void import(/* @vite-ignore */ "/app.js");
+const goBundle = document.createElement("script");
+goBundle.type = "module";
+goBundle.src = "/app.js";
+document.body.appendChild(goBundle);

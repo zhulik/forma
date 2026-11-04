@@ -57,7 +57,7 @@ func TestApply_Minimal(t *testing.T) {
 	require.Contains(t, string(mainTSX), `registerFormaHost`)
 	require.Contains(t, string(mainTSX), `mergeRegistry`)
 	require.Contains(t, string(mainTSX), `/app.js`)
-	require.Contains(t, string(mainTSX), `import(/* @vite-ignore */ "/app.js")`)
+	require.Contains(t, string(mainTSX), `goBundle.type = "module"`)
 
 	require.FileExists(t, filepath.Join(dir, "web", "src", "host", "index.ts"))
 	require.FileExists(t, filepath.Join(dir, "web", "src", "registry.custom.ts"))
