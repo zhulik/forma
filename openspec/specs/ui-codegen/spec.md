@@ -61,6 +61,20 @@ The pipeline MAY consult optional per-source override data when automatic classi
 - **WHEN** a maintainer adds an override for a source file that automatic classification cannot handle
 - **THEN** codegen emits Go and registry entries consistent with the override without hand-editing generated files
 
+### Requirement: Registry slot keys match Go wire keys
+
+For compound widgets, the generated host registry slot map keys SHALL match the wire slot keys written into the render tree for the corresponding Go slot fields (the same mapping used when emitting named slots from generated Go bindings). Registry slot keys MUST NOT use a separate capitalization scheme from those wire keys.
+
+#### Scenario: Compound registry keys align with tree slots
+
+- **WHEN** codegen emits a compound widget with slot fields and a registry entry that lists slot components
+- **THEN** each registry slot map key equals the wire key used for that field in the generated Go render output
+
+#### Scenario: Accordion-style parts stay consistent
+
+- **WHEN** codegen processes a compound with trigger/content-style parts
+- **THEN** the registry slot keys and the Go `Slots` map keys for those parts are identical strings
+
 ### Requirement: Committed output is verifiable by regenerate and git diff
 
 Projects SHALL be able to verify that committed generated Go and registry files match current shadcn sources by regenerating via `forma generate` (including through `go generate`) and confirming the whole repository has no git diff, without requiring a dedicated forma check flag.

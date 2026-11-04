@@ -74,7 +74,7 @@ tasks:
       - go test -race ./...
 
   check-init-scaffold:
-    desc: Build forma CLI, run init, assert scaffold compiles
+    desc: Build forma CLI, run init, assert scaffold compiles (Go + web host)
     cmds:
       - |
         set -euo pipefail
@@ -86,7 +86,10 @@ tasks:
         FORMA_REPLACE="$root" "$bin" init github.com/zhulik/forma/ci-smoke -d "$target"
         test -f "$target/generator.go"
         test -n "$(find "$target/internal/ui" -name '*.gen.go' | head -n 1)"
+        test -d "$target/web/src/host"
+        test -f "$target/web/src/registry.gen.ts"
         ( cd "$target" && go build -o /dev/null . )
+        ( cd "$target/web" && npm test && npm run build )
 
   lint:
     desc: Run golangci-lint

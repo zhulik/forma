@@ -1,17 +1,17 @@
-import { StrictMode } from "react";
-import { createRoot } from "react-dom/client";
+import { FormaHost, builtinRegistry, mergeRegistry, mountFormaHost } from "./host";
+import { customRegistry } from "./registry.custom";
+import { registry as generatedRegistry } from "./registry.gen";
 
-import "./index.css";
-import { registry } from "./registry.gen";
+const effectiveRegistry = mergeRegistry(
+  builtinRegistry,
+  generatedRegistry,
+  customRegistry,
+);
 
-// Host runtime wires registry later (P3b); keep the import so sync/codegen stay linked.
-void registry;
+// P3c replaces null with the GopherJS-driven tree root.
+const tree = null;
 
-const mount = document.getElementById("{{ .Mount }}");
-if (mount) {
-  createRoot(mount).render(
-    <StrictMode>
-      <p className="text-muted-foreground text-sm">forma web host (runtime not connected)</p>
-    </StrictMode>,
-  );
-}
+mountFormaHost(
+  "{{ .Mount }}",
+  <FormaHost registry={effectiveRegistry} tree={tree} />,
+);

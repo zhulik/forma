@@ -20,8 +20,10 @@ myapp/
     package.json
     src/
       components/ui/   # shadcn TSX sources (committed)
-      main.tsx
-      registry.gen.ts  # generated host registry
+      host/            # write-once React host (registry merge, renderer, sanitize)
+      main.tsx         # mounts FormaHost on ui.mount
+      registry.gen.ts  # generated host registry (do not hand-edit)
+      registry.custom.ts  # optional custom / third-party registry merges
     ...
 ```
 

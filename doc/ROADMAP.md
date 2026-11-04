@@ -36,7 +36,7 @@ OpenSpec changes should name the ROADMAP phase they belong to. Early phases (DSL
 | **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; `main.go` reference; stub `ui` runtime | **`forma-ui-dsl`**, **`forma-fragment-slots`** → `openspec/specs/ui-dsl/` | **Done** |
 | **P2** | **User documentation** — CLI-first install (`forma init` / `add` / `sync`), `forma.yaml`, project layout, writing UI, components, advanced, troubleshooting | **`forma-user-docs`** → `doc/user/`, OpenSpec **`ui-docs`** + **`forma-cli`** | **Done** |
 | **P3a** | **Codegen pipeline** — pure-Go TSX parse → app `*.gen.go` + registry; `forma generate`; scaffold `check-generate` | **`forma-ui-codegen`** → `openspec/specs/ui-codegen/` | **Done** |
-| **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |
+| **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | In progress |
 | **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** | Planned |
 | **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | Planned |
 | **P4** | **Desktop packaging** — native webview wrapper, same bundle | **`forma-desktop`** | Deferred |

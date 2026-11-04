@@ -2,12 +2,13 @@
 
 ## CLI or forma dev not found
 
-The **`forma`** binary and **`forma dev`** are not shipped from this repository yet. See [Install](install.md) for what works today (`main.go`, `task test`).
+Install the **`forma`** CLI per [Install](install.md). **`forma dev`** (live Go↔browser rebuild loop) remains **planned** until ROADMAP P3d. The scaffold React host renders trees without that loop; the GopherJS bridge is P3c.
 
 ## UI does not update after a click
 
 - Confirm the handler mutates **Go state** and calls **`ctx.RefreshUI()`** or **`ctx.Update`**.
 - Async: refresh must run after the goroutine updates state; check context cancellation.
+- Until P3c, the browser host is not driven by Go—fixture/`null` tree only; clicks will not refresh a live todo demo.
 
 ## List items jump or remount
 
@@ -15,7 +16,8 @@ The **`forma`** binary and **`forma dev`** are not shipped from this repository 
 
 ## Input loses focus or cursor jumps
 
-- Full-tree refresh on every keystroke can cause focus issues. The framework may use controlled/deferred input policies per widget (see DESIGN.md); until P3 documents per-component behavior, prefer blur/submit-driven updates for text fields if you hit this in a real host.
+- The host applies a **hybrid text-input policy** for `Input`: local React state while focused, sanitized string `OnChange`, value-prop sync when unfocused. Domain state stays in Go.
+- If caret still jumps, check that refreshes are not overwriting the field with a *different* value while focused, and that custom registry entries did not bypass the host `Input` wrapper path.
 
 ## forma sync / go mod tidy failures
 
@@ -24,8 +26,9 @@ The **`forma`** binary and **`forma dev`** are not shipped from this repository 
 
 ## Browser shows blank page
 
-- **`ui.mount`** must match **`UIMount`** id and the mount node in **`web/index.html`** (or your `web.path` HTML).
-- Registry must include every **Type** string your Go tree emits (sync should register generated widgets).
+- **`ui.mount`** must match **`UIMount`** id and the mount node in **`web/index.html`** (or your `web.path` HTML). Missing mount fails closed (no alternate root); check the console for `[forma] mount element … not found`.
+- Registry must include every **Type** string your tree emits (builtins + generated + `registry.custom.ts`). Unknown types are skipped with a console warning.
+- Without the P3c bridge, `main.tsx` mounts with a **null** tree—expect an empty host, not the live todo app.
 - Check the browser console for JavaScript errors (when the web tree is built and served).
 
 ## Docs vs behavior mismatch
