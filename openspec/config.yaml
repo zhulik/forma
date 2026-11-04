@@ -23,15 +23,15 @@ context: |
      main.go is the north-star example
   2. User documentation — install, dev workflow, adding shadcn components, codegen, custom
      widgets; written against the stabilized DSL, before large runtime work
-  3. Implementation — React host, GopherJS bridge, generator, Mount/Refresh; driven by DSL
+  3. Implementation — React host, Go↔host bridge, generator, Mount/Refresh; driven by DSL
      specs + user guide expectations
 
   Stack (target — document deviations in design):
-  - Go application logic compiled with GopherJS (not Wasm syscall/js for v1)
+  - Go application logic compiled with GoScript (s4wave/goscript); official Wasm contingency only
   - JavaScript host: React 18 + shadcn/ui (Tailwind); static ComponentRegistry + recursive
     tree renderer (Widget loop)
-  - Bridge: Go builds a component tree (Node / Component.Render); GopherJS passes structs
-    and func callbacks to JS without JSON serialization on the hot path
+  - Bridge: Go builds a component tree (Node / Component.Render); thin syscall/js seam
+    converts to a host object graph + js.Func callbacks without mandating full-tree JSON
   - Codegen: deterministic Go structs from local shadcn .tsx (ts-morph or equivalent);
     emit ui/*.gen.go; union props → string + optional const block; React events → sanitized
     Go callbacks (ui.Context first arg where applicable)
@@ -79,7 +79,7 @@ rules:
     - Distinguish author-facing DSL from host/runtime behavior when they differ
   design:
     - Follow doc/DESIGN.md and doc/ROADMAP.md unless documenting a deliberate deviation
-    - Record GopherJS + React + shadcn rationale only when relevant to the change
+    - Record GoScript + React + shadcn rationale only when relevant to the change
     - Codegen pipeline changes must describe inputs (tsx paths), outputs (*.gen.go), and
       manual override/escape hatch policy
     - Prefer sentinel errors in Go; keep React host thin (registry + render loop + event

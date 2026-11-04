@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritized **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0–P3d** complete (P3b host + P3c GopherJS bridge + P3d `forma-dev-experience`). Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`generate`**, **`add`**, **`version`**, and **`dev`**. Canonical specs include [`ui-host`](../openspec/specs/ui-host/spec.md) and [`ui-runtime`](../openspec/specs/ui-runtime/spec.md). Author guide: [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo. **Next:** P4 desktop (deferred) or P5 breadth.
+**Current status:** **P0–P3d** + **`forma-browser-compile`** on [#3](https://github.com/zhulik/forma/pull/3) (P3b host + P3c bridge + GoScript browser compile + P3d `forma dev`). Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`generate`**, **`add`**, **`version`**, and **`dev`**. Canonical specs include [`ui-host`](../openspec/specs/ui-host/spec.md) and [`ui-runtime`](../openspec/specs/ui-runtime/spec.md). Author guide: [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo. Keep #3 open until merge. **Next:** P4 desktop (deferred) or P5 breadth.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md). **Agent factory (operators):** [AGENT_FACTORY.md](./AGENT_FACTORY.md).
 
@@ -19,7 +19,7 @@ forma is a **Go-native UI framework**: authors write composable components in Go
 ## Non-goals (initial releases)
 
 - SSR/SSG as a supported product path.
-- Wasm-first UI bridge (GopherJS is v1).
+- Wasm-first UI bridge (GoScript is v1; official Wasm is contingency only).
 - Electron desktop; full native webview story comes after web dev loop works.
 - Complete shadcn catalog before core loop is stable.
 - Competing state managers in React (Redux, etc.) for domain state.
@@ -37,8 +37,9 @@ OpenSpec changes should name the ROADMAP phase they belong to. Early phases (DSL
 | **P2** | **User documentation** — CLI-first install (`forma init` / `add` / `sync`), `forma.yaml`, project layout, writing UI, components, advanced, troubleshooting | **`forma-user-docs`** → `doc/user/`, OpenSpec **`ui-docs`** + **`forma-cli`** | **Done** |
 | **P3a** | **Codegen pipeline** — pure-Go TSX parse → app `*.gen.go` + registry; `forma generate`; scaffold `check-generate` | **`forma-ui-codegen`** → `openspec/specs/ui-codegen/` | **Done** |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** → `openspec/specs/ui-host/` | **Done** |
-| **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** → `openspec/specs/ui-runtime/` | **Done** |
-| **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | **Done** |
+| **P3c** | **Browser runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** → `openspec/specs/ui-runtime/` (interop now GoScript/`syscall/js`) | **Done** |
+| **P3c′** | **Browser compile control plane** — retire GopherJS; GoScript under Go 1.27; amend DESIGN | **`forma-browser-compile`** | **Done** (on [#3](https://github.com/zhulik/forma/pull/3); awaiting merge) |
+| **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | **PR open** — GoScript rebuild wired; browser smoke on [#3](https://github.com/zhulik/forma/pull/3) |
 | **P4** | **Desktop packaging** — native webview wrapper, same bundle | **`forma-desktop`** | Deferred |
 | **P5** | **Breadth** — more shadcn widgets, 3rd-party recipes (maps, payments), performance notes | Multiple small changes | Deferred |
 
@@ -86,7 +87,8 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 |-------|-------------|-------|---------|--------|--------|-----|
 | 1 | `forma-react-host` | P3b | Static host app + ComponentRegistry + recursive renderer | Done | | |
 | 2 | `forma-gopherjs-runtime` | P3c | Wire Go `UIMount`/`RefreshUI` to host; callbacks + `ui.Context` | Done | | |
-| 3 | `forma-dev-experience` | P3d | `forma dev` (replace stub); demo runs in browser | Done | `change/forma-dev-experience` | [#3](https://github.com/zhulik/forma/pull/3) |
+| 3 | `forma-dev-experience` | P3d | `forma dev` (replace stub); demo runs in browser | PR open | `change/forma-dev-experience` | [#3](https://github.com/zhulik/forma/pull/3) |
+| 3a | `forma-browser-compile` | P3c′ | GoScript replaces GopherJS; `syscall/js` seam; docs/DESIGN | Done (same PR #3) | `change/forma-dev-experience` | [#3](https://github.com/zhulik/forma/pull/3) |
 | 4 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
 | 5 | — | P5 | Breadth: more widgets, 3rd-party recipes, perf notes | Deferred | | |
 
@@ -108,7 +110,7 @@ Guide under [`doc/user/`](user/README.md) for Go authors who may never open the 
 
 - **P3a (done):** codegen owns prop parity with TSX; overrides explicit.
 - **P3b–P3c (done):** host stays thin; runtime implements P1 contracts via `ui-runtime`.
-- **P3d done when:** todo demo runs in a browser with HMR or fast rebuild documented in the user guide (`forma dev` no longer stub).
+- **P3d done when:** todo demo runs in a browser with HMR or fast rebuild documented in the user guide (`forma dev` no longer stub), after **`forma-browser-compile`** lands GoScript under Go 1.27.
 
 ---
 

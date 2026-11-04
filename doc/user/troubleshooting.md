@@ -2,14 +2,14 @@
 
 ## CLI or forma dev not found
 
-Install the **`forma`** CLI per [Install](install.md). **`forma dev`** needs **Node.js**, **`npm`**, **`gopherjs`** on PATH, a readable **`forma.yaml`**, and **`web.path/node_modules`** (run **`forma sync`** once). Missing deps fail fast with a clear error—`forma dev` does not auto-sync.
+Install the **`forma`** CLI per [Install](install.md). **`forma dev`** needs **Node.js**, **`npm`**, **`goscript`** on PATH (pinned **v0.6.3**), a readable **`forma.yaml`**, and **`web.path/node_modules`** (run **`forma sync`** once). Missing deps fail fast with a clear error—`forma dev` does not auto-sync.
 
 ## UI does not update after a click
 
 - Confirm the handler mutates **Go state** and calls **`ctx.RefreshUI()`** or **`ctx.Update`**.
 - Async: refresh must run after the goroutine updates state; check context cancellation.
-- Confirm **`globalThis.formaHost.setTree`** exists before the Go bundle runs (scaffold `main.tsx` registers it, then loads `/app.js`). Missing seam → developer-visible panic/failure from `UIMount`, not a silent blank tree.
-- After a Go rebuild, **reload the page**—Go state is not preserved across GopherJS rebuilds (not true Go HMR).
+- Confirm **`globalThis.formaHost.setTree`** exists before the Go bundle runs (scaffold `main.tsx` registers it, then imports `/app.js`). Missing seam → developer-visible panic/failure from `UIMount`, not a silent blank tree.
+- After a Go rebuild, **reload the page**—Go state is not preserved across GoScript rebuilds (not true Go HMR).
 
 ## List items jump or remount
 

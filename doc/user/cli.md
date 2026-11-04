@@ -12,7 +12,7 @@ The forma CLI lives in **`cmd/forma/`** (nested Go module). Normative behavior i
 | `forma generate` | **Available** | Codegen only from `forma.yaml` (TSX → Go + registry) |
 | `forma add <component>` | **Available** | `shadcn add` then sync |
 | `forma version` | **Available** | Print CLI version |
-| `forma dev` | **Available** | Vite host + GopherJS rebuild loop |
+| `forma dev` | **Available** | Vite host + GoScript rebuild loop |
 
 Global flags:
 
@@ -87,8 +87,8 @@ forma dev -d ./myapp
 
 Long-running process supervisor (not a second runtime):
 
-1. Fail-fast if **`forma.yaml`**, **`web.path/node_modules`**, **`npm`**, or **`gopherjs`** is missing (does **not** auto-run sync). See [Install](install.md) for GopherJS / `GOPHERJS_GOROOT` and the current Go version ceiling.
-2. Initial GopherJS build: `gopherjs build -o <web.path>/public/app.js .` (P3c artifact; Vite serves `/app.js`).
+1. Fail-fast if **`forma.yaml`**, **`web.path/node_modules`**, **`npm`**, or **`goscript`** is missing (does **not** auto-run sync). See [Install](install.md) for the pinned GoScript version.
+2. Initial browser build: `goscript compile --package . --output <web.path>/.goscript`, then `npm run build:go` (Vite lib → `public/app.js`; Vite serves `/app.js`).
 3. Starts **`npm run dev`** under **`web.path`** (Vite).
 4. Watches project **`.go`** files (debounced, serialized rebuilds). Rebuild failures after start are logged; the loop keeps running. Vite exit or Ctrl-C stops the command.
 
@@ -97,11 +97,11 @@ Long-running process supervisor (not a second runtime):
 | Change | What happens |
 |--------|----------------|
 | Host TS/CSS under `web/` | Vite **HMR** (usual Vite behavior) |
-| Go sources for the app | GopherJS **rebuild** of `public/app.js`, then **full page reload** in the browser |
+| Go sources for the app | GoScript **rebuild** of `public/app.js`, then **full page reload** in the browser |
 
 This is **not** true Go HMR: in-memory Go state is **not** preserved across rebuilds. Reload the page after a successful rebuild (Vite also reloads when `public/app.js` changes).
 
-Scaffold **`main.tsx`** registers **`formaHost.setTree`** before loading **`/app.js`**, so `UIMount` finds the host seam.
+Scaffold **`main.tsx`** registers **`formaHost.setTree`** before importing **`/app.js`**, so `UIMount` finds the host seam.
 
 ### Browser todo-demo check
 

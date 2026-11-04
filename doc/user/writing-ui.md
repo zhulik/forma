@@ -18,9 +18,9 @@ func main() {
 
 `app-root` must match `ui.mount` in **`forma.yaml`** and the mount element in **`web/index.html`** (or your configured `web.path`).
 
-On a **browser (GopherJS) build**, `UIMount` performs an initial refresh into the host via `globalThis.formaHost.setTree`. The scaffold `main.tsx` registers that seam before loading `/app.js` (the GopherJS artifact). On **native** `go test` / `go build`, `UIMount` is a no-op stub.
+On a **browser (GoScript) build**, `UIMount` performs an initial refresh into the host via `globalThis.formaHost.setTree`. The scaffold `main.tsx` registers that seam before importing `/app.js` (the Vite-bundled GoScript artifact). On **native** `go test` / `go build`, `UIMount` is a no-op stub.
 
-Run the browser loop with **`forma dev`** in an initialized app (after **`forma sync`**, with GopherJS on PATH). Host TS/CSS use Vite HMR; Go rebuilds rewrite `web/public/app.js` and need a **page reload**—Go heap is not preserved. See [CLI — forma dev](cli.md#forma-dev).
+Run the browser loop with **`forma dev`** in an initialized app (after **`forma sync`**, with GoScript on PATH). Host TS/CSS use Vite HMR; Go rebuilds rewrite `web/public/app.js` and need a **page reload**—Go heap is not preserved. See [CLI — forma dev](cli.md#forma-dev).
 
 ## Dot imports
 

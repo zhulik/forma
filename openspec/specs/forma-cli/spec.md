@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Specify the forma command-line interface and project configuration authors use to create and maintain apps. The **`cmd/forma`** binary implements init (including config-only mode), sync, generate, add, version, and the browser dev loop (Vite host + GopherJS rebuild).
+Specify the forma command-line interface and project configuration authors use to create and maintain apps. The **`cmd/forma`** binary implements init (including config-only mode), sync, generate, add, version, and the browser dev loop (Vite host + supported browser compiler rebuild).
 
 ## Requirements
 
@@ -138,7 +138,7 @@ The minimal init template SHALL include a root `generator.go` whose `go:generate
 
 ### Requirement: Dev command is reserved for the browser loop
 
-The CLI SHALL provide `forma dev` that runs the local browser development loop: a long-lived process that starts the web-tree development server and rebuilds the application's Go entrypoint for the browser whenever relevant Go sources change. The command SHALL read `forma.yaml` for the web root and mount configuration. It SHALL assume `forma sync` has been run at least once; when required web dependencies or toolchain binaries are missing, it SHALL fail with a clear error that points authors at sync and documented install steps rather than claiming the loop started. On successful start it SHALL keep running until interrupted, forwarding child-process output so authors can see the host URL and rebuild status. Documentation SHALL describe `forma dev` as available (not planned).
+The CLI SHALL provide `forma dev` that runs the local browser development loop: a long-lived process that starts the web-tree development server and rebuilds the application's Go entrypoint for the browser with the project's supported browser compiler whenever relevant Go sources change. The command SHALL read `forma.yaml` for the web root and mount configuration. It SHALL assume `forma sync` has been run at least once; when required web dependencies or toolchain binaries are missing, it SHALL fail with a clear error that points authors at sync and documented install steps rather than claiming the loop started. On successful start it SHALL keep running until interrupted, forwarding child-process output so authors can see the host URL and rebuild status. Documentation SHALL describe `forma dev` as available (not planned). Documentation and error messages for the loop SHALL NOT require GopherJS or an EOL Go 1.21 toolchain as the supported browser compile path.
 
 #### Scenario: Documentation before P3d
 
@@ -147,8 +147,18 @@ The CLI SHALL provide `forma dev` that runs the local browser development loop: 
 
 #### Scenario: Author starts the browser loop
 
-- **WHEN** an author runs `forma dev` in a project with a readable `forma.yaml`, installed web dependencies, and the GopherJS toolchain available
+- **WHEN** an author runs `forma dev` in a project with a readable `forma.yaml`, installed web dependencies, and the supported browser compiler available
 - **THEN** the web development server starts and an initial browser-targeted Go build completes successfully without the command exiting on its own
+
+#### Scenario: Dev loop contract is compiler-agnostic
+
+- **WHEN** an author reads CLI material describing the available browser loop
+- **THEN** the rebuild step is described as using the project's supported browser compiler for the module's Go version, not as a GopherJS-only contract
+
+#### Scenario: Missing browser compiler fails clearly
+
+- **WHEN** `forma dev` runs and the supported browser compiler is missing from the environment
+- **THEN** the command fails with a clear error pointing at documented install steps rather than claiming the loop started
 
 #### Scenario: Go source change triggers rebuild
 

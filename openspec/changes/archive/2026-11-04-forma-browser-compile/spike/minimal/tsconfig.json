@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "paths": {
+      "@goscript/*": ["./output/@goscript/*"]
+    },
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "strict": false
+  }
+}

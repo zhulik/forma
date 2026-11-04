@@ -19,4 +19,4 @@ task generate # go generate ./...
 task test     # go test -race ./... (no tests yet; wired for later)
 ```
 
-CI runs `check-generate`, lint, and `check-fix` on every push. After `forma init`, the scaffold ships the React host (`web/src/host/`), GopherJS bridge wiring (`formaHost` then `/app.js`), and **`forma dev`** (Vite + GopherJS rebuild).
+CI runs `check-generate`, lint, and `check-test` on every push. After `forma init`, the scaffold ships the React host (`web/src/host/`), GoScript bridge wiring (`formaHost` then `/app.js`), and **`forma dev`** (Vite + GoScript rebuild).

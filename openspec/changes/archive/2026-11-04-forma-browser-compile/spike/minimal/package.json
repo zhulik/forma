@@ -1,0 +1,8 @@
+{
+  "name": "forma-goscript-spike-minimal",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "run-spike": "bun run run.mjs"
+  }
+}

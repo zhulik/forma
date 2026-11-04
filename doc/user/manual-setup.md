@@ -4,7 +4,7 @@ Use this when you prefer not to run **`forma init`**, or when you only need to a
 
 ## Prerequisites
 
-Same toolchain as [Install](install.md): Go matching `go.mod`, plus Node and GopherJS for **`forma sync`** / **`forma dev`**.
+Same toolchain as [Install](install.md): Go matching `go.mod`, plus Node and GoScript for **`forma sync`** / **`forma dev`**.
 
 ## 1. Create the Go module
 

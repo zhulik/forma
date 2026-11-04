@@ -2,7 +2,7 @@
 
 forma lets you build interactive UIs in **Go only**. You describe screens as typed, composable components; a fixed **React + shadcn/ui** layer turns that description into DOM updates. The design goal is the best practical DSL for UI authoring with **as little hassle as possible**—especially for agents, who should output reviewable Go instead of HTML/CSS/JS.
 
-This document captures the architecture and product decisions from the original design exploration (high-level UI, shadcn, GopherJS vs Wasm, recursive tree rendering, codegen, state model). Implementation details evolve in OpenSpec changes; this is the conceptual anchor.
+This document captures the architecture and product decisions from the original design exploration (high-level UI, shadcn, browser Go→JS vs Wasm, recursive tree rendering, codegen, state model). Implementation details evolve in OpenSpec changes; this is the conceptual anchor.
 
 ---
 
@@ -20,10 +20,11 @@ This document captures the architecture and product decisions from the original 
 | Layer | Choice | Why |
 |--------|--------|-----|
 | Authoring | Go | Strong types, familiar backend idioms, good for agents |
-| Browser compilation | **GopherJS** (v1) | Go structs and funcs map to JS objects/callbacks without a Wasm JSON bridge on every update |
+| Browser compilation | **GoScript** (`s4wave/goscript`, v1) | Go→TypeScript under the module’s Go version; thin `syscall/js` seam delivers an object/callback tree without mandating full-tree JSON |
 | Visual components | **React 18 + shadcn/ui** | shadcn is copy-paste TSX (great for codegen); huge third-party React catalog |
 | Styling | Tailwind (via shadcn) | Authors rarely touch CSS; optional `Class` escape hatch |
-| Wasm (Go `syscall/js`) | **Not v1** | Heavier payloads, serialization cost for full UI trees; revisited only if GopherJS limits bite |
+| Official Go Wasm (`js/wasm`) | **Contingency only** | Heavier payloads / boundary copying; kept if GoScript ever fails product gates—not the supported author path |
+| GopherJS | **Retired** | Stuck on Go 1.21 while forma targets modern Go; removed from the supported toolchain |
 
 Alternatives considered (Solid/Svelte signals, HTMX/HTML-over-the-wire, Franken UI) trade away **transparent React third-party components**. forma standardizes on React as a **dumb renderer** so Stripe, Leaflet, data grids, etc. stay one registry entry away.
 
@@ -35,12 +36,12 @@ Three cooperating parts:
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  Go application (GopherJS → JS)                          │
+│  Go application (GoScript → TS/JS)                       │
 │  • App state (structs, vars)                             │
 │  • ui.UIMount; handlers call ctx.RefreshUI()             │
 │  • Component tree via Render(ctx) → Node                 │
 └───────────────────────────┬─────────────────────────────┘
-                            │ structs, func callbacks, tree
+                            │ object graph + js.Func callbacks
                             ▼
 ┌─────────────────────────────────────────────────────────┐
 │  JavaScript host (write once)                            │
@@ -114,7 +115,7 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 ### Async
 
-- Use normal **goroutines** and **`net/http`** (GopherJS maps them to async JS).
+- Use normal **goroutines** and **`net/http`** (GoScript maps them to async JS).
 - After async work, mutate Go state and call **`ctx.RefreshUI()`** on the handler context (often from the goroutine, respecting cancellation on the embedded context).
 
 ---
