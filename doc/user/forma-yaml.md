@@ -1,6 +1,6 @@
 # forma.yaml
 
-`forma.yaml` at the project root is the **desired state** for your forma app. The CLI reads it on **`forma sync`** (and after **`forma init`** / **`forma add`**). Hand-edit advanced fields; use **`forma add`** for the component list in normal workflow.
+`forma.yaml` at the project root is the **desired state** for your forma app. The CLI reads it on **`forma sync`**, **`forma generate`**, and after **`forma init`** / **`forma add`**. Hand-edit paths and mount; use **`forma add`** to materialize new shadcn sources.
 
 ## Example
 
@@ -9,10 +9,6 @@ module: github.com/you/myapp
 
 ui:
   mount: app-root
-  components:
-    - button
-    - input
-    - card
 
 codegen:
   dir: internal/ui
@@ -32,10 +28,6 @@ Go module path. Set by **`forma init`**; should match `go.mod`.
 
 DOM element id passed to **`UIMount`**. Must match the mount node in **`web/index.html`** (or equivalent).
 
-### `ui.components`
-
-shadcn component names (CLI registry ids, typically lowercase) to include in the project. **`forma add`** appends here then syncs.
-
 ### `codegen.dir`
 
 Directory for generated `*.gen.go` widget bindings.
@@ -50,6 +42,8 @@ Go package name for generated files (usually `ui`). Import path is `<module>/int
 ### `web.path`
 
 Root of the Vite + React + shadcn web tree (default **`web/`**). The CLI manages shadcn config under this directory; authors rarely run `npx shadcn` directly.
+
+Widget inventory is **committed TSX** under **`{web.path}/components/ui/`**, not a list in this file.
 
 ## Future fields
 

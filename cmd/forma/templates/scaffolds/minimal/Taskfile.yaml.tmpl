@@ -1,0 +1,8 @@
+version: "3"
+
+tasks:
+  check-generate:
+    desc: Regenerate via go generate and fail if the whole repo drifts
+    cmds:
+      - go generate ./...
+      - git diff --exit-code

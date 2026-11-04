@@ -84,6 +84,8 @@ tasks:
         trap 'rm -f "$bin"; rm -rf "$target"' EXIT
         ( cd "$root/cmd/forma" && go build -o "$bin" . )
         FORMA_REPLACE="$root" "$bin" init github.com/zhulik/forma/ci-smoke -d "$target"
+        test -f "$target/generator.go"
+        test -n "$(find "$target/internal/ui" -name '*.gen.go' | head -n 1)"
         ( cd "$target" && go build -o /dev/null . )
 
   lint:

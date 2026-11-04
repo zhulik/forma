@@ -8,6 +8,7 @@ import (
 	"github.com/zhulik/pal"
 
 	"github.com/zhulik/forma/cmd/forma/internal/cli/app"
+	"github.com/zhulik/forma/cmd/forma/internal/codegen"
 	"github.com/zhulik/forma/cmd/forma/internal/gotool"
 	"github.com/zhulik/forma/cmd/forma/internal/webtool"
 )
@@ -18,7 +19,7 @@ const flagDirectory = "directory"
 func New() *cli.Command {
 	return &cli.Command{
 		Name:  "sync",
-		Usage: "reconcile project with forma.yaml (npm, shadcn; codegen and registry planned)",
+		Usage: "reconcile project with forma.yaml (npm, codegen, go mod tidy)",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    flagDirectory,
@@ -27,7 +28,7 @@ func New() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return app.Run(ctx, gotool.Provide(), webtool.Provide(), Provide(), pal.Provide(&runner{
+			return app.Run(ctx, gotool.Provide(), webtool.Provide(), codegen.Provide(), Provide(), pal.Provide(&runner{
 				Dir:          cmd.String(flagDirectory),
 				FormaReplace: os.Getenv(EnvFormaReplace),
 			}))

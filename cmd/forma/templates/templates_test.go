@@ -25,10 +25,13 @@ func TestApply_Minimal(t *testing.T) {
 	yaml, err := os.ReadFile(filepath.Join(dir, "forma.yaml"))
 	require.NoError(t, err)
 	require.Contains(t, string(yaml), "web:\n  path: web")
-	require.Contains(t, string(yaml), "- button")
+	require.NotContains(t, string(yaml), "components:")
 	require.FileExists(t, filepath.Join(dir, "main.go"))
+	require.FileExists(t, filepath.Join(dir, "generator.go"))
+	require.FileExists(t, filepath.Join(dir, "Taskfile.yaml"))
 	require.FileExists(t, filepath.Join(dir, "web", "package.json"))
 	require.FileExists(t, filepath.Join(dir, "web", "index.html"))
+	require.FileExists(t, filepath.Join(dir, "web", "src", "main.tsx"))
 
 	html, err := os.ReadFile(filepath.Join(dir, "web", "index.html"))
 	require.NoError(t, err)
@@ -37,6 +40,19 @@ func TestApply_Minimal(t *testing.T) {
 	raw, err := os.ReadFile(filepath.Join(dir, "main.go"))
 	require.NoError(t, err)
 	require.Contains(t, string(raw), "UIMount(\"app-root\"")
+
+	gen, err := os.ReadFile(filepath.Join(dir, "generator.go"))
+	require.NoError(t, err)
+	require.Contains(t, string(gen), "//go:generate forma generate")
+
+	taskfile, err := os.ReadFile(filepath.Join(dir, "Taskfile.yaml"))
+	require.NoError(t, err)
+	require.Contains(t, string(taskfile), "check-generate:")
+	require.Contains(t, string(taskfile), "git diff --exit-code")
+
+	mainTSX, err := os.ReadFile(filepath.Join(dir, "web", "src", "main.tsx"))
+	require.NoError(t, err)
+	require.Contains(t, string(mainTSX), `from "./registry.gen"`)
 }
 
 func TestNames_IncludesMinimal(t *testing.T) {

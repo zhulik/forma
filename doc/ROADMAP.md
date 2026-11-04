@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0–P2** complete for specs and author docs. **CLI:** nested **`cmd/forma`** ships **`init`** (embedded **`minimal`** template + **`web/`** tree), **partial **`sync`** (npm + shadcn; codegen/registry stub), and **`version`**; **`add`** / full sync / **`dev`** remain P3. Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md), [`forma-cli`](../openspec/specs/forma-cli/spec.md); author guide [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo; browser runtime still stub. **Next:** finish CLI breadth as needed, then P3a codegen → host → GopherJS → dev loop.
+**Current status:** **P0–P2** complete for specs and author docs. **CLI:** nested **`cmd/forma`** ships **`init`**, full **`sync`**, **`generate`**, **`add`**, and **`version`**; **`dev`** remains P3d. **P3a codegen** is implemented in-tree (`forma generate` + sync). Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md), [`forma-cli`](../openspec/specs/forma-cli/spec.md); author guide [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo; browser runtime still stub. **Next:** P3b host → P3c GopherJS → P3d dev loop.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md)
 
@@ -35,7 +35,7 @@ Work proceeds in **strict order**: DSL → user documentation → implementation
 | **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; `task test` wired | **`forma-dev-tooling`** → `openspec/specs/dev-tooling/` | **Done** |
 | **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; `main.go` reference; stub `ui` runtime | **`forma-ui-dsl`**, **`forma-fragment-slots`** (archived) → `openspec/specs/ui-dsl/` | **Done** |
 | **P2** | **User documentation** — CLI-first install (`forma init` / `add` / `sync`), `forma.yaml`, project layout, writing UI, components, advanced, troubleshooting; docs-first policy | **`forma-user-docs`** → `doc/user/`, OpenSpec **`ui-docs`** + **`forma-cli`** (contract) | **Done** (guide + specs; CLI binary deferred) |
-| **P3a** | **Codegen pipeline** — ts-morph (or equivalent) from shadcn TSX → `ui/*.gen.go`; CI check for drift | **`forma-ui-codegen`** | Planned |
+| **P3a** | **Codegen pipeline** — pure-Go TSX parse → app `*.gen.go` + registry; `forma generate`; scaffold `check-generate` | **`forma-ui-codegen`** | **Done** (archive OpenSpec change when reviewed) |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |
 | **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** | Planned |
 | **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | Planned |
@@ -71,7 +71,7 @@ P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
 | 3 | `forma-fragment-slots` | Fragment + field-only slots; tree `Slots` map | **Done** (archived) |
 | 4 | `forma-user-docs` | Author guide under `doc/user/` + ui-docs / forma-cli specs | **Done** (archive pending) |
 | 5 | `forma-cli-scaffold` | CLI module, init, stub sync, CI init smoke | **Done** |
-| 6 | `forma-ui-codegen` | Generator + first real generated components | Planned |
+| 6 | `forma-ui-codegen` | Generator + first real generated components | Done (archive pending) |
 | 7 | `forma-react-host` | Static host app + registry | Planned |
 | 8 | `forma-gopherjs-runtime` | Wire Go to host | Planned |
 | 9 | `forma-dev-experience` | Taskfile/scripts; demo runs in browser | Planned |

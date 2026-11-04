@@ -20,11 +20,12 @@ type Service struct {
 	Logger        *slog.Logger
 	GoModRunner   core.GoModRunner
 	WebSyncRunner core.WebSyncRunner
+	CodegenRunner core.CodegenRunner
 }
 
-// Sync runs web and Go reconciliation in dir with optional local replace path.
-func (s *Service) Sync(ctx context.Context, dir, formaReplace string) error {
-	target, err := resolveDir(dir)
+// Sync runs web, codegen, and Go reconciliation.
+func (s *Service) Sync(ctx context.Context, req core.SyncRequest) error {
+	target, err := resolveDir(req.Dir)
 	if err != nil {
 		return err
 	}
@@ -55,19 +56,20 @@ func (s *Service) Sync(ctx context.Context, dir, formaReplace string) error {
 		return err
 	}
 
-	components := dedupeComponents(project.UI.Components)
+	components := dedupeComponents(req.AddComponents)
 	if err := s.WebSyncRunner.ShadcnAdd(ctx, webRoot, components); err != nil {
 		return err
 	}
 
-	s.Logger.InfoContext(ctx, "sync: Go widget codegen skipped (not implemented)")
-	s.Logger.InfoContext(ctx, "sync: JS component registry update skipped (not implemented)")
+	if err := runCodegen(ctx, s.CodegenRunner, target, project); err != nil {
+		return err
+	}
 
 	if err := s.GoModRunner.RequireForma(ctx, target); err != nil {
 		return fmt.Errorf("require forma library: %w", err)
 	}
-	if formaReplace != "" {
-		if err := s.GoModRunner.ReplaceForma(ctx, target, formaReplace); err != nil {
+	if req.FormaReplace != "" {
+		if err := s.GoModRunner.ReplaceForma(ctx, target, req.FormaReplace); err != nil {
 			return fmt.Errorf("replace forma library: %w", err)
 		}
 	}
@@ -75,6 +77,19 @@ func (s *Service) Sync(ctx context.Context, dir, formaReplace string) error {
 		return fmt.Errorf("go mod tidy: %w", err)
 	}
 
+	return nil
+}
+
+func runCodegen(ctx context.Context, runner core.CodegenRunner, projectDir string, project formaconfig.Project) error {
+	componentsDir, codegenDir, pkg, registryOut := project.ToCodegenPaths(projectDir)
+	if err := runner.Generate(ctx, core.CodegenRequest{
+		ComponentsDir: componentsDir,
+		CodegenDir:    codegenDir,
+		Package:       pkg,
+		RegistryOut:   registryOut,
+	}); err != nil {
+		return fmt.Errorf("codegen: %w", err)
+	}
 	return nil
 }
 

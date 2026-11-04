@@ -2,30 +2,29 @@
 
 ## Normal path: forma add
 
-> **Planned** until the CLI ships.
-
 ```bash
 forma add dialog
 ```
 
-1. Adds `dialog` to **`ui.components`** in `forma.yaml`.
+1. Materializes **`dialog`** via the shadcn CLI under the configured web root (if missing).
 2. Runs **`forma sync`**, which:
-   - Installs or updates shadcn **source** under `web/…/components/ui/`
+   - Installs npm dependencies if needed
    - Regenerates Go bindings in **`internal/ui/`** (or your `codegen.dir`)
-   - Updates the host registry so the tree type `Dialog` renders correctly
+   - Regenerates **`web/src/registry.gen.ts`**
+   - Runs **`go mod tidy`**
 
-You should not need to run **`npx shadcn add`** in the happy path.
+You should not need to run **`npx shadcn add`** in the happy path. **`forma.yaml`** does not maintain a component name list.
 
 ## What to commit
 
 | Yes | No |
 |-----|-----|
-| Updated `forma.yaml` | `node_modules/` |
-| New or changed TSX under `web/` | |
+| New or changed TSX under `web/` | `node_modules/` |
 | New or changed `internal/ui/*.gen.go` | |
+| Updated `web/src/registry.gen.ts` | |
 | Lockfile under `web/` if sync changed deps | |
 
-Generated Go is **committed** so CI can verify `forma sync` produces a clean tree (same idea as `task check-generate` in the framework repo).
+Generated Go and registry files are **committed** so CI can verify **`task check-generate`** (`go generate` then whole-repo **`git diff --exit-code`**) stays clean.
 
 ## Using a new widget in Go
 
@@ -33,14 +32,14 @@ After sync, import your generated package and use the struct the codegen emitted
 
 ## Starter set
 
-**`forma init`** will include a small default list (e.g. button, input, card) so hello world works without an immediate **`forma add`**.
+**`forma init`** materializes a CLI-hardcoded starter set (`button`, `input`, `card`) during the first sync so hello world works without an immediate **`forma add`**.
 
 ## Manual / advanced
 
-If you add TSX by hand or patch shadcn files:
+If you add or edit TSX by hand:
 
-- Run **`forma sync`** to refresh codegen and registry.
-- Sync overwrite policy for edited TSX will be documented with P3a codegen (prefer CLI-managed files until then).
+- Run **`forma generate`** (codegen only) or **`forma sync`** (npm + codegen + tidy).
+- Prefer CLI-managed files under **`components/ui/`**.
 
 See [Advanced](advanced.md).
 

@@ -4,8 +4,8 @@
 
 | Tool | Why |
 |------|-----|
-| **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. |
-| **Node.js** | Web tree (`npm install`, shadcn CLI during **`forma sync`**). Required for **`forma init`**. |
+| **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. Building the CLI needs **CGO** (a C toolchain) for tree-sitter. |
+| **Node.js** | Web tree (`npm install`, shadcn CLI during **`forma sync`** / **`forma add`** / **`forma init`**). Not required for **`forma generate`** alone. |
 | **GopherJS** | Compile Go to JavaScript for the browser loop (planned P3c). |
 
 Optional: [asdf](https://asdf-vm.com/) with `.tool-versions` for pinned Go, Node, and Task.
@@ -41,8 +41,8 @@ What **`forma init`** does today:
 
 1. Requires an **empty** directory (or creates one with `-d`).
 2. **`go mod init`** with your module path (no git remote setup).
-3. Applies the embedded **`minimal`** template: `main.go`, `forma.yaml`, a **`web/`** Vite + React + shadcn-ready tree, and a hello layout using `github.com/zhulik/forma/ui`.
-4. Runs **`forma sync`**: **`npm install`**, **`shadcn add`** for default components (button, input, card), Go module tidy, and a **`require`** on the forma library. Go widget codegen and the JS component registry are **not** implemented yet (logged as skipped).
+3. Applies the embedded **`minimal`** template: `main.go`, `forma.yaml`, **`generator.go`**, **`Taskfile.yaml`**, a **`web/`** Vite + React + shadcn-ready tree, and a hello layout using `github.com/zhulik/forma/ui`.
+4. Runs **`forma sync`**: **`npm install`**, **`shadcn add`** for starter components (button, input, card), **codegen** into **`internal/ui/`** plus **`web/src/registry.gen.ts`**, Go module tidy, and a **`require`** on the forma library.
 
 Use your real module path (e.g. `github.com/you/myapp`), not a placeholder.
 

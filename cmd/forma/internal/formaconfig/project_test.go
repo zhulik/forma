@@ -17,8 +17,6 @@ func TestLoad_UIWebCodegen(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(dir, formaconfig.FileName), []byte(`module: github.com/example/app
 ui:
   mount: app-root
-  components:
-    - input
 web:
   path: frontend
 codegen:
@@ -30,7 +28,9 @@ codegen:
 	require.NoError(t, err)
 	require.Equal(t, "github.com/example/app", project.Module)
 	require.Equal(t, "app-root", project.UI.Mount)
-	require.Equal(t, []string{"input"}, project.UI.Components)
 	require.Equal(t, "frontend", project.Web.Path)
 	require.Equal(t, filepath.Join(dir, "frontend"), project.WebRoot(dir))
+	require.Equal(t, filepath.Join(dir, "internal", "ui"), project.CodegenAbsDir(dir))
+	require.Equal(t, filepath.Join(dir, "frontend", "src", "components", "ui"), project.ComponentsUIDir(dir))
+	require.Equal(t, filepath.Join(dir, "frontend", "src", "registry.gen.ts"), project.RegistryOutPath(dir))
 }

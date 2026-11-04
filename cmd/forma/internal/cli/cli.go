@@ -5,6 +5,7 @@ import (
 
 	addcmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/add"
 	devcmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/dev"
+	generatecmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/generate"
 	initcmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/init"
 	synccmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/sync"
 	versioncmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/version"
@@ -26,6 +27,7 @@ func NewRoot() *cli.Command {
 		Commands: []*cli.Command{
 			initcmd.New(),
 			synccmd.New(),
+			generatecmd.New(),
 			addcmd.New(),
 			devcmd.New(),
 			versioncmd.New(),

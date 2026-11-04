@@ -8,12 +8,12 @@ Specify the forma command-line interface and project configuration authors use t
 
 ### Requirement: Init scaffolds module and syncs
 
-The CLI SHALL provide `forma init <module>` that runs `go mod init` with the given module path in an empty target directory, writes a project scaffold from the selected embedded template (including `forma.yaml`, application entry, imports of the forma library, and a web tree under the configured `web.path` with package manifest and shadcn configuration), and runs `forma sync` before exiting successfully. If a step fails after earlier steps wrote files, the command MAY leave a partially initialized directory; the CLI SHALL NOT claim success unless init and sync both complete.
+The CLI SHALL provide `forma init <module>` that runs `go mod init` with the given module path in an empty target directory, writes a project scaffold from the selected embedded template (including `forma.yaml`, application entry, imports of the forma library, and a web tree under the configured `web.path` with package manifest and shadcn configuration), and runs `forma sync` before exiting successfully. If a step fails after earlier steps wrote files, the command MAY leave a partially initialized directory; the CLI SHALL NOT claim success unless init and sync both complete. First sync on a new project SHALL materialize a default starter set of shadcn components defined by the CLI (currently button, input, and card) via the shadcn CLI even when those names are not listed in `forma.yaml`.
 
 #### Scenario: New project in empty directory
 
 - **WHEN** an author runs `forma init github.com/user/myapp` in an empty directory
-- **THEN** a Go module exists with that path, scaffold files from the template are present including the web tree tooling under `web.path`, and sync has installed npm dependencies, materialized declared shadcn components, and reconciled Go module dependencies for the forma library
+- **THEN** a Go module exists with that path, scaffold files from the template are present including the web tree tooling under `web.path`, and sync has installed npm dependencies, materialized the default starter shadcn components under the web root, generated Go bindings and the host registry from those sources, and reconciled Go module dependencies for the forma library
 
 ### Requirement: Full init requires empty target directory
 
@@ -68,40 +68,73 @@ The CLI SHALL provide a version string via `--version` / `-v` and a `forma versi
 
 ### Requirement: Add registers a component and syncs
 
-The CLI SHALL provide `forma add <component>` that adds the component name to the project's declared component list in `forma.yaml` (if not already present) and runs `forma sync`.
+The CLI SHALL provide `forma add <component>` that materializes the named shadcn component under the configured web root when not already present and runs `forma sync`.
 
 #### Scenario: Add dialog
 
 - **WHEN** an author runs `forma add dialog`
-- **THEN** `dialog` appears in the configured component list and sync materializes shadcn sources under the configured web root and generated bindings for that component
+- **THEN** shadcn sources for dialog exist under the configured web root and sync regenerates Go bindings and the host registry so dialog is available to the application
 
 ### Requirement: Sync materializes full project state
 
-The CLI SHALL provide `forma sync` that, from `forma.yaml`, ensures dependencies are installed under the configured web root, shadcn component sources exist for each listed component, Go widget bindings are generated into the configured codegen directory, the JavaScript component registry under the web root reflects generated types, and `go mod tidy` runs so forma library imports resolve. Until the Go codegen and registry pipeline ships, sync SHALL still install npm dependencies under the web root, materialize shadcn sources for each listed component via the shadcn CLI, run `go mod tidy`, and ensure the forma library module requirement is present; sync SHALL log that codegen and registry steps are skipped rather than failing, and documentation SHALL distinguish partial sync from full materialization.
+The CLI SHALL provide `forma sync` that, from `forma.yaml`, ensures dependencies are installed under the configured web root, runs the same codegen path as `forma generate` (regenerating Go widget bindings and the JavaScript component registry from shadcn sources present under the web root), and runs `go mod tidy` so forma library imports resolve. Sync SHALL NOT require a component name list in `forma.yaml` to drive codegen. Sync SHALL run shadcn materialization for the init starter set only during the init-driven first sync, and SHALL run shadcn materialization for explicitly added component names when invoked via `forma add`; ordinary sync on an existing project SHALL regenerate from committed TSX without re-invoking shadcn for every widget unless add or init materialization is in progress.
 
 #### Scenario: Fresh clone after init
 
-- **WHEN** an author runs `forma sync` on a clean checkout with a valid `forma.yaml` and committed web tree sources
-- **THEN** npm dependencies are installed under the web root, shadcn component sources exist for each listed component without manual shadcn CLI steps, and Go module dependencies are tidied
-
-#### Scenario: Stub sync after init before P3 host
-
-- **WHEN** an author runs `forma sync` before Go widget codegen and the JS component registry are implemented
-- **THEN** npm install and shadcn materialization complete successfully, Go module dependencies including the forma library are reconciled, and the command exits successfully while reporting that codegen and registry update were skipped
+- **WHEN** an author runs `forma sync` on a clean checkout with a valid `forma.yaml` and committed web tree sources including shadcn TSX and generated bindings
+- **THEN** npm dependencies are installed under the web root, Go bindings and the host registry match the committed shadcn sources, and Go module dependencies are tidied
 
 #### Scenario: Sync without Node tooling
 
 - **WHEN** an author runs `forma sync` and neither `npm` nor an equivalent install command is available on PATH
 - **THEN** the command fails with a clear error before claiming success
 
+#### Scenario: Sync runs codegen
+
+- **WHEN** an author runs `forma sync` on a project with shadcn sources
+- **THEN** codegen and registry update run to completion and the command does not log that those steps were skipped
+
 ### Requirement: forma.yaml declares UI desired state
 
-Each forma application SHALL include a root `forma.yaml` that declares at minimum: the UI mount element id; the list of shadcn component names to include; web root path (`web.path`); codegen output directory and Go package name for generated widgets.
+Each forma application SHALL include a root `forma.yaml` that declares at minimum: the UI mount element id; web root path (`web.path`); codegen output directory and Go package name for generated widgets.
 
 #### Scenario: Default scaffold
 
 - **WHEN** init completes on a new project
-- **THEN** `forma.yaml` includes a default codegen directory of `internal/ui`, a default web root path of `web`, and a default starter set of shadcn component names unless the author overrides them before sync
+- **THEN** `forma.yaml` includes a default codegen directory of `internal/ui`, a default web root path of `web`, and a default UI mount id, and does not require a shadcn component name list for sync to succeed
+
+### Requirement: Generate regenerates bindings from config
+
+The CLI SHALL provide `forma generate` that reads the project's `forma.yaml`, regenerates Go widget bindings from shadcn sources under the configured web root into the configured codegen directory, and regenerates the JavaScript component registry under the web root. Generate SHALL NOT install npm dependencies, SHALL NOT invoke the shadcn CLI, SHALL NOT run `go mod tidy`, and SHALL NOT require Node.js or npm on PATH. Generate SHALL NOT require a component name list in `forma.yaml`.
+
+#### Scenario: Generate after editing committed TSX
+
+- **WHEN** an author edits a committed shadcn source under the web components directory and runs `forma generate`
+- **THEN** Go bindings and the host registry are updated to match the TSX without reinstalling npm packages or fetching new shadcn components
+
+#### Scenario: Generate without Node.js
+
+- **WHEN** an author runs `forma generate` with a valid `forma.yaml` and committed TSX while Node.js is unavailable on PATH
+- **THEN** codegen still completes successfully
+
+#### Scenario: Generate without forma.yaml
+
+- **WHEN** an author runs `forma generate` in a directory without a readable `forma.yaml`
+- **THEN** the command fails with a clear error and writes no generated output claimed as successful
+
+### Requirement: Init scaffold includes go generate and drift check
+
+The minimal init template SHALL include a root `generator.go` whose `go:generate` directive invokes `forma generate`, and a task target that runs `go generate` then fails when `git diff --exit-code` reports any change in the whole repository, so application CI can verify committed generated output is current without a dedicated forma check flag.
+
+#### Scenario: Author runs check in new project
+
+- **WHEN** an author runs the scaffold's generate check task after init on a clean tree whose generated files match current shadcn sources
+- **THEN** `go generate` runs successfully and the whole-repo git diff check exits successfully
+
+#### Scenario: Stale generated files fail check
+
+- **WHEN** generated Go or registry files are out of date relative to committed shadcn sources and the author runs the scaffold's generate check task
+- **THEN** the task fails with a non-zero exit status after regeneration leaves a dirty whole-repo git diff
 
 ### Requirement: Dev command is reserved for the browser loop
 
@@ -110,4 +143,4 @@ The CLI SHALL eventually provide `forma dev` to run the local browser developmen
 #### Scenario: Documentation before P3d
 
 - **WHEN** an author reads CLI reference material during P3d planning
-- **THEN** `forma dev` is listed with planned status distinct from implemented commands such as `init`, partial `sync`, and `version`
+- **THEN** `forma dev` is listed with planned status distinct from implemented commands such as `init`, `generate`, `sync`, `add`, and `version`

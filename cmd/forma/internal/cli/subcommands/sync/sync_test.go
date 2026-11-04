@@ -29,9 +29,12 @@ func TestRun_StubSync(t *testing.T) {
 	dir := t.TempDir()
 	require.NoError(t, os.WriteFile(filepath.Join(dir, formaconfig.FileName), []byte(`module: github.com/example/x
 ui:
-  components: []
+  mount: app-root
 web:
   path: web
+codegen:
+  dir: internal/ui
+  package: ui
 `), 0o600))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module github.com/example/x\n\ngo 1.27.3\n"), 0o600))
 	webDir := filepath.Join(dir, "web")

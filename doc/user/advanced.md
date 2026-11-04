@@ -10,7 +10,7 @@ codegen:
   package: widgets
 ```
 
-Use when a monorepo or import policy requires generated code outside **`internal/ui`**. After changing paths, run **`forma sync`**.
+Use when a monorepo or import policy requires generated code outside **`internal/ui`**. After changing paths, run **`forma generate`** or **`forma sync`**.
 
 Framework types (`Component`, `Context`, layout) stay in **`github.com/zhulik/forma/ui`**.
 
@@ -32,7 +32,7 @@ Go never imports DOM types; the wrapper calls back into Go with sanitized payloa
 
 ## Edit shadcn TSX
 
-shadcn is **source in your repo** so you can Tailor Tailwind and behavior. After edits, run **`forma sync`**. Future codegen may distinguish CLI-managed vs owner-managed files; until then, treat TSX as yours and re-sync deliberately.
+shadcn is **source in your repo** so you can tailor Tailwind and behavior. After edits, run **`forma generate`** (or **`forma sync`**). Prefer CLI-managed files under **`components/ui/`**.
 
 ## Agents and automation
 

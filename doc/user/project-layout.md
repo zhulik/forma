@@ -2,11 +2,13 @@
 
 ## Your app (after forma init)
 
-Layout after **`forma init`** (sync runs npm + shadcn for declared components):
+Layout after **`forma init`** (sync materializes starter shadcn components and runs codegen):
 
 ```
 myapp/
-  forma.yaml           # desired state (components, paths, mount)
+  forma.yaml           # mount, web path, codegen paths
+  generator.go         # //go:generate forma generate
+  Taskfile.yaml        # check-generate: go generate + git diff --exit-code
   go.mod
   go.sum               # after sync / go mod tidy
   main.go              # UIMount, app root component
@@ -16,7 +18,10 @@ myapp/
       ...
   web/                 # React + shadcn + Vite (web.path)
     package.json
-    components/ui/     # shadcn TSX sources (committed)
+    src/
+      components/ui/   # shadcn TSX sources (committed)
+      main.tsx
+      registry.gen.ts  # generated host registry
     ...
 ```
 
@@ -34,22 +39,22 @@ Application code often dot-imports framework `ui` and `fn` for a dense DSL (see 
 
 The forma repo is **not** a typical user app today:
 
-- **`ui/`** at repo root = framework DSL + **hand-written** `*.gen.go` stubs for development until P3a codegen.
+- **`ui/`** at repo root = framework DSL + **hand-written** `*.gen.go` stubs until a follow-up moves demos to **`examples/`**.
 - **`main.go`** = reference todo demo at repo root.
-- No **`web/`** or **`forma.yaml`** yet.
+- No app-level **`web/`** or **`forma.yaml`** at the framework root.
 
-When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source; examples may move under `examples/` later.
+When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source.
 
 ## Version control
 
 Commit:
 
-- `forma.yaml`, `go.mod`, `go.sum`
+- `forma.yaml`, `generator.go`, `Taskfile.yaml`, `go.mod`, `go.sum`
 - `main.go` and your app packages
 - `web/` sources including shadcn **`components/ui/*.tsx`**
-- Generated **`internal/ui/*.gen.go`**
+- Generated **`internal/ui/*.gen.go`** and **`web/src/registry.gen.ts`**
 
-Do not commit `web/node_modules/`. After **`forma sync`**, review diffs before commit—sync may add or update generated files and lockfiles.
+Do not commit `web/node_modules/`. After **`forma sync`** or **`forma generate`**, review diffs before commit.
 
 ## Related
 

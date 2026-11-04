@@ -2,8 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import "./index.css";
+import { registry } from "./registry.gen";
 
-const mount = document.getElementById("app-root");
+// Host runtime wires registry later (P3b); keep the import so sync/codegen stay linked.
+void registry;
+
+const mount = document.getElementById("{{ .Mount }}");
 if (mount) {
   createRoot(mount).render(
     <StrictMode>
