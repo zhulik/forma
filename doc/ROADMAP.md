@@ -58,9 +58,21 @@ P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
 ## OpenSpec workflow
 
 - **Schema:** `spec-driven` (see [`openspec/config.yaml`](../openspec/config.yaml)).
-- **Main specs home:** `openspec/specs/` — **`dev-tooling`**, **`ui-dsl`** today; more capabilities (e.g. `ui-runtime`, `ui-codegen`) land when P3+ changes archive.
+- **Main specs home:** `openspec/specs/` — **`dev-tooling`**, **`agent-factory`**, **`ui-dsl`**, and related capabilities; more (e.g. `ui-runtime`) land when P3+ changes archive.
 - **Active work:** `openspec/changes/<change-name>/` with `proposal.md`, `specs/.../spec.md`, `design.md`, `tasks.md`.
 - **Archive:** completed changes move to `openspec/changes/archive/`; sync capabilities to `openspec/specs/`.
+
+### Agent factory (local)
+
+Operator overview: [`AGENT_FACTORY.md`](./AGENT_FACTORY.md). **Who:** Cursor agents in `.cursor/agents/` — `planner`, `orch`, `architector`, `builder`, `debt`. **What:** OpenSpec skills/commands (`/opsx-*`).
+
+This roadmap is the factory **control plane**: **orch** (and peers) may update live fields on suggested-change rows as work advances—at least **Status**, and when known **branch** / **PR** (link or number). Humans alone merge. Factory runs locally (worktrees); cloud Automations are not the scheduler.
+
+| Live field | Meaning |
+|------------|---------|
+| Status | Planned / in progress / PR open / Done (etc.) |
+| branch | Feature branch when opened |
+| PR | Pull request identity when opened |
 
 ### Suggested changes (by phase)
 

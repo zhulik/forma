@@ -6,7 +6,7 @@ alwaysApply: false
 
 # Prefer `fn` over raw loops
 
-Raw `for` loops over slices or maps that **build a collection** (map, filter, remap, fallible collect) are **forbidden** unless they match an allowlisted case below. Use **`github.com/zhulik/forma/fn`** (`Map`, `Filter`, `FilterMap`, `MapErr`, `FilterMapErr`, `MapValues`, `MapEntries`, …). Add a new exported helper in `fn/` when the pattern is useful—do not add third-party collection libraries.
+Raw `for` loops over slices or maps that **build a collection** (map, filter, remap, fallible collect) are **forbidden** unless they match an allowlisted case below. Use **`github.com/zhulik/forma/fn`** (`Map`, `Filter`, `FilterMap`, `MapErr`, `FilterMapErr`, `MapValues`, `MapEntries`, …). Add a new exported helper in `fn/` when the pattern is useful—do not add third-party collection libraries. This exemption is deliberate under `prefer-reuse-over-handroll`: prefer reuse elsewhere, but **never** replace `fn/` with an external collection/util package.
 
 Side-effect-only **each** walks (including fallible I/O that does not return a built collection) MAY use raw `for`.
 

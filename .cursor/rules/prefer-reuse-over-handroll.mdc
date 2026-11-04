@@ -1,0 +1,34 @@
+---
+description: Prefer well-known third-party modules or existing codegen over hand-rolled code; keep fn/ in-tree
+alwaysApply: true
+---
+
+# Prefer reuse over hand-roll
+
+Before **planning or writing** new code that solves a problem, check for an existing solution in this order. Prefer the first match.
+
+1. **Well-known third-party module** that already solves the problem — use it instead of inventing a parallel implementation.
+2. **Repo codegen / generators** that can emit the code (e.g. `forma generate`, sync pipelines, `*.gen.go` owners) — extend or run those instead of maintaining a hand-written twin.
+3. **Hand-write** only when neither applies.
+
+## Exception — `fn/`
+
+Package **`fn/`** (`github.com/zhulik/forma/fn`) stays in-tree. Do **not** replace it with a third-party collection/util library. Extend `fn` when map/filter-shaped helpers are missing (see `prefer-fn`).
+
+Other existing “don’t add X library” rules still apply (e.g. no third-party immutable collections in `copy-dont-mutate`).
+
+## Debt and planning
+
+When reviewing or proposing cleanup: if hand-rolled code could be a well-known module or generated output, **propose replacing it** — do not leave NIH as the default path.
+
+## Do / Don’t
+
+```text
+DO    reach for a mature, widely used module when the need matches its purpose
+DO    generate via existing pipelines when the artifact is in that pipeline’s contract
+DO    record “reuse vs hand-roll” choices in designs and PR descriptions when material
+
+DON’T reimplement stacks already covered by stdlib or known modules
+DON’T hand-maintain mirrors of generated files
+DON’T swap out fn/ for lodash-like or generic collection deps
+```
