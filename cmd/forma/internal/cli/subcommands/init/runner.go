@@ -21,11 +21,10 @@ import (
 )
 
 type runner struct {
-	Opts          Options
-	FormaReplace  string
-	Logger        *slog.Logger
-	GoModRunner   core.GoModRunner
-	ProjectSyncer core.ProjectSyncer
+	Opts         Options
+	FormaReplace string
+	Logger       *slog.Logger
+	GoModWrapper core.GoModWrapper
 }
 
 // Run initializes a project (exported for tests).
@@ -97,7 +96,7 @@ func (r *runner) runFull(ctx context.Context, target string) error {
 		return fmt.Errorf("%w: %w", clierrors.ErrUnknownTemplate, err)
 	}
 
-	if err := r.GoModRunner.ModInit(ctx, target, r.Opts.Module); err != nil {
+	if err := r.GoModWrapper.InitModule(ctx, target, r.Opts.Module); err != nil {
 		return fmt.Errorf("go mod init: %w", err)
 	}
 
@@ -110,11 +109,7 @@ func (r *runner) runFull(ctx context.Context, target string) error {
 	if replace == "" {
 		replace = os.Getenv(synccmd.EnvFormaReplace)
 	}
-	if err := r.ProjectSyncer.Sync(ctx, core.SyncRequest{
-		Dir:           target,
-		FormaReplace:  replace,
-		AddComponents: starters.Components,
-	}); err != nil {
+	if err := synccmd.RunWithComponents(ctx, target, replace, starters.Components); err != nil {
 		return fmt.Errorf("sync: %w", err)
 	}
 

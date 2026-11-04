@@ -6,7 +6,7 @@ import (
 	"github.com/zhulik/forma/cmd/forma/internal/core"
 )
 
-// Provide registers the default Go toolchain adapter for pal injection.
+// Provide registers the default Go module wrapper for pal injection.
 func Provide() pal.ServiceDef {
-	return pal.Provide[core.GoModRunner](&Tool{})
+	return pal.Provide[core.GoModWrapper](&GoModWrapper{})
 }

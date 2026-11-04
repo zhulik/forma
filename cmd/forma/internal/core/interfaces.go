@@ -2,12 +2,12 @@ package core
 
 import "context"
 
-// GoModRunner runs go mod commands for CLI project setup.
-type GoModRunner interface {
-	ModInit(ctx context.Context, dir, module string) error
-	RequireForma(ctx context.Context, dir string) error
-	ReplaceForma(ctx context.Context, dir, localPath string) error
-	ModTidy(ctx context.Context, dir string) error
+// GoModWrapper runs go mod commands for CLI project setup.
+type GoModWrapper interface {
+	InitModule(ctx context.Context, dir, module string) error
+	Require(ctx context.Context, dir string) error
+	Replace(ctx context.Context, dir, localPath string) error
+	Tidy(ctx context.Context, dir string) error
 }
 
 // SyncRequest is the input to ProjectSyncer.Sync.
@@ -22,13 +22,17 @@ type ProjectSyncer interface {
 	Sync(ctx context.Context, req SyncRequest) error
 }
 
-// WebSyncRunner installs npm dependencies and materializes shadcn components under a web root.
-type WebSyncRunner interface {
-	NpmInstall(ctx context.Context, dir string) error
-	ShadcnAdd(ctx context.Context, dir string, components []string) error
+// NpmWrapper installs npm dependencies under a web root.
+type NpmWrapper interface {
+	Install(ctx context.Context, dir string) error
 }
 
-// CodegenRequest is the input to CodegenRunner.Generate.
+// ShadcnWrapper materializes shadcn components under a web root.
+type ShadcnWrapper interface {
+	Add(ctx context.Context, dir string, components []string) error
+}
+
+// CodegenRequest is the input to CodeGenerator.Generate.
 type CodegenRequest struct {
 	ComponentsDir string
 	CodegenDir    string
@@ -37,7 +41,7 @@ type CodegenRequest struct {
 	FormaUIImport string
 }
 
-// CodegenRunner turns local shadcn TSX into Go bindings and a JS registry.
-type CodegenRunner interface {
+// CodeGenerator turns local shadcn TSX into Go bindings and a JS registry.
+type CodeGenerator interface {
 	Generate(ctx context.Context, req CodegenRequest) error
 }

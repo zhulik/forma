@@ -28,10 +28,13 @@ func New() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return app.Run(ctx, gotool.Provide(), webtool.Provide(), codegen.Provide(), Provide(), pal.Provide(&runner{
+			services := []pal.ServiceDef{gotool.Provide()}
+			services = append(services, webtool.Provide()...)
+			services = append(services, codegen.Provide(), pal.Provide(&ProjectSyncer{
 				Dir:          cmd.String(flagDirectory),
 				FormaReplace: os.Getenv(EnvFormaReplace),
 			}))
+			return app.Run(ctx, services...)
 		},
 	}
 }

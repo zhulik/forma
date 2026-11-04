@@ -14,20 +14,23 @@ import (
 	"github.com/zhulik/forma/cmd/forma/internal/formaconfig"
 )
 
-type recordingWebRunner struct {
-	npmDir     string
-	shadcnDir  string
-	shadcnArgs []string
+type recordingNpm struct {
+	dir string
 }
 
-func (r *recordingWebRunner) NpmInstall(_ context.Context, dir string) error {
-	r.npmDir = dir
+func (r *recordingNpm) Install(_ context.Context, dir string) error {
+	r.dir = dir
 	return nil
 }
 
-func (r *recordingWebRunner) ShadcnAdd(_ context.Context, dir string, components []string) error {
-	r.shadcnDir = dir
-	r.shadcnArgs = append([]string(nil), components...)
+type recordingShadcn struct {
+	dir  string
+	args []string
+}
+
+func (r *recordingShadcn) Add(_ context.Context, dir string, components []string) error {
+	r.dir = dir
+	r.args = append([]string(nil), components...)
 	return nil
 }
 
@@ -40,16 +43,14 @@ func (r *recordingCodegen) Generate(_ context.Context, req core.CodegenRequest) 
 	return nil
 }
 
-type noopGoModRunner struct{}
+type noopGoMod struct{}
 
-func (noopGoModRunner) ModInit(context.Context, string, string) error { return nil }
-func (noopGoModRunner) RequireForma(context.Context, string) error    { return nil }
-func (noopGoModRunner) ReplaceForma(context.Context, string, string) error {
-	return nil
-}
-func (noopGoModRunner) ModTidy(context.Context, string) error { return nil }
+func (noopGoMod) InitModule(context.Context, string, string) error { return nil }
+func (noopGoMod) Require(context.Context, string) error            { return nil }
+func (noopGoMod) Replace(context.Context, string, string) error    { return nil }
+func (noopGoMod) Tidy(context.Context, string) error               { return nil }
 
-func TestService_Sync_WebCodegenAndGo(t *testing.T) {
+func TestProjectSyncer_Sync_WebCodegenAndGo(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
@@ -67,13 +68,15 @@ codegen:
 	require.NoError(t, os.MkdirAll(webDir, 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(webDir, "package.json"), []byte("{}"), 0o600))
 
-	web := &recordingWebRunner{}
+	npm := &recordingNpm{}
+	shadcn := &recordingShadcn{}
 	cg := &recordingCodegen{}
-	svc := &synccmd.Service{
+	svc := &synccmd.ProjectSyncer{
 		Logger:        slog.Default(),
-		GoModRunner:   noopGoModRunner{},
-		WebSyncRunner: web,
-		CodegenRunner: cg,
+		GoModWrapper:  noopGoMod{},
+		NpmWrapper:    npm,
+		ShadcnWrapper: shadcn,
+		CodeGenerator: cg,
 	}
 
 	err := svc.Sync(context.Background(), core.SyncRequest{
@@ -81,9 +84,9 @@ codegen:
 		AddComponents: []string{"button", "button", "card"},
 	})
 	require.NoError(t, err)
-	require.Equal(t, webDir, web.npmDir)
-	require.Equal(t, webDir, web.shadcnDir)
-	require.Equal(t, []string{"button", "card"}, web.shadcnArgs)
+	require.Equal(t, webDir, npm.dir)
+	require.Equal(t, webDir, shadcn.dir)
+	require.Equal(t, []string{"button", "card"}, shadcn.args)
 	require.Len(t, cg.reqs, 1)
 	require.Equal(t, filepath.Join(webDir, "src", "components", "ui"), cg.reqs[0].ComponentsDir)
 	require.Equal(t, filepath.Join(dir, "internal", "ui"), cg.reqs[0].CodegenDir)
@@ -91,7 +94,7 @@ codegen:
 	require.Equal(t, filepath.Join(webDir, "src", "registry.gen.ts"), cg.reqs[0].RegistryOut)
 }
 
-func TestService_Sync_NoShadcnWhenEmpty(t *testing.T) {
+func TestProjectSyncer_Sync_NoShadcnWhenEmpty(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
@@ -106,17 +109,19 @@ web:
 	require.NoError(t, os.MkdirAll(webDir, 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(webDir, "package.json"), []byte("{}"), 0o600))
 
-	web := &recordingWebRunner{}
+	npm := &recordingNpm{}
+	shadcn := &recordingShadcn{}
 	cg := &recordingCodegen{}
-	svc := &synccmd.Service{
+	svc := &synccmd.ProjectSyncer{
 		Logger:        slog.Default(),
-		GoModRunner:   noopGoModRunner{},
-		WebSyncRunner: web,
-		CodegenRunner: cg,
+		GoModWrapper:  noopGoMod{},
+		NpmWrapper:    npm,
+		ShadcnWrapper: shadcn,
+		CodeGenerator: cg,
 	}
 
 	err := svc.Sync(context.Background(), core.SyncRequest{Dir: dir})
 	require.NoError(t, err)
-	require.Empty(t, web.shadcnArgs)
+	require.Empty(t, shadcn.args)
 	require.Len(t, cg.reqs, 1)
 }

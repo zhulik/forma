@@ -24,7 +24,9 @@ cmd/forma/
 
 ## Pal
 
-Subcommand work runs through `app.Run` with explicit `pal.ServiceDef` lists (no global registration). Init uses `deps.Services(pal.Provide(&runner{…}))…`; synccmd inlines `gotool.Provide(), synccmd.Provide(), pal.Provide(…)` to avoid an import cycle with `deps`. Pass only CLI-bound fields on the runner. Cross-package DI interfaces live in `internal/core/interfaces.go`. Use `InjectSlog()` via `app.Run`. Version subcommand does not use pal.
+Subcommand work runs through `app.Run` with explicit `pal.ServiceDef` lists (no global registration). Init uses `deps.Services(gotool + runner)`; after scaffold it calls `synccmd.RunWithComponents` (nested pal graph). Sync/generate provide the real worker with CLI fields as the pal runner (`ProjectSyncer`, `generatecmd.Runner`) — no proxy. Cross-package DI ports live in `internal/core/interfaces.go`. Use `InjectSlog()` via `app.Run`. Version subcommand does not use pal.
+
+Runner/port naming and no-proxy rules: see `pal-runners.mdc`.
 
 ## Init
 

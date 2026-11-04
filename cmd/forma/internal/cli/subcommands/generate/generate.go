@@ -32,26 +32,27 @@ func New() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			return app.Run(ctx, codegen.Provide(), Provide(), pal.Provide(&runner{
+			return app.Run(ctx, codegen.Provide(), pal.Provide(&Runner{
 				Dir: cmd.String(flagDirectory),
 			}))
 		},
 	}
 }
 
-// Service loads forma.yaml and runs codegen only.
-type Service struct {
+// Runner loads forma.yaml and runs codegen (implements pal.Runner).
+type Runner struct {
+	Dir           string
 	Logger        *slog.Logger
-	CodegenRunner core.CodegenRunner
+	CodeGenerator core.CodeGenerator
 }
 
-// Provide registers the generate service (also used as Codegen orchestration for the command runner).
-func Provide() pal.ServiceDef {
-	return pal.Provide(&Service{})
+// Run regenerates bindings using the CLI-bound directory.
+func (r *Runner) Run(ctx context.Context) error {
+	return r.Generate(ctx, r.Dir)
 }
 
 // Generate reads forma.yaml under dir and regenerates bindings and registry.
-func (s *Service) Generate(ctx context.Context, dir string) error {
+func (r *Runner) Generate(ctx context.Context, dir string) error {
 	target, err := resolveDir(dir)
 	if err != nil {
 		return err
@@ -71,7 +72,7 @@ func (s *Service) Generate(ctx context.Context, dir string) error {
 	}
 
 	componentsDir, codegenDir, pkg, registryOut := project.ToCodegenPaths(target)
-	if err := s.CodegenRunner.Generate(ctx, core.CodegenRequest{
+	if err := r.CodeGenerator.Generate(ctx, core.CodegenRequest{
 		ComponentsDir: componentsDir,
 		CodegenDir:    codegenDir,
 		Package:       pkg,
@@ -80,17 +81,8 @@ func (s *Service) Generate(ctx context.Context, dir string) error {
 		return err
 	}
 
-	s.Logger.InfoContext(ctx, "generate complete", "codegen", codegenDir, "registry", registryOut)
+	r.Logger.InfoContext(ctx, "generate complete", "codegen", codegenDir, "registry", registryOut)
 	return nil
-}
-
-type runner struct {
-	Dir     string
-	Service *Service
-}
-
-func (r *runner) Run(ctx context.Context) error {
-	return r.Service.Generate(ctx, r.Dir)
 }
 
 func resolveDir(directory string) (string, error) {

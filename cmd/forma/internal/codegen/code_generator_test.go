@@ -10,9 +10,10 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/zhulik/forma/cmd/forma/internal/codegen"
+	"github.com/zhulik/forma/cmd/forma/internal/core"
 )
 
-func TestRunner_Generate_ButtonFixture(t *testing.T) {
+func TestCodeGenerator_Generate_ButtonFixture(t *testing.T) {
 	t.Parallel()
 
 	fixture := filepath.Join(testdataDir(t), "fixtures", "button")
@@ -20,7 +21,7 @@ func TestRunner_Generate_ButtonFixture(t *testing.T) {
 	codegenDir := filepath.Join(out, "ui")
 	registry := filepath.Join(out, "registry.gen.ts")
 
-	err := (&codegen.Runner{}).Generate(context.Background(), codegen.Request{
+	err := (&codegen.CodeGenerator{}).Generate(context.Background(), core.CodegenRequest{
 		ComponentsDir: fixture,
 		CodegenDir:    codegenDir,
 		Package:       "ui",
@@ -41,14 +42,14 @@ func TestRunner_Generate_ButtonFixture(t *testing.T) {
 	require.Equal(t, string(wantReg), string(reg))
 }
 
-func TestRunner_Generate_AccordionFixture(t *testing.T) {
+func TestCodeGenerator_Generate_AccordionFixture(t *testing.T) {
 	t.Parallel()
 
 	fixture := filepath.Join(testdataDir(t), "fixtures", "accordion")
 	out := t.TempDir()
 	codegenDir := filepath.Join(out, "ui")
 
-	err := (&codegen.Runner{}).Generate(context.Background(), codegen.Request{
+	err := (&codegen.CodeGenerator{}).Generate(context.Background(), core.CodegenRequest{
 		ComponentsDir: fixture,
 		CodegenDir:    codegenDir,
 		Package:       "ui",
@@ -63,7 +64,7 @@ func TestRunner_Generate_AccordionFixture(t *testing.T) {
 	require.Equal(t, string(want), string(got))
 }
 
-func TestRunner_Generate_PruneOrphan(t *testing.T) {
+func TestCodeGenerator_Generate_PruneOrphan(t *testing.T) {
 	t.Parallel()
 
 	fixture := filepath.Join(testdataDir(t), "fixtures", "button")
@@ -72,7 +73,7 @@ func TestRunner_Generate_PruneOrphan(t *testing.T) {
 	require.NoError(t, os.MkdirAll(codegenDir, 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(codegenDir, "orphan.gen.go"), []byte("package ui\n"), 0o600))
 
-	err := (&codegen.Runner{}).Generate(context.Background(), codegen.Request{
+	err := (&codegen.CodeGenerator{}).Generate(context.Background(), core.CodegenRequest{
 		ComponentsDir: fixture,
 		CodegenDir:    codegenDir,
 		Package:       "ui",

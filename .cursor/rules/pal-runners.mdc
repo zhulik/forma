@@ -1,0 +1,59 @@
+---
+description: Pal runners, DI ports, and collaborator naming for cmd/forma
+globs: cmd/forma/**/*
+alwaysApply: false
+---
+
+# Pal runners and DI ports
+
+## Runner structs implement pal.Runner
+
+A struct named `Runner` or `runner` MUST implement `pal.Runner` (`Run(ctx context.Context) error`).
+
+Do not name library/orchestrator types `Runner` / `runner` unless they are the pal lifecycle entrypoint. Prefer role names (`CodeGenerator`, `GoModWrapper`, …).
+
+Unexported `runner` for a subcommand entrypoint is fine when it implements `Run`.
+
+## No proxy runners
+
+Do not introduce a pal runner whose `Run` only forwards to another component.
+
+Put CLI-bound fields on the component that does the work and make **that** type the runner. Dual entry on the same type is OK (e.g. `Run` for CLI + `Sync(ctx, req)` for programmatic callers).
+
+```go
+// BAD — thin proxy
+func (r *runner) Run(ctx context.Context) error {
+	return r.ProjectSyncer.Sync(ctx, core.SyncRequest{Dir: r.Dir})
+}
+
+// GOOD — component is the runner
+func (s *ProjectSyncer) Run(ctx context.Context) error {
+	return s.Sync(ctx, core.SyncRequest{Dir: s.Dir, FormaReplace: s.FormaReplace, AddComponents: s.AddComponents})
+}
+```
+
+## Ports and main implementations share the role name
+
+Cross-package DI ports live in `internal/core`. The main concrete type in the implementing package uses the **same** name as the port (not `Service`, `Tool`, or `adapter`).
+
+| Port | Package type | Main method(s) |
+|------|--------------|----------------|
+| `GoModWrapper` | `gotool.GoModWrapper` | `InitModule`, `Require`, `Replace`, `Tidy` |
+| `NpmWrapper` | `webtool.NpmWrapper` | `Install` |
+| `ShadcnWrapper` | `webtool.ShadcnWrapper` | `Add` |
+| `CodeGenerator` | `codegen.CodeGenerator` | `Generate` |
+| `ProjectSyncer` | `synccmd.ProjectSyncer` | `Sync` (+ `Run` when it is the sync CLI entry) |
+
+Multi-method ports are fine when they wrap one toolchain (`GoModWrapper`). Split when tools are independent (npm vs shadcn).
+
+## Method verbs vs pal lifecycle
+
+Prefer short verb method names on ports. Do **not** use pal lifecycle names on non-runner collaborators: `Init`, `Run`, `Shutdown`, `HealthCheck` (or `Pal*` twins).
+
+`go mod init` → `InitModule` (not `Init`). `Run` belongs only on intentional `pal.Runner` types.
+
+## Related
+
+- Injected field names: `naming.mdc`
+- No Init wiring guards: `no-init-wiring-guards.mdc`
+- CLI layout: `forma-cli.mdc`

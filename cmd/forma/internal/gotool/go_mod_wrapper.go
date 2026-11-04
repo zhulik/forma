@@ -8,21 +8,21 @@ import (
 
 const FormaModule = "github.com/zhulik/forma"
 
-// Tool runs go commands in a project directory.
-type Tool struct{}
+// GoModWrapper runs go mod commands in a project directory.
+type GoModWrapper struct{}
 
-func (Tool) ModInit(ctx context.Context, dir, module string) error {
+func (GoModWrapper) InitModule(ctx context.Context, dir, module string) error {
 	return cmdexec.Run(ctx, dir, "go", "mod", "init", module)
 }
 
-func (Tool) RequireForma(ctx context.Context, dir string) error {
+func (GoModWrapper) Require(ctx context.Context, dir string) error {
 	return cmdexec.Run(ctx, dir, "go", "mod", "edit", "-require="+FormaModule+"@v0.0.0")
 }
 
-func (Tool) ReplaceForma(ctx context.Context, dir, localPath string) error {
+func (GoModWrapper) Replace(ctx context.Context, dir, localPath string) error {
 	return cmdexec.Run(ctx, dir, "go", "mod", "edit", "-replace="+FormaModule+"="+localPath)
 }
 
-func (Tool) ModTidy(ctx context.Context, dir string) error {
+func (GoModWrapper) Tidy(ctx context.Context, dir string) error {
 	return cmdexec.Run(ctx, dir, "go", "mod", "tidy")
 }

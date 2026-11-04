@@ -23,7 +23,7 @@ func (r *recordingCodegen) Generate(_ context.Context, req core.CodegenRequest) 
 	return nil
 }
 
-func TestService_Generate_LoadsConfigAndRunsCodegen(t *testing.T) {
+func TestRunner_Generate_LoadsConfigAndRunsCodegen(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
@@ -38,11 +38,11 @@ codegen:
 `), 0o600))
 
 	cg := &recordingCodegen{}
-	svc := &generatecmd.Service{
+	r := &generatecmd.Runner{
 		Logger:        slog.Default(),
-		CodegenRunner: cg,
+		CodeGenerator: cg,
 	}
-	err := svc.Generate(context.Background(), dir)
+	err := r.Generate(context.Background(), dir)
 	require.NoError(t, err)
 	require.Len(t, cg.reqs, 1)
 	require.Equal(t, filepath.Join(dir, "web", "src", "components", "ui"), cg.reqs[0].ComponentsDir)
@@ -51,14 +51,14 @@ codegen:
 	require.Equal(t, filepath.Join(dir, "web", "src", "registry.gen.ts"), cg.reqs[0].RegistryOut)
 }
 
-func TestService_Generate_MissingConfig(t *testing.T) {
+func TestRunner_Generate_MissingConfig(t *testing.T) {
 	t.Parallel()
 
-	svc := &generatecmd.Service{
+	r := &generatecmd.Runner{
 		Logger:        slog.Default(),
-		CodegenRunner: &recordingCodegen{},
+		CodeGenerator: &recordingCodegen{},
 	}
-	err := svc.Generate(context.Background(), t.TempDir())
+	err := r.Generate(context.Background(), t.TempDir())
 	require.Error(t, err)
 	require.Contains(t, err.Error(), formaconfig.FileName)
 }
