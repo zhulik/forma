@@ -86,7 +86,7 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 |-------|-------------|-------|---------|--------|--------|-----|
 | 1 | `forma-react-host` | P3b | Static host app + ComponentRegistry + recursive renderer | Done | | |
 | 2 | `forma-gopherjs-runtime` | P3c | Wire Go `UIMount`/`RefreshUI` to host; callbacks + `ui.Context` | Done | | |
-| 3 | `forma-dev-experience` | P3d | `forma dev` (replace stub); demo runs in browser | Done | `change/forma-dev-experience` | |
+| 3 | `forma-dev-experience` | P3d | `forma dev` (replace stub); demo runs in browser | Done | `change/forma-dev-experience` | [#3](https://github.com/zhulik/forma/pull/3) |
 | 4 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
 | 5 | — | P5 | Breadth: more widgets, 3rd-party recipes, perf notes | Deferred | | |
 
