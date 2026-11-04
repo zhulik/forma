@@ -2,13 +2,14 @@
 
 ## CLI or forma dev not found
 
-Install the **`forma`** CLI per [Install](install.md). **`forma dev`** (live Go↔browser rebuild loop) remains **planned** until ROADMAP P3d. The scaffold React host renders trees without that loop; the GopherJS bridge is P3c.
+Install the **`forma`** CLI per [Install](install.md). **`forma dev`** (one-command live Go↔browser rebuild loop) remains **planned** until ROADMAP P3d. The Go↔host bridge (`UIMount` / `RefreshUI`) is available without that loop—build with GopherJS and load after the host registers `formaHost`.
 
 ## UI does not update after a click
 
 - Confirm the handler mutates **Go state** and calls **`ctx.RefreshUI()`** or **`ctx.Update`**.
 - Async: refresh must run after the goroutine updates state; check context cancellation.
-- Until P3c, the browser host is not driven by Go—fixture/`null` tree only; clicks will not refresh a live todo demo.
+- Confirm **`globalThis.formaHost.setTree`** exists before the Go bundle runs (scaffold `main.tsx` registers it). Missing seam → developer-visible panic/failure from `UIMount`, not a silent blank tree.
+- Missing **`forma dev`** only means you lack the watch/rebuild loop—not that the bridge is absent.
 
 ## List items jump or remount
 
@@ -28,7 +29,7 @@ Install the **`forma`** CLI per [Install](install.md). **`forma dev`** (live Go�
 
 - **`ui.mount`** must match **`UIMount`** id and the mount node in **`web/index.html`** (or your `web.path` HTML). Missing mount fails closed (no alternate root); check the console for `[forma] mount element … not found`.
 - Registry must include every **Type** string your tree emits (builtins + generated + `registry.custom.ts`). Unknown types are skipped with a console warning.
-- Without the P3c bridge, `main.tsx` mounts with a **null** tree—expect an empty host, not the live todo app.
+- Tree stays null until Go calls **`UIMount`** / refresh. If the host never registered **`formaHost`**, the Go runtime fails closed instead of attaching elsewhere.
 - Check the browser console for JavaScript errors (when the web tree is built and served).
 
 ## Docs vs behavior mismatch

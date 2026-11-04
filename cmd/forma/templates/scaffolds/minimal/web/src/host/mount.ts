@@ -4,6 +4,9 @@ import { createElement, StrictMode, type ReactNode } from "react";
 /**
  * Attach a React root to the configured mount element.
  * Fails closed when the element is missing — never falls back to document.body.
+ *
+ * The Go runtime drives updates through `globalThis.formaHost.setTree`
+ * (see bridge.ts / FormaBridgeHost); this helper only owns the React root.
  */
 export function mountFormaHost(
   mountId: string,

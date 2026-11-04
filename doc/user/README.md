@@ -15,9 +15,9 @@ Contributors: see also OpenSpec capability **`ui-docs`** and `openspec/config.ya
 | UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`main.go`](../../main.go), [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
 | Author guide (this tree) | **Available** |
 | `forma` CLI (`init`, `sync`, `generate`, `add`, `version`) | **Available** — full sync + codegen; [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md); `dev` planned |
-| React host (registry merge, renderer, sanitize, text-input policy) | **Available** — scaffold `web/src/host/` (P3b); fixture/`null` tree until bridge |
-| GopherJS bridge (`UIMount` / `RefreshUI`) | **Planned** — ROADMAP P3c |
-| Browser `forma dev` loop | **Planned** — ROADMAP P3d |
+| React host (registry merge, renderer, sanitize, text-input policy) | **Available** — scaffold `web/src/host/` (P3b) |
+| GopherJS bridge (`UIMount` / `RefreshUI` / callbacks) | **Available** — ROADMAP P3c; host registers `globalThis.formaHost.setTree` |
+| Browser `forma dev` loop | **Planned** — ROADMAP P3d (one-command watch/rebuild) |
 | Codegen from shadcn TSX | **Available** — `forma generate` / sync (P3a) |
 
 Use [Install](install.md) and [CLI reference](cli.md) for new apps, or [Manual setup](manual-setup.md) without the CLI.

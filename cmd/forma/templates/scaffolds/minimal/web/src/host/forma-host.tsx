@@ -3,7 +3,7 @@ import { renderNode } from "./render";
 
 export type FormaHostProps = {
   registry: ComponentRegistry;
-  /** Replaceable tree root; null until the Go bridge (P3c) drives updates. */
+  /** Replaceable tree root; Go pushes updates via `formaHost.setTree`. */
   tree: FormaNode | null;
 };
 

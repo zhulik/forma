@@ -18,7 +18,9 @@ func main() {
 
 `app-root` must match `ui.mount` in **`forma.yaml`** and the mount element in **`web/index.html`** (or your configured `web.path`).
 
-> **Today:** `UIMount` in the framework repo is a stub. The scaffold **React host** (P3b) can render a tree from a fixture; the GopherJS bridge that drives `UIMount` / `RefreshUI` is **P3c**, and **`forma dev`** is **P3d**.
+On a **browser (GopherJS) build**, `UIMount` performs an initial refresh into the host via `globalThis.formaHost.setTree`. The scaffold `main.tsx` registers that seam before your Go bundle runs. On **native** `go test` / `go build`, `UIMount` is a no-op stub.
+
+> **`forma dev`** (one-command Vite + GopherJS watch) remains **planned** until ROADMAP P3d. Until then, build the Go app with GopherJS and load it after the host module registers `formaHost`.
 
 ## Dot imports
 
