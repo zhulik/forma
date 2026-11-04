@@ -1,10 +1,40 @@
 ---
-description: Pal runners, DI ports, and collaborator naming for cmd/forma
+description: Pal runners, DI ports, Provide placement, and collaborator naming for cmd/forma
 globs: cmd/forma/**/*
 alwaysApply: false
 ---
 
 # Pal runners and DI ports
+
+## Provide lives in services.go
+
+Package-level `Provide` functions that return `pal.ServiceDef` or `[]pal.ServiceDef` MUST live in `services.go` in that package.
+
+Do not put `Provide` next to the type implementation (`code_generator.go`, `go_mod_wrapper.go`, …). One `services.go` per package; it may register one or many defs.
+
+```go
+// BAD — Provide beside the type
+// code_generator.go
+func Provide() pal.ServiceDef {
+	return pal.Provide[core.CodeGenerator](&CodeGenerator{})
+}
+
+// GOOD — dedicated services.go
+// services.go
+func Provide() pal.ServiceDef {
+	return pal.Provide[core.CodeGenerator](&CodeGenerator{})
+}
+
+// GOOD — multiple defs in the same package
+func Provide() []pal.ServiceDef {
+	return []pal.ServiceDef{
+		pal.Provide[core.NpmWrapper](&NpmWrapper{}),
+		pal.Provide[core.ShadcnWrapper](&ShadcnWrapper{}),
+	}
+}
+```
+
+Composition roots (`app.Run`, `deps.Services`, subcommand Action bodies) assemble these defs; they do not own package `Provide` helpers for other packages.
 
 ## Runner structs implement pal.Runner
 

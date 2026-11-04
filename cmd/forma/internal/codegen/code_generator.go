@@ -8,19 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/zhulik/pal"
-
 	"github.com/zhulik/forma/cmd/forma/internal/core"
 	"github.com/zhulik/forma/fn"
 )
 
 // CodeGenerator runs in-process TSX → Go + registry codegen.
 type CodeGenerator struct{}
-
-// Provide registers the code generator for pal injection.
-func Provide() pal.ServiceDef {
-	return pal.Provide[core.CodeGenerator](&CodeGenerator{})
-}
 
 // Generate analyzes components and writes Go bindings plus the host registry.
 func (*CodeGenerator) Generate(ctx context.Context, req core.CodegenRequest) error {
