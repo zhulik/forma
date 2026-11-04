@@ -1,10 +1,10 @@
 # forma roadmap
 
-forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritizes **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
+forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritized **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0–P2** complete for specs and author docs. **CLI:** nested **`cmd/forma`** ships **`init`**, full **`sync`**, **`generate`**, **`add`**, and **`version`**; **`dev`** remains P3d. **P3a codegen** is implemented in-tree (`forma generate` + sync). Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md), [`forma-cli`](../openspec/specs/forma-cli/spec.md); author guide [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo; browser runtime still stub. **Next:** P3b host → P3c GopherJS → P3d dev loop.
+**Current status:** **P0–P3a** complete and archived. Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`generate`**, **`add`**, and **`version`**; **`dev`** is a registered stub until P3d. Canonical specs: [`dev-tooling`](../openspec/specs/dev-tooling/spec.md), [`ui-dsl`](../openspec/specs/ui-dsl/spec.md), [`forma-cli`](../openspec/specs/forma-cli/spec.md), [`ui-codegen`](../openspec/specs/ui-codegen/spec.md), [`ui-docs`](../openspec/specs/ui-docs/spec.md), [`agent-factory`](../openspec/specs/agent-factory/spec.md). Author guide: [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo; browser host/runtime still stub. **Next:** P3b React host → P3c GopherJS runtime → P3d `forma dev` loop.
 
-**Canonical design:** [DESIGN.md](./DESIGN.md)
+**Canonical design:** [DESIGN.md](./DESIGN.md). **Agent factory (operators):** [AGENT_FACTORY.md](./AGENT_FACTORY.md).
 
 ---
 
@@ -28,14 +28,14 @@ forma is a **Go-native UI framework**: authors write composable components in Go
 
 ## Phased delivery
 
-Work proceeds in **strict order**: DSL → user documentation → implementation. OpenSpec changes should name the phase they belong to.
+OpenSpec changes should name the ROADMAP phase they belong to. Early phases (DSL → docs → codegen) are complete; remaining work is host, runtime, and the browser dev loop.
 
 | Phase | Scope | OpenSpec / deliverables | Status |
 |-------|--------|-------------------------|--------|
-| **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/fix), Cursor rules; `task test` wired | **`forma-dev-tooling`** → `openspec/specs/dev-tooling/` | **Done** |
-| **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; `main.go` reference; stub `ui` runtime | **`forma-ui-dsl`**, **`forma-fragment-slots`** (archived) → `openspec/specs/ui-dsl/` | **Done** |
-| **P2** | **User documentation** — CLI-first install (`forma init` / `add` / `sync`), `forma.yaml`, project layout, writing UI, components, advanced, troubleshooting; docs-first policy | **`forma-user-docs`** → `doc/user/`, OpenSpec **`ui-docs`** + **`forma-cli`** (contract) | **Done** (guide + specs; CLI binary deferred) |
-| **P3a** | **Codegen pipeline** — pure-Go TSX parse → app `*.gen.go` + registry; `forma generate`; scaffold `check-generate` | **`forma-ui-codegen`** | **Done** (archive OpenSpec change when reviewed) |
+| **P0** | **Dev tooling** — golangci-lint, Taskfile, GitHub CI (lint/generate/test), Cursor rules; `task test` wired | **`forma-dev-tooling`** → `openspec/specs/dev-tooling/` | **Done** |
+| **P1** | **UI DSL v1** — semantics, composition, events, keys, inputs, escape hatches, **Fragment**, field-only compound **slots**; `main.go` reference; stub `ui` runtime | **`forma-ui-dsl`**, **`forma-fragment-slots`** → `openspec/specs/ui-dsl/` | **Done** |
+| **P2** | **User documentation** — CLI-first install (`forma init` / `add` / `sync`), `forma.yaml`, project layout, writing UI, components, advanced, troubleshooting | **`forma-user-docs`** → `doc/user/`, OpenSpec **`ui-docs`** + **`forma-cli`** | **Done** |
+| **P3a** | **Codegen pipeline** — pure-Go TSX parse → app `*.gen.go` + registry; `forma generate`; scaffold `check-generate` | **`forma-ui-codegen`** → `openspec/specs/ui-codegen/` | **Done** |
 | **P3b** | **React host** — registry, recursive renderer, event sanitization, text-input policy | **`forma-react-host`** | Planned |
 | **P3c** | **GopherJS runtime** — real `UIMount`/`RefreshUI`, tree crossing, callback dispatch, `ui.Context` propagation | **`forma-gopherjs-runtime`** | Planned |
 | **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | Planned |
@@ -51,14 +51,14 @@ P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
                                          └──► P4 Desktop ──► P5 Breadth
 ```
 
-**Rule:** Do not merge implementation-heavy changes (P3+) until P1 specs are approved and P2 doc outline exists (even if P2 prose is still draft). Exception: spikes behind feature flags must say so in the proposal.
+P0–P3a are done. Schedule **P3b** and **P3c** before **P3d**; ask before parallelizing if overlap is unclear. **P4** / **P5** stay deferred until the browser loop works.
 
 ---
 
 ## OpenSpec workflow
 
 - **Schema:** `spec-driven` (see [`openspec/config.yaml`](../openspec/config.yaml)).
-- **Main specs home:** `openspec/specs/` — **`dev-tooling`**, **`agent-factory`**, **`ui-dsl`**, and related capabilities; more (e.g. `ui-runtime`) land when P3+ changes archive.
+- **Main specs home:** `openspec/specs/` — **`dev-tooling`**, **`agent-factory`**, **`ui-dsl`**, **`ui-docs`**, **`forma-cli`**, **`ui-codegen`**; more (e.g. `ui-runtime`) land when P3+ changes archive.
 - **Active work:** `openspec/changes/<change-name>/` with `proposal.md`, `specs/.../spec.md`, `design.md`, `tasks.md`.
 - **Archive:** completed changes move to `openspec/changes/archive/`; sync capabilities to `openspec/specs/`.
 
@@ -74,67 +74,41 @@ This roadmap is the factory **control plane**: **orch** (and peers) may update l
 | branch | Feature branch when opened |
 | PR | Pull request identity when opened |
 
-### Suggested changes (by phase)
+### Completed through P3a
 
-| Order | Change name | Purpose | Status |
-|-------|-------------|---------|--------|
-| 1 | `forma-dev-tooling` | Lint, Taskfile, CI, Cursor rules | **Done** (archived) |
-| 2 | `forma-ui-dsl` | Lock DSL behavior; `Component`, `Node`, `Context`, `.Or`, `fn`, events | **Done** (archived) |
-| 3 | `forma-fragment-slots` | Fragment + field-only slots; tree `Slots` map | **Done** (archived) |
-| 4 | `forma-user-docs` | Author guide under `doc/user/` + ui-docs / forma-cli specs | **Done** (archive pending) |
-| 5 | `forma-cli-scaffold` | CLI module, init, stub sync, CI init smoke | **Done** |
-| 6 | `forma-ui-codegen` | Generator + first real generated components | Done (archive pending) |
-| 7 | `forma-react-host` | Static host app + registry | Planned |
-| 8 | `forma-gopherjs-runtime` | Wire Go to host | Planned |
-| 9 | `forma-dev-experience` | Taskfile/scripts; demo runs in browser | Planned |
+Shipped and archived: **P0** `forma-dev-tooling`; **P1** `forma-ui-dsl`, `forma-fragment-slots`; **P2** `forma-user-docs`, `forma-cli-scaffold`; web tree via `forma-web-scaffold`; **P3a** `forma-ui-codegen`. Meta: **`forma-agent-factory`** (local roles + this control-plane convention). Debt/refactor archives are intentionally omitted from the queue below.
 
-Proposals must reference **ROADMAP phase** (P1–P5) in the Impact section.
+### Suggested changes (forward queue)
 
----
+Orch schedules from this table only. Leave **branch** / **PR** empty until a change is in flight.
 
-## P1 — DSL focus (complete)
+| Order | Change name | Phase | Purpose | Status | branch | PR |
+|-------|-------------|-------|---------|--------|--------|-----|
+| 1 | `forma-react-host` | P3b | Static host app + ComponentRegistry + recursive renderer | Planned | | |
+| 2 | `forma-gopherjs-runtime` | P3c | Wire Go `UIMount`/`RefreshUI` to host; callbacks + `ui.Context` | Planned | | |
+| 3 | `forma-dev-experience` | P3d | `forma dev` (replace stub); demo runs in browser | Planned | | |
+| 4 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
+| 5 | — | P5 | Breadth: more widgets, 3rd-party recipes, perf notes | Deferred | | |
 
-Deliverables authors and agents can rely on **before** runtime exists (implemented and specified in `openspec/specs/ui-dsl/`):
-
-- **`UIMount` / `RefreshUI`** contract and when handlers must refresh.
-- **Imports:** dot-import `ui` and `fn` in apps; `fn.Map` / `fn.Filter` for lists and state.
-- **Component** composition: `.With`, **`.Or`** fallbacks, string children, splatting dynamic slices (see `renderTodoList` in `main.go`).
-- **Layout vs leaf** components; naming and prop conventions for generated shadcn types.
-- **Events:** `ui.Context` on handlers; no DOM types in Go API.
-- **Lists:** keys; **inputs:** controlled vs deferred sync policy.
-- **Escape hatches:** `Class`, `Style`, `Attrs` — documented limits.
-- **Open questions** captured in design (not left implicit): optional vs required props, variant typing strictness, custom component naming.
-
-Acceptance: a reader can implement a new screen **only from specs + `main.go`**, without reading React code.
+Proposals must reference **ROADMAP phase** (P3b–P5) in the Impact section.
 
 ---
 
-## P2 — User documentation focus
+## Phase notes
 
-Target audience: Go developers who may never open the React host.
+### P1 — DSL (complete)
 
-Topics (minimum):
+Authors rely on `openspec/specs/ui-dsl/` + [`main.go`](../main.go): `UIMount`/`RefreshUI`, dot-import `ui`/`fn`, `.With`/`.Or`, events via `ui.Context`, keys/inputs policy, escape hatches. Runtime remains stub until P3c.
 
-1. Prerequisites and repo layout (Go app + `web/` or equivalent).
-2. Creating an app from scratch (clone template → `main.go` → mount id in `index.html`).
-3. State + `ctx.RefreshUI()` pattern; async goroutines.
-4. Adding a shadcn component (CLI → registry → codegen → Go usage).
-5. Custom composite components in Go; custom JS wrapper for a npm React lib.
-6. Debugging (tree not updating, callback not firing, input focus).
+### P2 — User docs (complete)
 
-Docs must match P1 specs; contradictions are resolved by updating specs first.
+Guide under [`doc/user/`](user/README.md) for Go authors who may never open the React host. Docs track shipped CLI (`init`/`add`/`sync`/`generate`); label host/`dev` as planned until P3b–P3d land. Spec contradictions → update specs first.
 
----
+### P3 — Implementation
 
-## P3 — Implementation focus
-
-Implementation is **downstream** of P1 + P2:
-
-- **Codegen** owns prop parity with TSX; manual overrides are explicit.
-- **Host** stays thin; all business rules stay in Go.
-- **Runtime** implements exactly what P1 specifies; gaps become spec amendments, not silent behavior.
-
-**Definition of done for P3d:** `main.go` todo app runs in a browser with HMR or fast rebuild documented in user guide.
+- **P3a (done):** codegen owns prop parity with TSX; overrides explicit.
+- **P3b–P3c:** host stays thin; runtime implements P1 contracts; gaps become spec amendments.
+- **P3d done when:** todo demo runs in a browser with HMR or fast rebuild documented in the user guide (`forma dev` no longer stub).
 
 ---
 
@@ -145,8 +119,7 @@ Implementation is **downstream** of P1 + P2:
 | SSR / hydration | See DESIGN.md; only if product requires SEO |
 | Signal-based fine-grained updates | Alternative to full-tree RefreshUI; breaks simple mental model |
 | Desktop webview | P4 |
-| Official CLI binary (`cmd/forma`) | Spec in **`forma-cli`**; implement with P3 (after or alongside dev loop) |
-| Agent-specific prompts/skills | Optional; after DSL + docs stable |
+| Deeper agent prompts/skills | Optional; factory v1 ships roles + OpenSpec skills |
 
 ---
 
