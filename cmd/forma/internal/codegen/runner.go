@@ -6,6 +6,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
+
+	"github.com/zhulik/forma/fn"
 )
 
 // Request holds paths for a codegen run derived from forma.yaml.
@@ -44,7 +47,9 @@ func (r *Runner) Generate(ctx context.Context, req Request) error {
 		return fmt.Errorf("mkdir registry dir: %w", err)
 	}
 
-	emitted := map[string]struct{}{}
+	emitted := fn.Associate(widgets, func(w Widget) (string, struct{}) {
+		return w.FileBase + ".gen.go", struct{}{}
+	})
 	for _, w := range widgets {
 		fileName := w.FileBase + ".gen.go"
 		path := filepath.Join(req.CodegenDir, fileName)
@@ -52,7 +57,6 @@ func (r *Runner) Generate(ctx context.Context, req Request) error {
 		if err := os.WriteFile(path, []byte(emitGoFile(w, pkg, formaUI)), 0o644); err != nil {
 			return fmt.Errorf("write %s: %w", path, err)
 		}
-		emitted[fileName] = struct{}{}
 	}
 
 	//nolint:gosec // generated project sources
@@ -64,17 +68,20 @@ func (r *Runner) Generate(ctx context.Context, req Request) error {
 	if err != nil {
 		return fmt.Errorf("read codegen dir: %w", err)
 	}
-	for _, e := range entries {
+	stale := fn.FilterMap(entries, func(e os.DirEntry) (string, bool) {
 		if e.IsDir() {
-			continue
+			return "", false
 		}
 		name := e.Name()
-		if !hasSuffix(name, ".gen.go") {
-			continue
+		if !strings.HasSuffix(name, ".gen.go") {
+			return "", false
 		}
 		if _, ok := emitted[name]; ok {
-			continue
+			return "", false
 		}
+		return name, true
+	})
+	for _, name := range stale {
 		if err := os.Remove(filepath.Join(req.CodegenDir, name)); err != nil {
 			return fmt.Errorf("prune %s: %w", name, err)
 		}
@@ -84,10 +91,6 @@ func (r *Runner) Generate(ctx context.Context, req Request) error {
 		return fmt.Errorf("gofmt codegen output: %w", err)
 	}
 	return nil
-}
-
-func hasSuffix(name, suffix string) bool {
-	return len(name) >= len(suffix) && name[len(name)-len(suffix):] == suffix
 }
 
 func gofmtDir(ctx context.Context, dir string) error {
@@ -101,16 +104,12 @@ func gofmtDir(ctx context.Context, dir string) error {
 	if err != nil {
 		return err
 	}
-	var files []string
-	for _, e := range entries {
-		if e.IsDir() {
-			continue
+	files := fn.FilterMap(entries, func(e os.DirEntry) (string, bool) {
+		if e.IsDir() || filepath.Ext(e.Name()) != ".go" {
+			return "", false
 		}
-		if filepath.Ext(e.Name()) != ".go" {
-			continue
-		}
-		files = append(files, filepath.Join(dir, e.Name()))
-	}
+		return filepath.Join(dir, e.Name()), true
+	})
 	if len(files) == 0 {
 		return nil
 	}

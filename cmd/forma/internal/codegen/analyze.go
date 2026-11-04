@@ -10,6 +10,9 @@ import (
 
 	sitter "github.com/tree-sitter/go-tree-sitter"
 	tree_sitter_typescript "github.com/tree-sitter/tree-sitter-typescript/bindings/go"
+
+	"github.com/zhulik/forma/cmd/forma/pkg/ident"
+	"github.com/zhulik/forma/fn"
 )
 
 const (
@@ -84,20 +87,19 @@ func listTsx(dir string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	var out []string
-	for _, e := range entries {
+	out := fn.FilterMap(entries, func(e os.DirEntry) (string, bool) {
 		if e.IsDir() {
-			continue
+			return "", false
 		}
 		name := e.Name()
 		if _, skip := skipFiles[name]; skip {
-			continue
+			return "", false
 		}
 		if !strings.HasSuffix(name, ".tsx") && !strings.HasSuffix(name, ".ts") {
-			continue
+			return "", false
 		}
-		out = append(out, filepath.Join(dir, name))
-	}
+		return filepath.Join(dir, name), true
+	})
 	slices.Sort(out)
 	return out, nil
 }
@@ -114,12 +116,7 @@ func analyzeSource(path string, src []byte, root *sitter.Node) (Widget, bool) {
 		if child == nil || child.Kind() != kindExportStatement {
 			continue
 		}
-		for _, n := range findDescendants(child, kindExportSpecifier) {
-			name := identText(n.ChildByFieldName("name"), src)
-			if isComponentExportName(name) {
-				valueExports = append(valueExports, name)
-			}
-		}
+		valueExports = append(valueExports, componentExportNames(findDescendants(child, kindExportSpecifier), src)...)
 		decl := child.ChildByFieldName("declaration")
 		if decl == nil {
 			continue
@@ -131,12 +128,7 @@ func analyzeSource(path string, src []byte, root *sitter.Node) (Widget, bool) {
 				valueExports = append(valueExports, name)
 			}
 		case kindLexicalDeclaration, kindVariableDeclaration:
-			for _, n := range findDescendants(decl, kindVariableDeclarator) {
-				name := identText(n.ChildByFieldName("name"), src)
-				if isComponentExportName(name) {
-					valueExports = append(valueExports, name)
-				}
-			}
+			valueExports = append(valueExports, componentExportNames(findDescendants(decl, kindVariableDeclarator), src)...)
 		case kindInterfaceDeclaration:
 			name := identText(decl.ChildByFieldName("name"), src)
 			if name != "" {
@@ -151,7 +143,7 @@ func analyzeSource(path string, src []byte, root *sitter.Node) (Widget, bool) {
 		}
 	}
 
-	valueExports = uniqSorted(valueExports)
+	valueExports = fn.UniqSorted(valueExports)
 	if len(valueExports) == 0 {
 		return Widget{}, false
 	}
@@ -161,12 +153,9 @@ func analyzeSource(path string, src []byte, root *sitter.Node) (Widget, bool) {
 		return Widget{}, false
 	}
 
-	var prefixed []string
-	for _, n := range valueExports {
-		if n != rootName && strings.HasPrefix(n, rootName) && len(n) > len(rootName) {
-			prefixed = append(prefixed, n)
-		}
-	}
+	prefixed := fn.Filter(valueExports, func(n string) bool {
+		return n != rootName && strings.HasPrefix(n, rootName) && len(n) > len(rootName)
+	})
 
 	props := propsByType[rootName+"Props"]
 	if props == nil {
@@ -185,14 +174,10 @@ func analyzeSource(path string, src []byte, root *sitter.Node) (Widget, bool) {
 		}, true
 	}
 
-	var slots []SlotField
-	for _, exportName := range prefixed {
-		field := exportName[len(rootName):]
-		if field == "" {
-			continue
-		}
-		slots = append(slots, SlotField{Field: field, ExportName: exportName})
-	}
+	slots := fn.Map(prefixed, func(exportName string) SlotField {
+		return SlotField{Field: exportName[len(rootName):], ExportName: exportName}
+	})
+	slots = fn.Filter(slots, func(s SlotField) bool { return s.Field != "" })
 	slices.SortFunc(slots, func(a, b SlotField) int {
 		return strings.Compare(a.Field, b.Field)
 	})
@@ -230,7 +215,7 @@ func findDescendants(n *sitter.Node, kind string) []*sitter.Node {
 }
 
 func pickRoot(names []string, fileBase string) string {
-	pascal := toPascal(fileBase)
+	pascal := ident.ToPascal(fileBase)
 	if slices.Contains(names, pascal) {
 		return pascal
 	}
@@ -243,17 +228,9 @@ func pickRoot(names []string, fileBase string) string {
 	})
 	for _, candidate := range sorted {
 		others := slices.DeleteFunc(slices.Clone(names), func(n string) bool { return n == candidate })
-		if len(others) == 0 {
-			return candidate
-		}
-		ok := true
-		for _, o := range others {
-			if !strings.HasPrefix(o, candidate) {
-				ok = false
-				break
-			}
-		}
-		if ok {
+		if len(others) == 0 || !slices.ContainsFunc(others, func(o string) bool {
+			return !strings.HasPrefix(o, candidate)
+		}) {
 			return candidate
 		}
 	}
@@ -288,7 +265,7 @@ func propsFromObjectType(body *sitter.Node, src []byte) []PropField {
 		if goType == "" {
 			continue
 		}
-		out = append(out, PropField{Name: toExportedGoName(name), GoType: goType})
+		out = append(out, PropField{Name: ident.ToExportedGoName(name), GoType: goType})
 	}
 	slices.SortFunc(out, func(a, b PropField) int {
 		return strings.Compare(a.Name, b.Name)
@@ -312,18 +289,14 @@ func heuristicProps(text string) []PropField {
 }
 
 func mergeProps(primary, fallback []PropField) []PropField {
-	seen := map[string]struct{}{}
-	var out []PropField
-	for _, p := range primary {
-		seen[p.Name] = struct{}{}
-		out = append(out, p)
-	}
-	for _, p := range fallback {
-		if _, ok := seen[p.Name]; ok {
-			continue
-		}
-		out = append(out, p)
-	}
+	seen := fn.Associate(primary, func(p PropField) (string, struct{}) {
+		return p.Name, struct{}{}
+	})
+	out := slices.Clone(primary)
+	out = append(out, fn.Filter(fallback, func(p PropField) bool {
+		_, ok := seen[p.Name]
+		return !ok
+	})...)
 	slices.SortFunc(out, func(a, b PropField) int {
 		return strings.Compare(a.Name, b.Name)
 	})
@@ -336,6 +309,13 @@ func isComponentExportName(name string) bool {
 	}
 	r := []rune(name)
 	return unicode.IsUpper(r[0])
+}
+
+func componentExportNames(nodes []*sitter.Node, src []byte) []string {
+	return fn.FilterMap(nodes, func(n *sitter.Node) (string, bool) {
+		name := identText(n.ChildByFieldName("name"), src)
+		return name, isComponentExportName(name)
+	})
 }
 
 func mapTSTypeToGo(propName, typeText string) string {
@@ -364,52 +344,9 @@ func mapTSTypeToGo(propName, typeText string) string {
 	return ""
 }
 
-func toExportedGoName(name string) string {
-	if strings.HasPrefix(name, "on") && len(name) > 2 {
-		return "On" + strings.ToUpper(name[2:3]) + name[3:]
-	}
-	if name == "" {
-		return name
-	}
-	r := []rune(name)
-	r[0] = unicode.ToUpper(r[0])
-	return string(r)
-}
-
-func toPascal(kebabOrSnake string) string {
-	parts := strings.FieldsFunc(kebabOrSnake, func(r rune) bool {
-		return r == '-' || r == '_'
-	})
-	var b strings.Builder
-	for _, p := range parts {
-		if p == "" {
-			continue
-		}
-		b.WriteString(strings.ToUpper(p[:1]))
-		if len(p) > 1 {
-			b.WriteString(p[1:])
-		}
-	}
-	return b.String()
-}
-
 func identText(n *sitter.Node, src []byte) string {
 	if n == nil {
 		return ""
 	}
 	return n.Utf8Text(src)
-}
-
-func uniqSorted(in []string) []string {
-	seen := map[string]struct{}{}
-	var out []string
-	for _, s := range in {
-		if _, ok := seen[s]; ok {
-			continue
-		}
-		seen[s] = struct{}{}
-		out = append(out, s)
-	}
-	slices.Sort(out)
-	return out
 }
