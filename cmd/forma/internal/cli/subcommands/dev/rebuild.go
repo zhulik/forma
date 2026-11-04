@@ -63,16 +63,16 @@ func RunSerializedRebuilds(
 	rebuild := func() {
 		busy = true
 		pending = false
-		logger.InfoContext(ctx, "forma dev: rebuilding GopherJS artifact", "out", artifact)
+		logger.InfoContext(ctx, "forma dev: rebuilding GoScript artifact", "out", artifact)
 		err := buildGo(ctx, projectDir, artifact)
 		busy = false
 		if ctx.Err() != nil {
 			return
 		}
 		if err != nil {
-			logger.ErrorContext(ctx, "forma dev: GopherJS rebuild failed (still watching)", "err", err)
+			logger.ErrorContext(ctx, "forma dev: GoScript rebuild failed (still watching)", "err", err)
 		} else {
-			logger.InfoContext(ctx, "forma dev: GopherJS rebuild ok — reload the browser page")
+			logger.InfoContext(ctx, "forma dev: GoScript rebuild ok — reload the browser page")
 		}
 		if pending {
 			pending = false

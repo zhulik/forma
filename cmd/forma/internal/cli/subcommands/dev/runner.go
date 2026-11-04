@@ -15,28 +15,31 @@ import (
 	"github.com/zhulik/forma/cmd/forma/pkg/cmdexec"
 )
 
-// P3c GopherJS build contract used by forma dev:
+// Browser build contract used by forma dev (GoScript → Vite lib bundle):
 //
-//	gopherjs build -o <web.path>/public/app.js .
+//  1. goscript compile --package . --output <web.path>/.goscript
+//  2. npm run build:go  (Vite lib → <web.path>/public/app.js)
 //
-// from the project root. Vite serves public/ at /, and scaffold main.tsx loads
-// /app.js only after registering globalThis.formaHost.setTree.
+// from the project / web roots. Vite serves public/ at /, and scaffold main.tsx
+// registers globalThis.formaHost.setTree before importing /app.js.
 const (
-	gopherjsBin     = "gopherjs"
+	goscriptBin     = "goscript"
+	goscriptOutRel  = ".goscript"
 	viteNPMScript   = "dev"
+	goBundleScript  = "build:go"
 	rebuildDebounce = 200 * time.Millisecond
 )
 
 // LongRunner starts a long-lived child and waits for exit (Vite).
 type LongRunner func(ctx context.Context, dir, name string, args ...string) error
 
-// GoBuilder runs one GopherJS build for the browser artifact.
+// GoBuilder runs one browser Go→JS build for the public artifact.
 type GoBuilder func(ctx context.Context, projectDir, artifactPath string) error
 
 // PathLooker resolves a binary on PATH (defaults to exec.LookPath).
 type PathLooker func(file string) (string, error)
 
-// Runner orchestrates Vite + the GopherJS rebuild loop (implements pal.Runner).
+// Runner orchestrates Vite + the GoScript rebuild loop (implements pal.Runner).
 type Runner struct {
 	Dir    string
 	Logger *slog.Logger
@@ -76,9 +79,9 @@ func (r *Runner) Run(ctx context.Context) error {
 
 	r.Logger.InfoContext(ctx, "forma dev: building browser Go artifact", "out", artifact)
 	if err := buildGo(ctx, target, artifact); err != nil {
-		return fmt.Errorf("initial GopherJS build: %w", err)
+		return fmt.Errorf("initial GoScript build: %w", err)
 	}
-	r.Logger.InfoContext(ctx, "forma dev: initial GopherJS build ok")
+	r.Logger.InfoContext(ctx, "forma dev: initial GoScript build ok")
 
 	g, gctx := errgroup.WithContext(ctx)
 
@@ -119,7 +122,7 @@ func (r *Runner) prepare(ctx context.Context, target string) (formaconfig.Projec
 
 	artifact := project.BrowserAppJSPath(target)
 	if err := os.MkdirAll(filepath.Dir(artifact), 0o755); err != nil {
-		return formaconfig.Project{}, "", "", fmt.Errorf("create GopherJS output dir: %w", err)
+		return formaconfig.Project{}, "", "", fmt.Errorf("create browser artifact dir: %w", err)
 	}
 
 	r.Logger.InfoContext(ctx, "forma dev: project ready",
@@ -146,8 +149,16 @@ func defaultRunLong(ctx context.Context, dir, name string, args ...string) error
 }
 
 func defaultBuildGo(ctx context.Context, projectDir, artifactPath string) error {
-	if err := os.MkdirAll(filepath.Dir(artifactPath), 0o755); err != nil {
+	webRoot := filepath.Dir(filepath.Dir(artifactPath)) // …/web/public/app.js → …/web
+	outDir := filepath.Join(webRoot, goscriptOutRel)
+	if err := os.MkdirAll(outDir, 0o755); err != nil {
 		return err
 	}
-	return cmdexec.Run(ctx, projectDir, gopherjsBin, "build", "-o", artifactPath, ".")
+	if err := cmdexec.Run(ctx, projectDir, goscriptBin, "compile", "--package", ".", "--output", outDir); err != nil {
+		return fmt.Errorf("goscript compile: %w", err)
+	}
+	if err := cmdexec.Run(ctx, webRoot, "npm", "run", goBundleScript); err != nil {
+		return fmt.Errorf("npm run %s: %w", goBundleScript, err)
+	}
+	return nil
 }

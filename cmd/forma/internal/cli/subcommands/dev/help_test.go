@@ -18,6 +18,6 @@ func TestDevHelp_NotPlannedOnly(t *testing.T) {
 	cmd.Writer = &out
 	err := cmd.Run(context.Background(), []string{"forma", "dev", "--help"})
 	require.NoError(t, err)
-	require.Contains(t, out.String(), "Vite host + GopherJS rebuild")
+	require.Contains(t, out.String(), "Vite host + GoScript rebuild")
 	require.NotContains(t, out.String(), "planned")
 }

@@ -30,17 +30,17 @@ func TestCheckPrerequisites_MissingNodeModules(t *testing.T) {
 	require.ErrorIs(t, err, devcmd.ErrNodeModulesMissing)
 }
 
-func TestCheckPrerequisites_MissingGopherJS(t *testing.T) {
+func TestCheckPrerequisites_MissingGoScript(t *testing.T) {
 	t.Parallel()
 
 	dir := writeMinimalProject(t, true)
 	_, _, err := devcmd.CheckPrerequisites(dir, func(file string) (string, error) {
-		if file == "gopherjs" {
+		if file == "goscript" {
 			return "", errors.New("not found")
 		}
 		return "/bin/" + file, nil
 	})
-	require.ErrorIs(t, err, devcmd.ErrGopherJSMissing)
+	require.ErrorIs(t, err, devcmd.ErrGoScriptMissing)
 }
 
 func TestCheckPrerequisites_MissingPackageJSON(t *testing.T) {

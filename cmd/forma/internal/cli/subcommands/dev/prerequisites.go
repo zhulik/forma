@@ -14,8 +14,8 @@ import (
 var (
 	// ErrNodeModulesMissing means web deps were not installed (run forma sync).
 	ErrNodeModulesMissing = errors.New("web node_modules missing; run forma sync first")
-	// ErrGopherJSMissing means the GopherJS toolchain is not on PATH.
-	ErrGopherJSMissing = errors.New("gopherjs not found on PATH; install GopherJS (see doc/user/install.md)")
+	// ErrGoScriptMissing means the GoScript toolchain is not on PATH.
+	ErrGoScriptMissing = errors.New("goscript not found on PATH; install GoScript (see doc/user/install.md)")
 )
 
 func defaultLookPath(file string) (string, error) {
@@ -54,8 +54,8 @@ func CheckPrerequisites(projectDir string, lookPath PathLooker) (formaconfig.Pro
 		return formaconfig.Project{}, "", fmt.Errorf("%w under %s", ErrNodeModulesMissing, webRoot)
 	}
 
-	if _, err := lookPath(gopherjsBin); err != nil {
-		return formaconfig.Project{}, "", ErrGopherJSMissing
+	if _, err := lookPath(goscriptBin); err != nil {
+		return formaconfig.Project{}, "", ErrGoScriptMissing
 	}
 	if _, err := lookPath("npm"); err != nil {
 		return formaconfig.Project{}, "", errors.New("npm not found on PATH; install Node.js to run forma dev")

@@ -57,15 +57,23 @@ func TestApply_Minimal(t *testing.T) {
 	require.Contains(t, string(mainTSX), `registerFormaHost`)
 	require.Contains(t, string(mainTSX), `mergeRegistry`)
 	require.Contains(t, string(mainTSX), `/app.js`)
+	require.Contains(t, string(mainTSX), `import(/* @vite-ignore */ "/app.js")`)
 
 	require.FileExists(t, filepath.Join(dir, "web", "src", "host", "index.ts"))
 	require.FileExists(t, filepath.Join(dir, "web", "src", "registry.custom.ts"))
+	require.FileExists(t, filepath.Join(dir, "web", "goscript-entry.ts"))
+	require.FileExists(t, filepath.Join(dir, "web", "vite.goscript.config.ts"))
 	require.DirExists(t, filepath.Join(dir, "web", "public"))
+
+	entry, err := os.ReadFile(filepath.Join(dir, "web", "goscript-entry.ts"))
+	require.NoError(t, err)
+	require.Contains(t, string(entry), `@goscript/github.com/example/app/main.gs.ts`)
 
 	pkgJSON, err := os.ReadFile(filepath.Join(dir, "web", "package.json"))
 	require.NoError(t, err)
 	require.Contains(t, string(pkgJSON), `"test"`)
 	require.Contains(t, string(pkgJSON), "vitest")
+	require.Contains(t, string(pkgJSON), `"build:go"`)
 }
 
 func TestNames_IncludesMinimal(t *testing.T) {

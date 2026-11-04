@@ -14,11 +14,11 @@ import (
 
 const flagDirectory = "directory"
 
-// New returns the forma dev subcommand (Vite host + GopherJS rebuild loop).
+// New returns the forma dev subcommand (Vite host + GoScript rebuild loop).
 func New() *cli.Command {
 	return &cli.Command{
 		Name:  "dev",
-		Usage: "run the browser development loop (Vite host + GopherJS rebuild)",
+		Usage: "run the browser development loop (Vite host + GoScript rebuild)",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    flagDirectory,

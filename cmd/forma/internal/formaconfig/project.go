@@ -74,12 +74,12 @@ func (p Project) RegistryOutPath(projectDir string) string {
 	return filepath.Join(p.WebRoot(projectDir), "src", "registry.gen.ts")
 }
 
-// BrowserAppJSRel is the GopherJS browser artifact path relative to the web root.
-// P3c contract: Vite serves public/ at /, so the bundle is loaded as /app.js after
+// BrowserAppJSRel is the Vite-bundled GoScript browser artifact relative to the web root.
+// Contract: Vite serves public/ at /, so the ES module is loaded as /app.js after
 // main.tsx registers formaHost.setTree (host-before-Go order).
 const BrowserAppJSRel = "public/app.js"
 
-// BrowserAppJSPath returns the absolute GopherJS output path under the web tree.
+// BrowserAppJSPath returns the absolute browser Go bundle path under the web tree.
 func (p Project) BrowserAppJSPath(projectDir string) string {
 	return filepath.Join(p.WebRoot(projectDir), filepath.FromSlash(BrowserAppJSRel))
 }
