@@ -56,9 +56,11 @@ func TestApply_Minimal(t *testing.T) {
 	require.Contains(t, string(mainTSX), `FormaBridgeHost`)
 	require.Contains(t, string(mainTSX), `registerFormaHost`)
 	require.Contains(t, string(mainTSX), `mergeRegistry`)
+	require.Contains(t, string(mainTSX), `/app.js`)
 
 	require.FileExists(t, filepath.Join(dir, "web", "src", "host", "index.ts"))
 	require.FileExists(t, filepath.Join(dir, "web", "src", "registry.custom.ts"))
+	require.DirExists(t, filepath.Join(dir, "web", "public"))
 
 	pkgJSON, err := os.ReadFile(filepath.Join(dir, "web", "package.json"))
 	require.NoError(t, err)

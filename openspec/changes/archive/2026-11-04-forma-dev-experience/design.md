@@ -62,11 +62,12 @@ Copy into the shipping PR body.
 
 ## Risks / Trade-offs
 
-- **[P3c artifact path unknown until propose lands]** → Design pins “consume P3c contract”; builder reconciles command line to P3c docs/tasks after rebase.  
-- **[GopherJS rebuild latency]** → Debounce + clear “rebuilding…” logs; document reload expectation.  
-- **[Watching too much of module cache]** → Limit watch roots to app dir + configured replace path; ignore `web/node_modules`.  
-- **[Framework repo has no `web/`]** → Success is app-project oriented; docs must not imply `forma dev` at framework root without a scaffolded app.  
-- **[Initial build vs Vite race]** → Start Vite and kick first GopherJS build in parallel; host may briefly load before JS exists—document refresh once, or gate first open message until first build succeeds.
+- **[P3c artifact path]** → Concrete contract: `gopherjs build -o <web.path>/public/app.js .`; scaffold `main.tsx` loads `/app.js` after `formaHost` registration.
+- **[GopherJS vs Go 1.27]** → Current GopherJS `v1.21.x` cannot compile modules with `go 1.27.x`. Documented in install docs; orchestration still ships. Full interactive browser smoke waits on a GopherJS that understands forma's Go version.
+- **[GopherJS rebuild latency]** → Debounce + clear rebuilding logs; document reload expectation.
+- **[Watching too much of module cache]** → Limit watch roots to app dir; ignore `web/` / `node_modules` / `.git`.
+- **[Framework repo has no `web/`]** → Success is app-project oriented; docs must not imply forma dev at framework root without a scaffolded app.
+- **[Initial build vs Vite race]** → Initial GopherJS build runs before Vite start; host may briefly load before `/app.js` is fetched—document reload.
 
 ## Migration Plan
 

@@ -23,3 +23,10 @@ mountFormaHost(
   "{{ .Mount }}",
   <FormaBridgeHost registry={effectiveRegistry} bridge={bridge} />,
 );
+
+// P3c contract: GopherJS writes web/public/app.js (served as /app.js).
+// Host must be registered before this classic script runs UIMount.
+const goBundle = document.createElement("script");
+goBundle.src = "/app.js";
+goBundle.async = false;
+document.body.appendChild(goBundle);
