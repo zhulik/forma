@@ -90,7 +90,7 @@ Long-running process supervisor (not a second runtime):
 1. Fail-fast if **`forma.yaml`**, **`web.path/node_modules`**, **`npm`**, or **`goscript`** is missing (does **not** auto-run sync). See [Install](install.md) for the pinned GoScript version.
 2. Initial browser build: `goscript compile --package . --output <web.path>/.goscript`, then `npm run build:go` (Vite lib → `public/app.js`; Vite serves `/app.js`).
 3. Starts **`npm run dev`** under **`web.path`** (Vite).
-4. Watches project **`.go`** files (debounced, serialized rebuilds). Rebuild failures after start are logged; the loop keeps running. Vite exit or Ctrl-C stops the command.
+4. Watches project **`.go`** files via **moddwatch** (batched/lull + serialized rebuilds). Rebuild failures after start are logged; the loop keeps running. Vite exit or Ctrl-C stops the command (pal cancels the shared context).
 
 ### Host HMR vs Go reload
 

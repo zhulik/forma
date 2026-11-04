@@ -35,10 +35,11 @@ Copy into the shipping PR body.
    Invoke the same GopherJS build entrypoint and output path P3c documents (artifact under the web tree Vite serves, or the import P3c wires in `main.tsx`). Preserve P3c’s **host-before-Go** order: scaffold registers `formaHost.setTree` (or equivalent) before the GopherJS `main` runs `UIMount`. `forma dev` only rebuilds that Go bundle and keeps the Vite host up—it does not invent a parallel `-o` path or a second bridge.  
    *Alternatives:* P3d defines its own output path (rejected—stack drift); poll until `formaHost` appears (P3c already prefers deterministic order).
 
-4. **Watch with a well-known Go file watcher (`fsnotify`), debounce rebuilds**  
-   Watch project Go packages relevant to the browser build (app module + local replace of forma when present). Debounce rapid saves; serialize rebuilds (no overlapping `gopherjs` runs). Prefer `fsnotify` over shelling out to `watchexec`/`air` so authors need only Node + GopherJS.  
-   *Reuse:* `cmdexec` for child processes; extend with a Start/long-running helper if `Run` is wait-only. Prefer `golang.org/x/sync/errgroup` for supervising children.  
-   *Alternatives:* hand-rolled `mtime` polling (worse); require `air` binary (extra toolchain).
+4. **Watch with `moddwatch` (not air-as-library); serialize rebuilds**  
+   Watch project Go packages relevant to the browser build (app module + local replace of forma when present). Use [`github.com/cortesi/moddwatch`](https://github.com/cortesi/moddwatch) (MIT; powers `modd`) for recursive watch + lull batching; serialize rebuilds (no overlapping GoScript runs). Authors need only Node + GoScript—no global live-reload binary.  
+   *Reuse:* `cmdexec` for child processes; `golang.org/x/sync/errgroup` for supervising Vite + watcher.  
+   *Rejected — air as library (`github.com/air-verse/air/runner`):* GPL-3.0 (viral link into `forma`); `Engine.Run` calls `os.Exit` on watch setup failure (unsafe under pal); always `runBin` after build (wrong shape next to long-lived Vite); pulls Hugo and a large unrelated module graph.  
+   *Alternatives:* hand-rolled `fsnotify` tree walk (replaced here); require a global `air`/`watchexec` binary (extra toolchain); `go run` air as a subprocess (possible but slower/offline-fragile vs linking MIT `moddwatch`).
 
 5. **Fail fast on missing prerequisites; do not auto-sync**  
    Require readable `forma.yaml`. If `node_modules` (or equivalent) missing under `web.path`, error → run `forma sync`. If `gopherjs` (or P3c-documented tool) missing on PATH, error → install docs. Optional `-d/--directory` like other commands.  
@@ -55,10 +56,13 @@ Copy into the shipping PR body.
    Delta only `forma-cli` + `ui-docs`. No new capability. No host behavior rewrite beyond whatever tiny Vite/static wiring P3c already requires for the artifact.
 
 9. **prefer-reuse / prefer-fn**  
-   Reuse Vite, npm script, `cmdexec`, webtool require-npm patterns, pal/`app.Run` if the subcommand needs DI. Add `fsnotify` (+ errgroup already available transitively or direct). Do not add a lodash-like JS util. Any Go slice remaps in new CLI code use `fn`. Do not replace `fn/`.
+   Reuse Vite, npm script, `cmdexec`, webtool require-npm patterns, pal/`app.Run` if the subcommand needs DI. Add `moddwatch` (+ errgroup). Do not add a lodash-like JS util. Any Go slice remaps in new CLI code use `fn`. Do not replace `fn/`.
 
 10. **Stacked PR base**  
     Feature branch `change/forma-dev-experience`; PR targets `change/forma-gopherjs-runtime`. Rebase onto P3c tip before merge-ready apply.
+
+11. **No hand-rolled process signal subscription in CLI commands**  
+    Pal’s `Run` already `signal.NotifyContext`s `SIGINT`/`SIGTERM`. Subcommands pass the urfave context into `app.Run` / `pal.Run` and must not wrap it again with `signal.NotifyContext` (double-subscribe / competing stop).
 
 ## Risks / Trade-offs
 

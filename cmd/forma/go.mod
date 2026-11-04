@@ -3,8 +3,8 @@ module github.com/zhulik/forma/cmd/forma
 go 1.27.3
 
 require (
+	github.com/cortesi/moddwatch v0.1.0
 	github.com/dave/jennifer v1.7.1
-	github.com/fsnotify/fsnotify v1.10.1
 	github.com/stretchr/testify v1.12.1
 	github.com/tree-sitter/go-tree-sitter v0.25.0
 	github.com/tree-sitter/tree-sitter-typescript v0.23.2
@@ -16,12 +16,14 @@ require (
 )
 
 require (
+	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.13 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.30.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-pointer v0.0.1 // indirect
+	github.com/rjeczalik/notify v0.9.3 // indirect
 	github.com/samber/go-type-to-string v1.8.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.49.0 // indirect

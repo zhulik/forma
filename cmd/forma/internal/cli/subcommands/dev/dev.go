@@ -2,9 +2,6 @@ package devcmd
 
 import (
 	"context"
-	"os"
-	"os/signal"
-	"syscall"
 
 	"github.com/urfave/cli/v3"
 	"github.com/zhulik/pal"
@@ -27,9 +24,7 @@ func New() *cli.Command {
 			},
 		},
 		Action: func(ctx context.Context, cmd *cli.Command) error {
-			ctx, stop := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
-			defer stop()
-
+			// Pal's Run already NotifyContext(SIGINT/SIGTERM); do not subscribe again.
 			return app.Run(ctx, pal.Provide(&Runner{
 				Dir: cmd.String(flagDirectory),
 			}))
