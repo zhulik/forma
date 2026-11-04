@@ -1,0 +1,42 @@
+---
+description: Offer durable Cursor rules and occurrence sweeps for reusable coding feedback
+alwaysApply: true
+---
+
+# Promote reusable feedback to Cursor rules
+
+When the user gives implementation feedback (refactors, renames, preferred APIs, forbidden patterns)—especially after `/opsx-apply`—apply the local fix as usual, then follow this promotion workflow. Do **not** wait for them to say “make this a rule.”
+
+## Classifier
+
+**Reusable (offer promotion):** naming conventions, forbidden patterns, preferred APIs/helpers, package or file layout, error-handling style, testing conventions, and similar guidance meant to apply beyond the current edit.
+
+**One-off (do not offer):** typos, this-file-only renames, temporary workarounds, and other nits that clearly do not generalize.
+
+If unsure, treat as one-off (skip the asks). Explicit promote phrasing covers false negatives.
+
+## Default flow (ask-first)
+
+1. Apply or confirm the local change.
+2. **Question 1/2** — Ask whether to promote the convention into a durable Cursor rule under `.cursor/rules/`. Do **not** write or update a rule until they say yes.
+3. If they say **no** → stop (local fix only).
+4. If they say **yes** → create or update the rule, briefly name the path changed, then **Question 2/2** — ask whether to find and fix similar occurrences under that rule.
+5. If sweep **no** → keep the rule; leave other occurrences alone. If **yes** → search proportionally, fix, and report what changed.
+
+## Sequential questions only
+
+Ask **exactly one** of these questions per assistant message. Label with **`Question k/N`** (see `one-clarifying-question`). Never batch durable-rule and occurrence-sweep into the same turn. Wait for the answer before the next step.
+
+## Explicit phrasing (skip asks)
+
+When the user already states intent, do not re-ask:
+
+- Durable rule only (e.g. “add durable rule: prefer X over Y”) → write/update the rule; then ask Question 2/2 about the sweep unless they already addressed it.
+- Rule + sweep (e.g. “add durable rule … and fix all the occurrences”) → write/update the rule and run the sweep with **no** Q1/Q2.
+
+## Authoring promoted rules
+
+- Prefer **updating** an overlapping existing `.mdc` over adding a near-duplicate.
+- Use standard frontmatter (`description`, `globs` and/or `alwaysApply`).
+- Keep each rule focused; include short Do/Don't or allowlist examples when helpful.
+- After writing, acknowledge in one short line which rule path was created or updated.

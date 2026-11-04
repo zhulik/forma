@@ -99,6 +99,8 @@ operations:
       - "Generated ui/*.gen.go: regenerate via codegen when props change; hand-edit only
         escape hatches documented in DESIGN.md"
       - "React host stays dumb: no business logic in JS; sanitize third-party events before Go"
+      - "After reusable implementation feedback, follow .cursor/rules/promote-reusable-feedback.mdc
+        (ask durable-rule then occurrence-sweep; honor explicit promote/fix-all phrasing)"
   archive:
     guidance:
       - Note which ROADMAP phase advanced and update doc/ROADMAP.md status table if needed
