@@ -2,20 +2,32 @@ package devcmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/urfave/cli/v3"
+	"github.com/zhulik/pal"
 
-	clierrors "github.com/zhulik/forma/cmd/forma/internal/cli/errors"
+	"github.com/zhulik/forma/cmd/forma/internal/cli/app"
 )
 
-// New returns the dev subcommand (planned P3d).
+const flagDirectory = "directory"
+
+// New returns the forma dev subcommand (Vite host + GoScript rebuild loop).
 func New() *cli.Command {
 	return &cli.Command{
 		Name:  "dev",
-		Usage: "run the browser development loop (planned)",
-		Action: func(_ context.Context, _ *cli.Command) error {
-			return fmt.Errorf("forma dev: %w (see ROADMAP P3d)", clierrors.ErrNotImplemented)
+		Usage: "run the browser development loop (Vite host + GoScript rebuild)",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    flagDirectory,
+				Aliases: []string{"d"},
+				Usage:   "project directory (default: current working directory)",
+			},
+		},
+		Action: func(ctx context.Context, cmd *cli.Command) error {
+			// Pal's Run already NotifyContext(SIGINT/SIGTERM); do not subscribe again.
+			return app.Run(ctx, pal.Provide(&Runner{
+				Dir: cmd.String(flagDirectory),
+			}))
 		},
 	}
 }

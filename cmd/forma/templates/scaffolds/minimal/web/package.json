@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "build:go": "vite build --config vite.goscript.config.ts",
     "preview": "vite preview",
     "test": "vitest run"
   },

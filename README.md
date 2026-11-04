@@ -19,4 +19,4 @@ task generate # go generate ./...
 task test     # go test -race ./... (no tests yet; wired for later)
 ```
 
-CI runs `check-generate`, lint, and `check-fix` on every push. The scaffold React host (P3b) ships under `web/src/host/` after `forma init`; the live Go↔browser bridge and `forma dev` remain planned (P3c–P3d).
+CI runs `check-generate`, lint, and `check-test` on every push. After `forma init`, the scaffold ships the React host (`web/src/host/`), GoScript bridge wiring (`formaHost` then `/app.js`), and **`forma dev`** (Vite + GoScript rebuild).

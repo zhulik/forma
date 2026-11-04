@@ -5,10 +5,19 @@
 | Tool | Why |
 |------|-----|
 | **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. Building the CLI needs **CGO** (a C toolchain) for tree-sitter. |
-| **Node.js** | Web tree (`npm install`, shadcn CLI during **`forma sync`** / **`forma add`** / **`forma init`**). Not required for **`forma generate`** alone. |
-| **GopherJS** | Compile Go to JavaScript for the browser (bridge available; **`forma dev`** watch loop is P3d). |
+| **Node.js** | Web tree (`npm install`, shadcn CLI during **`forma sync`** / **`forma add`** / **`forma init`**). Also required for **`forma dev`**. Not required for **`forma generate`** alone. |
+| **GoScript** | Compile Go to TypeScript for the browser; required on PATH for **`forma dev`**. Pin **v0.6.3**. |
 
 Optional: [asdf](https://asdf-vm.com/) with `.tool-versions` for pinned Go, Node, and Task.
+
+Install GoScript (pinned):
+
+```bash
+go install github.com/s4wave/goscript/cmd/goscript@v0.6.3
+goscript compile --help
+```
+
+GoScript targets the same Go version as `go.mod` (currently **1.27**). Official Go Wasm remains a documented contingency only—not the supported author path.
 
 ## Install the forma CLI
 
@@ -60,7 +69,13 @@ forma init --only-config github.com/you/myapp
 
 Fails if **`forma.yaml`** already exists. See [Manual setup](manual-setup.md) for the equivalent hand-written steps.
 
-**Browser loop:** **`forma dev`** is not available yet (ROADMAP P3d).
+**Browser loop:** after sync and with GoScript on PATH:
+
+```bash
+forma dev
+```
+
+Vite serves the host; GoScript + Vite lib rebuild write `web/public/app.js` on Go saves. Host asset edits use Vite HMR; Go edits need a page reload (not preserved Go heap). See [CLI — forma dev](cli.md#forma-dev).
 
 ## Learn the DSL today (no new app)
 
@@ -69,7 +84,7 @@ You can also learn from this repository:
 1. Read [`main.go`](../../main.go) (todo demo).
 2. Run `task test` and `task lint` from the repo root.
 
-That exercises the **authoring model**. Browser builds use the GopherJS bridge (`UIMount` → `formaHost.setTree`); native `go test` keeps a no-op stub. One-command **`forma dev`** remains P3d.
+That exercises the **authoring model**. To run interactive UI in a browser, use an initialized **app** project with **`forma sync`** + **`forma dev`** (the framework repo itself has no app `web/` tree).
 
 ## Next steps
 

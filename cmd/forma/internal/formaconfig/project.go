@@ -74,6 +74,16 @@ func (p Project) RegistryOutPath(projectDir string) string {
 	return filepath.Join(p.WebRoot(projectDir), "src", "registry.gen.ts")
 }
 
+// BrowserAppJSRel is the Vite-bundled GoScript browser artifact relative to the web root.
+// Contract: Vite serves public/ at /, so the ES module is loaded as /app.js after
+// main.tsx registers formaHost.setTree (host-before-Go order).
+const BrowserAppJSRel = "public/app.js"
+
+// BrowserAppJSPath returns the absolute browser Go bundle path under the web tree.
+func (p Project) BrowserAppJSPath(projectDir string) string {
+	return filepath.Join(p.WebRoot(projectDir), filepath.FromSlash(BrowserAppJSRel))
+}
+
 // CodegenRequest builds a core-compatible path set for generation from this project.
 func (p Project) ToCodegenPaths(projectDir string) (componentsDir, codegenDir, pkg, registryOut string) {
 	return p.ComponentsUIDir(projectDir),

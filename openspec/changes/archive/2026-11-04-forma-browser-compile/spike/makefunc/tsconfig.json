@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "paths": { "@goscript/*": ["./output/@goscript/*"] },
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "noEmit": true
+  }
+}

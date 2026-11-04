@@ -12,7 +12,7 @@ The forma CLI lives in **`cmd/forma/`** (nested Go module). Normative behavior i
 | `forma generate` | **Available** | Codegen only from `forma.yaml` (TSX → Go + registry) |
 | `forma add <component>` | **Available** | `shadcn add` then sync |
 | `forma version` | **Available** | Print CLI version |
-| `forma dev` | Planned | GopherJS watch + host dev server (P3d) |
+| `forma dev` | **Available** | Vite host + GoScript rebuild loop |
 
 Global flags:
 
@@ -79,7 +79,40 @@ Runs **`shadcn add dialog`** under the web root, then **`forma sync`**. Does not
 
 ## forma dev
 
-Planned P3d. Will assume **`forma sync`** has been run at least once.
+```bash
+forma sync          # once, when node_modules is missing
+forma dev
+forma dev -d ./myapp
+```
+
+Long-running process supervisor (not a second runtime):
+
+1. Fail-fast if **`forma.yaml`**, **`web.path/node_modules`**, **`npm`**, or **`goscript`** is missing (does **not** auto-run sync). See [Install](install.md) for the pinned GoScript version.
+2. Initial browser build: `goscript compile --package . --output <web.path>/.goscript`, then `npm run build:go` (Vite lib → `public/app.js`; Vite serves `/app.js`).
+3. Starts **`npm run dev`** under **`web.path`** (Vite).
+4. Watches project **`.go`** files via **moddwatch** (batched/lull + serialized rebuilds). Rebuild failures after start are logged; the loop keeps running. Vite exit or Ctrl-C stops the command (pal cancels the shared context).
+
+### Host HMR vs Go reload
+
+| Change | What happens |
+|--------|----------------|
+| Host TS/CSS under `web/` | Vite **HMR** (usual Vite behavior) |
+| Go sources for the app | GoScript **rebuild** of `public/app.js`, then **full page reload** in the browser |
+
+This is **not** true Go HMR: in-memory Go state is **not** preserved across rebuilds. Reload the page after a successful rebuild (Vite also reloads when `public/app.js` changes).
+
+Scaffold **`main.tsx`** registers **`formaHost.setTree`** before importing **`/app.js`**, so `UIMount` finds the host seam.
+
+### Browser todo-demo check
+
+The framework repo’s [`main.go`](../../main.go) is the reference todo demo. Scaffold `main.go` stays a small hello unless you replace it.
+
+In an **initialized app** (not the framework root):
+
+1. Adapt todo patterns from the repo `main.go` into your app’s `main.go` (dot-import `ui` / `fn`, `UIMount`, `RefreshUI` / `Update`).
+2. `forma sync` (if needed).
+3. `forma dev`, open the Vite URL, confirm clicks mutate Go state and refresh the host tree.
+4. Save a `.go` file and confirm a rebuild log + page reload shows the change.
 
 ## Related
 
