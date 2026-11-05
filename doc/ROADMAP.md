@@ -87,7 +87,7 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 | Order | Change name | Phase | Purpose | Status | branch | PR |
 |-------|-------------|-------|---------|--------|--------|-----|
 | 1 | `forma-todo-shadcn-slice` | P5 | Gap-analyze a minimal responsive shadcn todo UI; add any missing default-shadcn widgets, layout/responsive primitives, codegen, and host/registry wiring forma still lacks | PR open | `forma-todo-shadcn-slice` | [#5](https://github.com/zhulik/forma/pull/5) |
-| 2 | `forma-todo-example` | P5 | Ship `examples/todo`: in-browser todo list on that slice, runnable with `forma dev`; document how to run it | PR open | `forma-todo-example` | |
+| 2 | `forma-todo-example` | P5 | Ship `examples/todo`: in-browser todo list on that slice, runnable with `forma dev`; document how to run it | PR open | `forma-todo-example` | [#6](https://github.com/zhulik/forma/pull/6) |
 | 3 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
 
 Proposals must reference **ROADMAP phase** (P4–P5) in the Impact section. Further P5 items (extra catalog, 3rd-party recipes, perf notes) stay out of this queue until the todo example lands.
