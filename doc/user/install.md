@@ -77,14 +77,17 @@ forma dev
 
 Vite serves the host; GoScript + Vite lib rebuild write `web/public/app.js` on Go saves. Host asset edits use Vite HMR; Go edits need a page reload (not preserved Go heap). See [CLI — forma dev](cli.md#forma-dev).
 
-## Learn the DSL today (no new app)
+## Learn the DSL today (in this repo)
 
-You can also learn from this repository:
+The runnable in-browser todo is **[`examples/todo`](../../examples/todo/)**:
 
-1. Read [`main.go`](../../main.go) (todo demo).
-2. Run `task test` and `task lint` from the repo root.
+```bash
+cd examples/todo
+forma sync   # if node_modules / generated artifacts are missing
+forma dev
+```
 
-That exercises the **authoring model**. To run interactive UI in a browser, use an initialized **app** project with **`forma sync`** + **`forma dev`** (the framework repo itself has no app `web/` tree).
+Open the Vite URL and confirm add / toggle / delete. Root [`main.go`](../../main.go) is thin DSL smoke only (no `web/` tree). See [`examples/todo/README.md`](../../examples/todo/README.md).
 
 ## Next steps
 

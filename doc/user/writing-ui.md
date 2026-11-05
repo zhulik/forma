@@ -6,7 +6,7 @@
 - **UI** is a function of state: build a tree of **`Component`** values.
 - **Events** run Go handlers; after mutating state, call **`ctx.RefreshUI()`** (or **`ctx.Update`**).
 
-The reference implementation is [`main.go`](../../main.go) in the forma repository.
+The reference implementation is [`examples/todo`](../../examples/todo/) (run with `forma sync` + `forma dev`). Root [`main.go`](../../main.go) is thin DSL smoke only.
 
 ## Mount
 

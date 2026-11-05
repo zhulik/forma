@@ -61,6 +61,20 @@ The project SHALL verify in continuous integration that building the forma CLI a
 - **WHEN** automation runs on a clean checkout after CLI scaffold or codegen changes
 - **THEN** it builds the forma CLI with CGO, runs init with a test module path in a temporary empty directory, sync completes npm, default shadcn materialization, and codegen during init, `generator.go` is present, and the generated application compiles with `go build` without manual fixes
 
+### Requirement: Examples todo module smoke in automation
+
+The project SHALL verify in continuous integration (or an equivalent Task entry wired into CI) that the committed `examples/todo` Go module builds successfully against the local forma replace path, and that the example’s web tree can run its package test and production build scripts after dependencies are present (matching the spirit of the init-scaffold web checks without re-running `forma init` into a temp dir).
+
+#### Scenario: Example Go entrypoint compiles
+
+- **WHEN** CI runs the examples-todo smoke check
+- **THEN** `go build` for the `examples/todo` module entrypoint succeeds with the module’s committed `replace` of the forma library to the repository root
+
+#### Scenario: Example web host builds
+
+- **WHEN** CI runs the examples-todo smoke check with Node available
+- **THEN** the example’s `web/` tree completes its configured unit test and build commands (after `npm` dependencies are installed if not already present in the check)
+
 ### Requirement: Agent-oriented Go rules are present
 
 The repository SHALL include Cursor rules covering early-stage compatibility policy, Go error handling, testing conventions (for when tests are added later), file/type organization, and preferential use of the functional helper package over raw loops, so automated edits follow the same standards as sister zhulik Go projects. The prefer-fn rule MUST forbid raw `for` loops except an explicit allowlist (helper package internals, generated code, table-driven tests, side-effect-only each walks, non-slice/non-map iteration such as channels, indexed count APIs, short-circuit search, and index-heavy algorithms), and MUST forbid no-op proxy lambdas when a named function already matches a helper callback signature.

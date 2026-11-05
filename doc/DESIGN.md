@@ -61,7 +61,7 @@ Three cooperating parts:
 
 ## Authoring model (DSL)
 
-The north-star example is [`main.go`](../main.go): a todo app with no HTML.
+The north-star runnable example is [`examples/todo`](../examples/todo/): an in-browser todo app with no author-written HTML. Framework-root [`main.go`](../main.go) is thin DSL smoke only.
 
 ### Core APIs
 
@@ -77,7 +77,7 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 - Package **`github.com/zhulik/forma/fn`** holds **generic** helpers only (`Map`, `Filter`, …) — not forma-specific UI control flow.
 - Authors reuse **`fn.Map`** / **`fn.Filter`** for lists and state; forma uses `fn` internally where mapping helps.
-- Prefer **`fn.Map`** when turning slices into `.With(...)` arguments (see `renderTodoList` in [`main.go`](../main.go)).
+- Prefer **`fn.Map`** when turning slices into `.With(...)` arguments (see `renderTodoList` in [`examples/todo`](../examples/todo/)).
 
 ### Composition
 
@@ -163,7 +163,7 @@ Author-facing workflow and install steps live in **[doc/user/](user/README.md)**
 
 1. **App module** depends on `github.com/zhulik/forma/ui` and `fn`; generated shadcn bindings live under **`internal/ui/`** by default (see **`forma.yaml`** `codegen.dir`).
 2. **Define app state** as ordinary Go types.
-3. **Implement `func MyApp() Component`** using dot-imported layout + generated widgets (see [`main.go`](../main.go) in this repo).
+3. **Implement `func MyApp() Component`** using dot-imported layout + generated widgets (see [`examples/todo`](../examples/todo/) in this repo).
 4. **`UIMount(mountID, MyApp())`** — mount id matches **`forma.yaml`** `ui.mount` and the mount node in the web tree HTML.
 5. On user actions or async completion: **update state → `ctx.RefreshUI()`** or **`ctx.Update`**.
 
@@ -191,13 +191,13 @@ Same Go + host bundle, served inside a **native system webview** (not Electron).
 
 ## Reference demo
 
-[`main.go`](../main.go) demonstrates:
+[`examples/todo`](../examples/todo/) demonstrates:
 
-- Dot imports of `ui` and `fn` for a dense authoring surface
+- Dot imports of `ui` and `fn` for a dense authoring surface (normal import for generated `internal/ui`)
 - Global app state and CRUD handlers
-- Nested layout and generated widgets
+- Generated shadcn **Card** / Input / Button / Checkbox with nested layout
 - Dynamic list rendering with **`fn.Map`** and **`.Or(...)`** empty-state fallback
-- **`ui.Context`** on handlers (`RefreshUI` after mutations)
-- `Class` escape hatch alongside typed props
+- **`ui.Context`** on handlers (`Update` / `RefreshUI` after mutations)
+- Responsive `Class` composer (`sm:flex-row`) alongside typed props
 
-The `ui` package today implements **types and stub** `UIMount`/`RefreshUI`; runtime behavior is defined in OpenSpec and built in roadmap phase P3.
+Run it with **`forma sync`** + **`forma dev`** from `examples/todo`. Framework-root [`main.go`](../main.go) stays a thin compile smoke.

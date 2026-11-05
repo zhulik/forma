@@ -4,7 +4,7 @@ Go-native UI framework (in development): compose semantic widgets in Go; a React
 
 **Authors:** start with the [user guide](doc/user/README.md) (install, CLI, `forma.yaml`, writing UI). Architecture and phases: [doc/DESIGN.md](doc/DESIGN.md), [doc/ROADMAP.md](doc/ROADMAP.md).
 
-The reference DSL demo is [main.go](main.go) (dot-imported [`ui`](ui/) and [`fn`](fn/), `.With` / `.Or`, `ui.Context`).
+The runnable browser todo is [`examples/todo`](examples/todo/) (`forma sync` + `forma dev`). Root [main.go](main.go) is thin DSL smoke only.
 
 ## Development
 

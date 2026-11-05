@@ -138,8 +138,8 @@ Apps SHALL attach a root component to a DOM mount identifier through the single 
 
 #### Scenario: Demo app startup
 
-- **WHEN** the reference todo application starts
-- **THEN** it registers its root component against a fixed mount id
+- **WHEN** the reference todo application under `examples/todo` starts
+- **THEN** it registers its root component against a fixed mount id matching that project’s configured mount
 
 #### Scenario: Browser mount is live
 
@@ -152,8 +152,8 @@ Application and screen packages MUST be allowed to use dot-import style for the 
 
 #### Scenario: Reference demo imports
 
-- **WHEN** a reader opens the canonical todo demo
-- **THEN** it uses dot imports for UI and list helpers with linter exceptions documented inline
+- **WHEN** a reader opens the canonical todo demo at `examples/todo`
+- **THEN** it uses dot imports for framework UI and list helpers (and normal imports for the project’s generated widget package) with linter exceptions documented inline where required
 
 ### Requirement: Fragment grouping without layout host
 

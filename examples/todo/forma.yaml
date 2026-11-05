@@ -1,0 +1,11 @@
+module: github.com/zhulik/forma/examples/todo
+
+ui:
+  mount: app-root
+
+codegen:
+  dir: internal/ui
+  package: ui
+
+web:
+  path: web

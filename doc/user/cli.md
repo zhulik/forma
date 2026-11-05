@@ -105,14 +105,20 @@ Scaffold **`main.tsx`** registers **`formaHost.setTree`** before importing **`/a
 
 ### Browser todo-demo check
 
-The framework repo’s [`main.go`](../../main.go) is the reference todo demo. Scaffold `main.go` stays a small hello unless you replace it.
+Use the committed reference app **[`examples/todo`](../../examples/todo/)**:
 
-In an **initialized app** (not the framework root):
+```bash
+cd examples/todo
+forma sync   # if needed
+forma dev
+```
 
-1. Adapt todo patterns from the repo `main.go` into your app’s `main.go` (dot-import `ui` / `fn`, `UIMount`, `RefreshUI` / `Update`).
-2. `forma sync` (if needed).
-3. `forma dev`, open the Vite URL, confirm clicks mutate Go state and refresh the host tree.
-4. Save a `.go` file and confirm a rebuild log + page reload shows the change.
+Open the Vite URL and confirm:
+
+- add / toggle done / delete (Go state → host refresh)
+- composer stacks Input above Add on a narrow viewport; Input+Add sit side-by-side from the `sm` breakpoint up
+
+Root [`main.go`](../../main.go) is thin DSL smoke without a web tree. Scaffold `main.go` from `forma init` stays a small hello unless you replace it with your own UI (patterns from `examples/todo`).
 
 ## Related
 

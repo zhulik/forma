@@ -1,6 +1,6 @@
 # forma author guide
 
-forma is a Go-native UI framework: you compose widgets in Go; a React + shadcn host renders them. This guide is the **primary onboarding path** for app authors—alongside the reference demo [`main.go`](../../main.go) and the [`ui-dsl`](../../openspec/specs/ui-dsl/spec.md) specification.
+forma is a Go-native UI framework: you compose widgets in Go; a React + shadcn host renders them. This guide is the **primary onboarding path** for app authors—alongside the runnable demo [`examples/todo`](../../examples/todo/) and the [`ui-dsl`](../../openspec/specs/ui-dsl/spec.md) specification.
 
 ## Documentation is first-class
 
@@ -12,12 +12,13 @@ Contributors: see also OpenSpec capability **`ui-docs`** and `openspec/config.ya
 
 | Area | Status |
 |------|--------|
-| UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`main.go`](../../main.go), [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
+| UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`examples/todo`](../../examples/todo/), thin root [`main.go`](../../main.go) smoke, [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
 | Author guide (this tree) | **Available** |
 | `forma` CLI (`init`, `sync`, `generate`, `add`, `version`, `dev`) | **Available** — full sync + codegen + browser loop; [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md) |
 | React host (registry merge, renderer, sanitize, text-input policy) | **Available** — scaffold `web/src/host/` (P3b) |
 | Go↔host bridge (`UIMount` / `RefreshUI` / callbacks) | **Available** — ROADMAP P3c; host registers `globalThis.formaHost.setTree` |
 | Browser `forma dev` loop | **Available** — ROADMAP P3d (Vite host + GoScript rebuild; Go changes need page reload) |
+| Runnable todo example | **Available** — [`examples/todo`](../../examples/todo/) (`forma sync` + `forma dev`) |
 | Codegen from shadcn TSX | **Available** — `forma generate` / sync (P3a) |
 
 Use [Install](install.md) and [CLI reference](cli.md) for new apps, or [Manual setup](manual-setup.md) without the CLI.

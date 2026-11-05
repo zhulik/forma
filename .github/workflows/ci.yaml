@@ -47,3 +47,6 @@ jobs:
 
       - name: Init scaffold smoke
         run: task check-init-scaffold
+
+      - name: Examples todo smoke
+        run: task check-example-todo

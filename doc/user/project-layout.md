@@ -39,13 +39,13 @@ Application code often dot-imports framework `ui` and `fn` for a dense DSL (see 
 
 ## This repository (github.com/zhulik/forma)
 
-The forma repo is **not** a typical user app today:
+The forma repo is the library and CLI source, plus a committed example app:
 
-- **`ui/`** at repo root = framework DSL + **hand-written** `*.gen.go` stubs until a follow-up moves demos to **`examples/`**.
-- **`main.go`** = reference todo demo at repo root.
-- No app-level **`web/`** or **`forma.yaml`** at the framework root.
+- **`ui/`** at repo root = framework DSL (+ some hand-written `*.gen.go` stubs for framework smoke).
+- **`main.go`** = thin DSL compile smoke (no `web/` / `forma.yaml` at the framework root).
+- **[`examples/todo`](../../examples/todo/)** = nested module with its own `go.mod` (`replace` → repo root), `forma.yaml`, `web/`, and generated `internal/ui/` — the runnable browser todo (`forma sync` + `forma dev`).
 
-When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source.
+When you build a real app, use **`forma init`** into its own module (same shape as `examples/todo`).
 
 ## Version control
 

@@ -40,7 +40,7 @@ The author guide SHALL document how to create a forma app without the CLI: initi
 
 ### Requirement: Implementation status is explicit
 
-Where documented behavior still depends on work not yet shipped (for example desktop packaging), the guide SHALL label that material as planned or not yet available. After this change, the guide SHALL treat **`forma dev`**, the live Go↔host bridge, and the scaffold React host as available: **`init`**, config-only init, **`add`**, **`generate`**, full **`sync`**, **`version`**, and **`dev`** are documented as implemented; scaffold **`check-generate`** remains documented for CI drift. The guide SHALL NOT document **`forma generate --check`** or **`forma sync --check`**.
+Where documented behavior still depends on work not yet shipped (for example desktop packaging), the guide SHALL label that material as planned or not yet available. After this change, the guide SHALL treat **`forma dev`**, the live Go↔host bridge, the scaffold React host, and the **`examples/todo`** runnable example as available: **`init`**, config-only init, **`add`**, **`generate`**, full **`sync`**, **`version`**, and **`dev`** are documented as implemented; scaffold **`check-generate`** remains documented for CI drift. The guide SHALL NOT document **`forma generate --check`** or **`forma sync --check`**.
 
 #### Scenario: Author expects forma dev today
 
@@ -65,7 +65,7 @@ Where documented behavior still depends on work not yet shipped (for example des
 #### Scenario: Author expects a live todo app in the browser
 
 - **WHEN** an author follows the documented `forma dev` verification path with the live bridge available
-- **THEN** documentation directs them to open the browser URL from the dev loop and confirms the Go-driven todo (or equivalent) demo is the expected success check
+- **THEN** documentation directs them to `examples/todo` and confirms the Go-driven todo demo is the expected success check
 
 ### Requirement: Guide documents the Go↔host bridge
 
@@ -88,7 +88,7 @@ The author guide SHALL describe how the browser runtime mounts a root component,
 
 ### Requirement: Guide documents the forma dev browser loop
 
-The author guide SHALL document how to run `forma dev`, including prerequisites, host-vs-Go update semantics, and a concrete browser verification path for the reference todo demo (or equivalent interactive UI from `main.go` patterns).
+The author guide SHALL document how to run `forma dev`, including prerequisites, host-vs-Go update semantics, and a concrete browser verification path for the **`examples/todo`** reference todo (or equivalent interactive UI from that example’s patterns).
 
 #### Scenario: Author learns rebuild vs HMR
 
@@ -97,8 +97,8 @@ The author guide SHALL document how to run `forma dev`, including prerequisites,
 
 #### Scenario: Author runs the todo demo in the browser
 
-- **WHEN** an author follows the documented verification path after `forma sync`
-- **THEN** the guide tells them how to open the running app in a browser and confirm interactive todo (or equivalent) behavior driven by Go via the live bridge
+- **WHEN** an author follows the documented verification path after syncing `examples/todo`
+- **THEN** the guide tells them how to open the running app in a browser and confirm interactive todo behavior (add, toggle done, delete) driven by Go via the live bridge, including that the composer stacks on narrow viewports and sits Input+Add side-by-side from the `sm` breakpoint up
 
 ### Requirement: Guide documents the React host and text-input policy
 
@@ -134,12 +134,31 @@ Any change that materially affects author experience (CLI commands, `forma.yaml`
 
 ### Requirement: Entry points link to the author guide
 
-The repository root README SHALL link to `doc/user/` for authors. ROADMAP and DESIGN SHALL treat `doc/user/` as the author onboarding path alongside `main.go` and OpenSpec `ui-dsl`.
+The repository root README SHALL link to `doc/user/` for authors. ROADMAP and DESIGN SHALL treat `doc/user/` as the author onboarding path alongside OpenSpec `ui-dsl`, with the runnable reference UI pointed at **`examples/todo`** (framework-root `main.go` MAY remain cited only as thin DSL smoke).
 
 #### Scenario: README reader
 
 - **WHEN** someone reads README.md for forma
-- **THEN** they find a clear link to the user documentation index
+- **THEN** they find a clear link to the user documentation index and a pointer to the runnable `examples/todo` demo
+
+#### Scenario: DESIGN north-star pointer
+
+- **WHEN** a reader opens DESIGN for the authoring model north-star
+- **THEN** the north-star runnable example is `examples/todo`, not an implication that root `main.go` alone is the browser product demo
+
+### Requirement: Guide documents the runnable examples/todo project
+
+The author guide SHALL document the repository’s `examples/todo` app as the runnable in-browser todo example: how to install dependencies (`forma sync` or equivalent), how to run `forma dev` from that project directory, and that the UI is a single default-shadcn todo list proving create/toggle/delete and responsive composer layout.
+
+#### Scenario: Author finds how to run the example
+
+- **WHEN** an author opens install, CLI, or project-layout material looking for a live browser demo
+- **THEN** they are directed to `examples/todo` with concrete run steps (sync prerequisites, `forma dev`, open the Vite URL)
+
+#### Scenario: Author understands example vs framework smoke
+
+- **WHEN** an author compares the framework repository root to an initialized app
+- **THEN** the guide states that root `main.go` is thin DSL smoke without a web tree, while `examples/todo` is the full app module used for browser verification
 
 ### Requirement: Guide documents todo-slice authoring surface
 

@@ -91,6 +91,15 @@ tasks:
         ( cd "$target" && go build -o /dev/null . )
         ( cd "$target/web" && npm test && npm run build )
 
+  check-example-todo:
+    desc: Build committed examples/todo module and its web host (test + build)
+    cmds:
+      - |
+        set -euo pipefail
+        root="$(git rev-parse --show-toplevel)"
+        ( cd "$root/examples/todo" && go build -o /dev/null . )
+        ( cd "$root/examples/todo/web" && npm ci && npm test && npm run build )
+
   lint:
     desc: Run golangci-lint
     cmds:
