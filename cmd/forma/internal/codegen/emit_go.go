@@ -128,8 +128,18 @@ func goTypeExpr(formaUIImport, goType string) *jen.Statement {
 		return jen.Bool()
 	case "float64":
 		return jen.Float64()
-	case "func(ctx ui.Context)":
+	case goTypeClickCallback:
 		return jen.Func().Params(jen.Id("ctx").Qual(formaUIImport, "Context"))
+	case goTypeChangeCallback:
+		return jen.Func().Params(
+			jen.Id("ctx").Qual(formaUIImport, "Context"),
+			jen.Id("value").String(),
+		)
+	case goTypeCheckedCallback:
+		return jen.Func().Params(
+			jen.Id("ctx").Qual(formaUIImport, "Context"),
+			jen.Id("checked").Bool(),
+		)
 	default:
 		return jen.Id(goType)
 	}

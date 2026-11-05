@@ -28,11 +28,15 @@ Generated Go and registry files are **committed** so CI can verify **`task check
 
 ## Using a new widget in Go
 
-After sync, import your generated package and use the struct the codegen emitted—for example `Button`, `Input`, or compound types with slot fields. Props and events are typed on the struct; events use **`func(ctx Context)`** (or variants documented for that widget).
+After sync, import your generated package and use the struct the codegen emitted—for example `Button`, `Input`, `Checkbox`, or compound types with slot fields. Props and events are typed on the struct:
+
+- Click-style: **`func(ctx Context)`** (e.g. `OnClick`)
+- Value change: **`func(ctx Context, value string)`** (e.g. `Input.OnChange`)
+- Checked change: **`func(ctx Context, checked bool)`** (e.g. `Checkbox.OnCheckedChange`)
 
 ## Starter set
 
-**`forma init`** materializes a CLI-hardcoded starter set (`button`, `input`, `card`) during the first sync so hello world works without an immediate **`forma add`**.
+**`forma init`** materializes a CLI-hardcoded starter set (`button`, `input`, `card`, `checkbox`) during the first sync so hello world works without an immediate **`forma add`**. After init, generated **`Card`** is the shadcn compound—not the framework boxed layout (**`Panel`**).
 
 ## Manual / advanced
 

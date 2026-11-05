@@ -35,7 +35,7 @@ Full init:
 
 - Target directory must be **empty** (only `.` and `..`).
 - Does **not** run `git init`.
-- Ends with **`forma sync`** that materializes starter components (`button`, `input`, `card`) then runs codegen.
+- Ends with **`forma sync`** that materializes starter components (`button`, `input`, `card`, `checkbox`) then runs codegen.
 - Writes root **`generator.go`** (`//go:generate forma generate`) and a **`Taskfile.yaml`** with **`check-generate`**.
 
 `--only-config`:

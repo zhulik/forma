@@ -1,0 +1,3 @@
+props:
+  - name: OnSelect
+    goType: "func(ctx ui.Context, value string)"

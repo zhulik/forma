@@ -14,6 +14,12 @@ Use when a monorepo or import policy requires generated code outside **`internal
 
 Framework types (`Component`, `Context`, layout) stay in **`github.com/zhulik/forma/ui`**.
 
+## Per-source codegen overrides (maintainers)
+
+When TSX analysis misses a prop or classifies an event incorrectly, place a **`<file>.override.yaml`** next to the component source (e.g. `input.tsx` → `input.override.yaml`). Overrides merge on top of analysis and can set Go field names/types (including `func(ctx ui.Context, value string)` and `func(ctx ui.Context, checked bool)`).
+
+forma also ships **embedded maintainer defaults** for shadcn `input` and `checkbox` (forwardRef sources without a Prop interface). Sidecar files win over embeds. Format and merge rules are documented in `cmd/forma/internal/codegen/override.go`. Prefer overrides over hand-editing `*.gen.go`.
+
 ## Custom Go components
 
 Any struct that implements **`Component`** (`Render(context.Context) *Node`) can appear in the tree. Use layout helpers (`Row`, `Column`, `Fragment`, …) and compose without shadcn.

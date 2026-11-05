@@ -49,7 +49,7 @@ Generated widgets import from **`your/module/internal/ui`** (or your configured 
 
 ## Handlers and refresh
 
-Handlers receive **`ui.Context`** (embeds `context.Context`):
+Handlers receive **`ui.Context`** (embeds `context.Context`) as the first argument. Click-style handlers are context-only; value and checked handlers take a sanitized payload:
 
 ```go
 OnClick: func(ctx Context) {
@@ -57,11 +57,25 @@ OnClick: func(ctx Context) {
         state.Count++
     })
 },
+OnChange: func(ctx Context, value string) {
+    ctx.Update(func() {
+        state.Draft = value
+    })
+},
+OnCheckedChange: func(ctx Context, checked bool) {
+    ctx.Update(func() {
+        todo.Done = checked
+    })
+},
 ```
 
 `Update` runs the mutation and calls **`RefreshUI()`** once on success.
 
 After async work (goroutine), mutate state then **`RefreshUI()`** on the handler context, respecting cancellation.
+
+## Layout vs generated Card
+
+Framework layout uses **`Panel`** for a padded bordered box (`Padding` prop). After **`forma init`**, **`Card`** refers to the generated shadcn Card binding (Header / Title / Content slots)—do not expect a framework layout type named `Card`.
 
 ## Compound widgets
 
@@ -79,6 +93,8 @@ See **`ui-dsl`** for slot rules.
 ## Escape hatches
 
 `Class`, `Style`, and `Attrs` on **`BaseComponent`** for Tailwind or rare attributes—use sparingly.
+
+`Class` values must be **static** Tailwind utility strings (including responsive variants such as `sm:flex-row`). The scaffold `tailwind.config.js` scans `../*.go` and `../internal/**/*.go` relative to `web/` so those utilities are not purged. Dynamic string concatenation in Go will not appear in the built CSS.
 
 ## Related
 

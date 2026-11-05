@@ -23,18 +23,89 @@ function asBool(value: unknown): boolean {
   return value === true;
 }
 
+/** Closed Tailwind spacing scale (0–12) used by layout props. */
+const SPACING_CLASS: Record<number, string> = {
+  0: "gap-0",
+  1: "gap-1",
+  2: "gap-2",
+  3: "gap-3",
+  4: "gap-4",
+  5: "gap-5",
+  6: "gap-6",
+  7: "gap-7",
+  8: "gap-8",
+  9: "gap-9",
+  10: "gap-10",
+  11: "gap-11",
+  12: "gap-12",
+};
+
+const PADDING_CLASS: Record<number, string> = {
+  0: "p-0",
+  1: "p-1",
+  2: "p-2",
+  3: "p-3",
+  4: "p-4",
+  5: "p-5",
+  6: "p-6",
+  7: "p-7",
+  8: "p-8",
+  9: "p-9",
+  10: "p-10",
+  11: "p-11",
+  12: "p-12",
+};
+
+const MARGIN_Y_CLASS: Record<number, string> = {
+  0: "my-0",
+  1: "my-1",
+  2: "my-2",
+  3: "my-3",
+  4: "my-4",
+  5: "my-5",
+  6: "my-6",
+  7: "my-7",
+  8: "my-8",
+  9: "my-9",
+  10: "my-10",
+  11: "my-11",
+  12: "my-12",
+};
+
+const MAX_WIDTH_CLASS: Record<string, string> = {
+  sm: "max-w-sm",
+  md: "max-w-md",
+  lg: "max-w-lg",
+  xl: "max-w-xl",
+  "2xl": "max-w-2xl",
+  full: "max-w-full",
+  none: "max-w-none",
+  prose: "max-w-prose",
+};
+
 function gapClass(gap: number): string | undefined {
   if (gap <= 0) {
     return undefined;
   }
-  return `gap-${gap}`;
+  return SPACING_CLASS[gap];
 }
 
 function paddingClass(padding: number): string | undefined {
   if (padding <= 0) {
     return undefined;
   }
-  return `p-${padding}`;
+  return PADDING_CLASS[padding];
+}
+
+function marginYClass(marginY: number): string | undefined {
+  return MARGIN_Y_CLASS[marginY];
+}
+
+function maxWidthClass(token: string): string | undefined {
+  if (!token) {
+    return undefined;
+  }
+  return MAX_WIDTH_CLASS[token];
 }
 
 function TextBuiltin({ className, style, children, ...props }: BuiltinProps) {
@@ -101,12 +172,13 @@ function ColumnBuiltin({ className, style, children, ...props }: BuiltinProps) {
 function ContainerBuiltin({ className, style, children, ...props }: BuiltinProps) {
   const maxWidth = asString(props.MaxWidth);
   const marginX = asString(props.MarginX);
+  const hasMarginY = props.MarginY !== undefined;
   return (
     <div
       className={cn(
-        maxWidth && `max-w-${maxWidth}`,
+        maxWidthClass(maxWidth),
         marginX === "auto" && "mx-auto",
-        props.MarginY !== undefined && `my-${asNumber(props.MarginY)}`,
+        hasMarginY && marginYClass(asNumber(props.MarginY)),
         className,
       )}
       style={style}
@@ -116,7 +188,7 @@ function ContainerBuiltin({ className, style, children, ...props }: BuiltinProps
   );
 }
 
-function CardBuiltin({ className, style, children, ...props }: BuiltinProps) {
+function PanelBuiltin({ className, style, children, ...props }: BuiltinProps) {
   return (
     <div
       className={cn(
@@ -145,5 +217,5 @@ export const builtinRegistry: ComponentRegistry = {
   Row: entry(RowBuiltin),
   Column: entry(ColumnBuiltin),
   Container: entry(ContainerBuiltin),
-  Card: entry(CardBuiltin),
+  Panel: entry(PanelBuiltin),
 };

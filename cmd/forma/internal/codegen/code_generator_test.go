@@ -64,6 +64,45 @@ func TestCodeGenerator_Generate_AccordionFixture(t *testing.T) {
 	require.Equal(t, string(want), string(got))
 }
 
+func TestCodeGenerator_Generate_InputFixture(t *testing.T) {
+	t.Parallel()
+	assertGoldenLeaf(t, "input")
+}
+
+func TestCodeGenerator_Generate_CheckboxFixture(t *testing.T) {
+	t.Parallel()
+	assertGoldenLeaf(t, "checkbox")
+}
+
+func assertGoldenLeaf(t *testing.T, name string) {
+	t.Helper()
+
+	fixture := filepath.Join(testdataDir(t), "fixtures", name)
+	out := t.TempDir()
+	codegenDir := filepath.Join(out, "ui")
+	registry := filepath.Join(out, "registry.gen.ts")
+
+	err := (&codegen.CodeGenerator{}).Generate(context.Background(), core.CodegenRequest{
+		ComponentsDir: fixture,
+		CodegenDir:    codegenDir,
+		Package:       "ui",
+		RegistryOut:   registry,
+	})
+	require.NoError(t, err)
+
+	got, err := os.ReadFile(filepath.Join(codegenDir, name+".gen.go"))
+	require.NoError(t, err)
+	want, err := os.ReadFile(filepath.Join(testdataDir(t), "goldens", name, name+".gen.go"))
+	require.NoError(t, err)
+	require.Equal(t, string(want), string(got))
+
+	reg, err := os.ReadFile(registry)
+	require.NoError(t, err)
+	wantReg, err := os.ReadFile(filepath.Join(testdataDir(t), "goldens", name, "registry.gen.ts"))
+	require.NoError(t, err)
+	require.Equal(t, string(wantReg), string(reg))
+}
+
 func TestCodeGenerator_Generate_PruneOrphan(t *testing.T) {
 	t.Parallel()
 

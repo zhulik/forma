@@ -20,6 +20,13 @@ Install the **`forma`** CLI per [Install](install.md). **`forma dev`** needs **N
 - The host applies a **hybrid text-input policy** for `Input`: local React state while focused, sanitized string `OnChange`, value-prop sync when unfocused. Domain state stays in Go.
 - If caret still jumps, check that refreshes are not overwriting the field with a *different* value while focused, and that custom registry entries did not bypass the host `Input` wrapper path.
 
+## Tailwind utilities from Go `Class` missing in CSS
+
+- Put static utility strings in `Class` fields under app root `*.go` or `internal/**/*.go` (paths included in scaffold `web/tailwind.config.js` `content`).
+- Responsive stacks belong in `Class` (e.g. `flex flex-col gap-2 sm:flex-row`), not a breakpoint DSL.
+- Layout gap/padding/max-width props use a closed static scale in host builtins; unsupported values omit the utility—use `Class` for anything outside that scale.
+- Framework boxed layout is **`Panel`**; generated shadcn **`Card`** is separate. If you still reference layout `Card`, rename to `Panel`.
+
 ## forma sync / go mod tidy failures
 
 - Ensure **`main.go`** (or scaffold) imports **`github.com/zhulik/forma/ui`** so tidy retains the framework module.

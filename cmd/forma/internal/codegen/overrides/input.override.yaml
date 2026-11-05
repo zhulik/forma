@@ -1,0 +1,12 @@
+# Maintainer default for shadcn Input (forwardRef + ComponentProps<"input">).
+props:
+  - name: Value
+    goType: string
+  - name: Placeholder
+    goType: string
+  - name: Type
+    goType: string
+  - name: Disabled
+    goType: bool
+  - name: OnChange
+    goType: "func(ctx ui.Context, value string)"

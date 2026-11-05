@@ -74,6 +74,16 @@ func TestApply_Minimal(t *testing.T) {
 	require.Contains(t, string(pkgJSON), `"test"`)
 	require.Contains(t, string(pkgJSON), "vitest")
 	require.Contains(t, string(pkgJSON), `"build:go"`)
+
+	tw, err := os.ReadFile(filepath.Join(dir, "web", "tailwind.config.js"))
+	require.NoError(t, err)
+	require.Contains(t, string(tw), `"../*.go"`)
+	require.Contains(t, string(tw), `"../internal/**/*.go"`)
+
+	builtins, err := os.ReadFile(filepath.Join(dir, "web", "src", "host", "builtins.tsx"))
+	require.NoError(t, err)
+	require.Contains(t, string(builtins), "Panel:")
+	require.NotContains(t, string(builtins), "Card:")
 }
 
 func TestNames_IncludesMinimal(t *testing.T) {

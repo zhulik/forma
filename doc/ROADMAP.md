@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React + shadcn/ui** host renders them. The roadmap prioritized **DSL quality and author docs before runtime implementation**, so OpenSpec artifacts and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0–P3d** complete and archived (P3b host + P3c bridge + GoScript browser compile via **`forma-browser-compile`** + P3d `forma dev` on [#3](https://github.com/zhulik/forma/pull/3)). Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`generate`**, **`add`**, **`version`**, and **`dev`**. Canonical specs include [`ui-host`](../openspec/specs/ui-host/spec.md) and [`ui-runtime`](../openspec/specs/ui-runtime/spec.md). Author guide: [`doc/user/`](user/README.md). [`main.go`](../main.go) is the reference todo demo. **Next:** **P4** desktop (deferred) or **P5** breadth.
+**Current status:** **P0–P3d** complete and archived (P3b host + P3c bridge + GoScript browser compile via **`forma-browser-compile`** + P3d `forma dev` on [#3](https://github.com/zhulik/forma/pull/3)). Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`generate`**, **`add`**, **`version`**, and **`dev`**. Canonical specs include [`ui-host`](../openspec/specs/ui-host/spec.md) and [`ui-runtime`](../openspec/specs/ui-runtime/spec.md). Author guide: [`doc/user/`](user/README.md). [`main.go`](../main.go) remains the framework-root smoke todo. **Next:** **P5** — prove forma can run a **single in-browser todo list** as an example project with a **minimal, responsive UI on default shadcn** (gap-fill catalog → ship `examples/todo`). **P4** desktop stays deferred.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md). **Agent factory (operators):** [AGENT_FACTORY.md](./AGENT_FACTORY.md).
 
@@ -21,14 +21,14 @@ forma is a **Go-native UI framework**: authors write composable components in Go
 - SSR/SSG as a supported product path.
 - Wasm-first UI bridge (GoScript is v1; official Wasm is contingency only).
 - Electron desktop; full native webview story is **P4**.
-- Complete shadcn catalog before core loop is stable.
+- Full shadcn catalog or third-party recipes before the **responsive todo example** proves the browser path.
 - Competing state managers in React (Redux, etc.) for domain state.
 
 ---
 
 ## Phased delivery
 
-OpenSpec changes should name the ROADMAP phase they belong to. Early phases through the browser dev loop are complete; remaining work is desktop packaging and catalog breadth.
+OpenSpec changes should name the ROADMAP phase they belong to. Early phases through the browser dev loop are complete; the tip is **P5** breadth aimed at the todo example. Desktop packaging remains deferred.
 
 | Phase | Scope | OpenSpec / deliverables | Status |
 |-------|--------|-------------------------|--------|
@@ -41,7 +41,7 @@ OpenSpec changes should name the ROADMAP phase they belong to. Early phases thro
 | **P3c′** | **Browser compile control plane** — retire GopherJS; GoScript under Go 1.27; amend DESIGN | **`forma-browser-compile`** | **Done** |
 | **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | **Done** |
 | **P4** | **Desktop packaging** — native webview wrapper, same bundle | **`forma-desktop`** | Deferred |
-| **P5** | **Breadth** — more shadcn widgets, 3rd-party recipes (maps, payments), performance notes | Multiple small changes | Deferred |
+| **P5** | **Breadth (todo example tip)** — gap-fill default shadcn + host/codegen as needed; ship responsive in-browser `examples/todo`. Later: more widgets, 3rd-party recipes, perf notes | **`forma-todo-shadcn-slice`**, **`forma-todo-example`** | **Planned** |
 
 ### Phase dependencies
 
@@ -49,10 +49,11 @@ OpenSpec changes should name the ROADMAP phase they belong to. Early phases thro
 P1 DSL ──► P2 User docs ──► P3a Codegen ──┐
                            P3b Host ─────┼──► P3d Dev loop
                            P3c Runtime ──┘
-                                         └──► P4 Desktop ──► P5 Breadth
+                                         ├──► P5 Breadth (todo example) ──► …further P5
+                                         └──► P4 Desktop (deferred; same bundle)
 ```
 
-P0–P3d are done. **Orch** may schedule **P4** / **P5** when the operator un-defers them.
+P0–P3d are done. **Orch** schedules **P5** tip rows below; **P4** stays deferred until the operator un-defers it. P5 does **not** wait on P4.
 
 ---
 
@@ -85,10 +86,11 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 
 | Order | Change name | Phase | Purpose | Status | branch | PR |
 |-------|-------------|-------|---------|--------|--------|-----|
-| 1 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
-| 2 | — | P5 | Breadth: more widgets, 3rd-party recipes, perf notes | Deferred | | |
+| 1 | `forma-todo-shadcn-slice` | P5 | Gap-analyze a minimal responsive shadcn todo UI; add any missing default-shadcn widgets, layout/responsive primitives, codegen, and host/registry wiring forma still lacks | complete | `forma-todo-shadcn-slice` | |
+| 2 | `forma-todo-example` | P5 | Ship `examples/todo`: in-browser todo list on that slice, runnable with `forma dev`; document how to run it | Planned | | |
+| 3 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
 
-Proposals must reference **ROADMAP phase** (P4–P5) in the Impact section.
+Proposals must reference **ROADMAP phase** (P4–P5) in the Impact section. Further P5 items (extra catalog, 3rd-party recipes, perf notes) stay out of this queue until the todo example lands.
 
 ---
 
@@ -109,6 +111,15 @@ Guide under [`doc/user/`](user/README.md) for Go authors who may never open the 
 - **P3c′:** GopherJS retired; browser builds use GoScript under Go 1.27.
 - **P3d:** `forma dev` runs the Vite host, watches Go, and rebuilds the browser bundle; user guide documents the loop.
 
+### P5 — Breadth / todo example (planned)
+
+**Product goal:** forma can run a **single in-browser todo list** as an **example project**—minimal UI, **default shadcn**, **responsive**.
+
+1. **`forma-todo-shadcn-slice`** — invent the target UI once (architector), diff against today’s generated/default set (`button` / `input` / `card` / `checkbox` / layout, etc.), then extend forma only where the example needs it. Not a full catalog sweep.
+2. **`forma-todo-example`** — add **`examples/todo`** (own module + web tree as needed), implement the UI, prove CRUD + layout at narrow/wide viewports via `forma dev`. Framework-root [`main.go`](../main.go) may stay a thin smoke until this example owns the narrative; migration of docs/pointers is in scope of the example change if useful.
+
+Later P5 (not scheduled yet): wider shadcn coverage, third-party recipes, performance notes.
+
 ---
 
 ## Follow-ups (deferred)
@@ -119,6 +130,7 @@ Guide under [`doc/user/`](user/README.md) for Go authors who may never open the 
 | Signal-based fine-grained updates | Alternative to full-tree RefreshUI; breaks simple mental model |
 | Desktop webview | P4 |
 | Deeper agent prompts/skills | Optional; factory v1 ships roles + OpenSpec skills |
+| Broader P5 catalog / 3rd-party / perf | After `examples/todo` ships |
 
 ---
 
@@ -127,3 +139,4 @@ Guide under [`doc/user/`](user/README.md) for Go authors who may never open the 
 - New widget: **registry + codegen + Go usage** in minutes, not days.
 - Agent-generated UI diff is **Go-only** and compiles.
 - Authors never need to read React source for standard shadcn widgets.
+- **P5 tip:** `examples/todo` runs in the browser with a responsive default-shadcn todo UI end-to-end.

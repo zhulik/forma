@@ -1,0 +1,8 @@
+# Maintainer default for shadcn Checkbox (Radix Root props via forwardRef).
+props:
+  - name: Checked
+    goType: bool
+  - name: Disabled
+    goType: bool
+  - name: OnCheckedChange
+    goType: "func(ctx ui.Context, checked bool)"

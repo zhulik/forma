@@ -24,9 +24,9 @@ const types: FormaNode[] = [
     Children: [{ Type: "Text", Props: { Text: "container-child" } }],
   },
   {
-    Type: "Card",
+    Type: "Panel",
     Props: { Padding: 2 },
-    Children: [{ Type: "Text", Props: { Text: "card-child" } }],
+    Children: [{ Type: "Text", Props: { Text: "panel-child" } }],
   },
 ];
 
@@ -39,5 +39,77 @@ describe("builtinRegistry", () => {
     }
     render(<>{renderNode(types[1], builtinRegistry)}</>);
     expect(screen.getByText("hello-text")).toBeTruthy();
+  });
+
+  it("maps gap and padding through static class literals", () => {
+    const { container, unmount } = render(
+      <>
+        {renderNode(
+          {
+            Type: "Row",
+            Props: { Gap: 2, Padding: 3 },
+            Children: [{ Type: "Text", Props: { Text: "spaced" } }],
+          },
+          builtinRegistry,
+        )}
+      </>,
+    );
+    const el = container.firstElementChild as HTMLElement;
+    expect(el.className.split(/\s+/)).toEqual(
+      expect.arrayContaining(["gap-2", "p-3"]),
+    );
+    unmount();
+  });
+
+  it("maps max-width tokens through static class literals", () => {
+    const { container, unmount } = render(
+      <>
+        {renderNode(
+          {
+            Type: "Container",
+            Props: { MaxWidth: "md", MarginY: 4 },
+            Children: [{ Type: "Text", Props: { Text: "box" } }],
+          },
+          builtinRegistry,
+        )}
+      </>,
+    );
+    const el = container.firstElementChild as HTMLElement;
+    expect(el.className.split(/\s+/)).toEqual(
+      expect.arrayContaining(["max-w-md", "my-4"]),
+    );
+    unmount();
+  });
+
+  it("omits unsupported spacing and max-width values", () => {
+    const { container, unmount } = render(
+      <>
+        {renderNode(
+          {
+            Type: "Column",
+            Props: { Gap: 99 },
+            Children: [
+              {
+                Type: "Container",
+                Props: { MaxWidth: "nope", MarginY: 99 },
+                Children: [{ Type: "Text", Props: { Text: "skip" } }],
+              },
+            ],
+          },
+          builtinRegistry,
+        )}
+      </>,
+    );
+    const column = container.firstElementChild as HTMLElement;
+    expect(column.className).not.toMatch(/gap-99/);
+    const inner = column.firstElementChild as HTMLElement;
+    expect(inner.className).not.toMatch(/max-w-nope/);
+    expect(inner.className).not.toMatch(/my-99/);
+    unmount();
+  });
+
+  it("does not register a layout Card builtin", () => {
+    expect(builtinRegistry.Card).toBeUndefined();
+    expect(builtinRegistry.Panel).toBeDefined();
   });
 });

@@ -39,7 +39,7 @@ func TodoApp() Component {
 		MarginX:  "auto",
 		MarginY:  10,
 	}.With(
-		Card{
+		Panel{
 			Class:   "shadow-xl border-slate-200", // Escape hatch alongside props!
 			Padding: 6,
 		}.With(

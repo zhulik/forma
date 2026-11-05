@@ -88,7 +88,7 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 - **`.Or(...)`** — fallback children when `.With` would otherwise be empty (e.g. dynamic list with zero items). Typed on each wrapper (same return type as `.With`); at render time, if there are no primary children, fallbacks are rendered instead.
 - **`If(cond, …func() Component)`** (package **`ui`**, dot-imported in apps) — lazy conditional branches; one branch and false yields no node; two branches select then/else.
 - **`Key`** — stable string on **`BaseComponent`** (promoted on widgets); required for repeated siblings built from lists.
-- **Layout primitives** — `Row`, `Column`, `Container`, `Card`, … express structure without HTML tag names.
+- **Layout primitives** — `Row`, `Column`, `Container`, `Panel`, … express structure without HTML tag names. Generated shadcn `Card` owns the `Card` type string after init.
 - **Generated shadcn types** — `Button`, `Input`, `Checkbox`, … with typed props (`Variant`, `Size`, …). **Compounds** (`Dialog`, `Sheet`, …) are **`*.gen.go` like leaves**: codegen analyzes each shadcn `.tsx` export graph (root + prefixed parts → one Go struct with slot fields; strip the prefix for field names). Optional per-file overrides only when heuristics fail (e.g. complex Select/Tabs). No hand-maintained catalog compounds in `ui/`.
 - **Escape hatches** — `Class`, `Style`, `Attrs` on **`WidgetMeta`**, embedded on layout/leaves via `BaseComponent`; generated compounds embed **`WidgetMeta` only** (no `.With`) and use **`RenderComponentSlot` / `PutSlot` / `SlotKeyFromField`** in generated `Render` methods.
 

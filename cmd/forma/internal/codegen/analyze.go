@@ -61,7 +61,14 @@ func AnalyzeComponentsDir(componentsDir string) ([]Widget, error) {
 		root := tree.RootNode()
 		w, ok := analyzeSource(path, src, root)
 		tree.Close()
-		return w, ok, nil
+		if !ok {
+			return Widget{}, false, nil
+		}
+		w, err = applySourceOverride(path, w)
+		if err != nil {
+			return Widget{}, false, err
+		}
+		return w, true, nil
 	})
 	if err != nil {
 		return nil, err
@@ -283,7 +290,16 @@ func heuristicProps(text string) []PropField {
 	}
 	if strings.Contains(text, "onClick") || strings.Contains(text, "React.MouseEvent") ||
 		strings.Contains(text, "ButtonHTMLAttributes") {
-		fields = append(fields, PropField{Name: "OnClick", GoType: "func(ctx ui.Context)"})
+		fields = append(fields, PropField{Name: "OnClick", GoType: goTypeClickCallback})
+	}
+	if strings.Contains(text, "onCheckedChange") {
+		fields = append(fields, PropField{Name: "OnCheckedChange", GoType: goTypeCheckedCallback})
+	}
+	if strings.Contains(text, "onValueChange") {
+		fields = append(fields, PropField{Name: "OnValueChange", GoType: goTypeChangeCallback})
+	}
+	if strings.Contains(text, "onChange") {
+		fields = append(fields, PropField{Name: "OnChange", GoType: goTypeChangeCallback})
 	}
 	return fields
 }
@@ -318,13 +334,16 @@ func componentExportNames(nodes []*sitter.Node, src []byte) []string {
 	})
 }
 
+const (
+	goTypeClickCallback   = "func(ctx ui.Context)"
+	goTypeChangeCallback  = "func(ctx ui.Context, value string)"
+	goTypeCheckedCallback = "func(ctx ui.Context, checked bool)"
+)
+
 func mapTSTypeToGo(propName, typeText string) string {
 	t := strings.Join(strings.Fields(typeText), " ")
-	if strings.HasPrefix(propName, "on") || strings.HasPrefix(propName, "On") {
-		return "func(ctx ui.Context)"
-	}
-	if strings.Contains(t, "=>") || strings.Contains(t, "MouseEventHandler") || strings.Contains(t, "EventHandler") {
-		return "func(ctx ui.Context)"
+	if isEventProp(propName, t) {
+		return mapEventPropToGo(propName)
 	}
 	if t == "boolean" || t == "bool" {
 		return "bool"
@@ -338,10 +357,33 @@ func mapTSTypeToGo(propName, typeText string) string {
 	if strings.Contains(t, "ReactNode") {
 		return ""
 	}
-	if !strings.Contains(t, "=>") && t != "" {
+	if t != "" {
 		return "string"
 	}
 	return ""
+}
+
+func isEventProp(propName, typeText string) bool {
+	if strings.HasPrefix(propName, "on") || strings.HasPrefix(propName, "On") {
+		return true
+	}
+	return strings.Contains(typeText, "=>") ||
+		strings.Contains(typeText, "MouseEventHandler") ||
+		strings.Contains(typeText, "EventHandler") ||
+		strings.Contains(typeText, "ChangeEventHandler")
+}
+
+func mapEventPropToGo(propName string) string {
+	n := strings.ToLower(propName)
+	n = strings.TrimPrefix(n, "on")
+	switch n {
+	case "checkedchange":
+		return goTypeCheckedCallback
+	case "change", "valuechange":
+		return goTypeChangeCallback
+	default:
+		return goTypeClickCallback
+	}
 }
 
 func identText(n *sitter.Node, src []byte) string {

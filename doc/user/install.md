@@ -51,7 +51,7 @@ What **`forma init`** does today:
 1. Requires an **empty** directory (or creates one with `-d`).
 2. **`go mod init`** with your module path (no git remote setup).
 3. Applies the embedded **`minimal`** template: `main.go`, `forma.yaml`, **`generator.go`**, **`Taskfile.yaml`**, a **`web/`** Vite + React + shadcn-ready tree, and a hello layout using `github.com/zhulik/forma/ui`.
-4. Runs **`forma sync`**: **`npm install`**, **`shadcn add`** for starter components (button, input, card), **codegen** into **`internal/ui/`** plus **`web/src/registry.gen.ts`**, Go module tidy, and a **`require`** on the forma library.
+4. Runs **`forma sync`**: **`npm install`**, **`shadcn add`** for starter components (button, input, card, checkbox), **codegen** into **`internal/ui/`** plus **`web/src/registry.gen.ts`**, Go module tidy, and a **`require`** on the forma library.
 
 Use your real module path (e.g. `github.com/you/myapp`), not a placeholder.
 
