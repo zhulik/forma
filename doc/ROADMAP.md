@@ -86,7 +86,7 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 
 | Order | Change name | Phase | Purpose | Status | branch | PR |
 |-------|-------------|-------|---------|--------|--------|-----|
-| 1 | `forma-todo-shadcn-slice` | P5 | Gap-analyze a minimal responsive shadcn todo UI; add any missing default-shadcn widgets, layout/responsive primitives, codegen, and host/registry wiring forma still lacks | complete | `forma-todo-shadcn-slice` | |
+| 1 | `forma-todo-shadcn-slice` | P5 | Gap-analyze a minimal responsive shadcn todo UI; add any missing default-shadcn widgets, layout/responsive primitives, codegen, and host/registry wiring forma still lacks | complete | `forma-todo-shadcn-slice` | [#5](https://github.com/zhulik/forma/pull/5) |
 | 2 | `forma-todo-example` | P5 | Ship `examples/todo`: in-browser todo list on that slice, runnable with `forma dev`; document how to run it | Planned | | |
 | 3 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
 
