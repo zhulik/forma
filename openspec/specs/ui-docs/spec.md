@@ -40,7 +40,7 @@ The author guide SHALL document how to create a forma app without the CLI: initi
 
 ### Requirement: Implementation status is explicit
 
-Where documented behavior still depends on work not yet shipped (for example desktop packaging or a dedicated `examples/todo` package), the guide SHALL label that material as planned or not yet available. After this change, the guide SHALL treat **`forma dev`**, the live Go↔host bridge, the scaffold React host, and the **owned-widgets + semantic CSS** path as available for the todo-sized surface. The guide SHALL document **`init`**, config-only init, **`sync`**, **`version`**, and **`dev`** as implemented for that path. The guide MUST NOT document shadcn **`add`**, kit **`generate`**, or scaffold **`check-generate`** as the primary author workflow. The guide SHALL NOT document **`forma generate --check`** or **`forma sync --check`**.
+Where documented behavior still depends on work not yet shipped (for example desktop packaging), the guide SHALL label that material as planned or not yet available. The guide SHALL treat **`forma dev`**, the live Go↔host bridge, the scaffold React host, the **owned-widgets + semantic CSS** path, and the dedicated **`examples/todo`** runnable demo as available for the todo-sized surface. The guide SHALL document **`init`**, config-only init, **`sync`**, **`version`**, and **`dev`** as implemented for that path. The guide MUST NOT document shadcn **`add`**, kit **`generate`**, or scaffold **`check-generate`** as the primary author workflow. The guide SHALL NOT document **`forma generate --check`** or **`forma sync --check`**.
 
 #### Scenario: Author expects forma dev today
 
@@ -65,9 +65,10 @@ Where documented behavior still depends on work not yet shipped (for example des
 #### Scenario: Author expects a live todo app in the browser
 
 - **WHEN** an author follows the documented `forma dev` verification path with the live bridge available
-- **THEN** documentation directs them to open the browser URL from the dev loop and confirms a Go-driven interactive UI (reference `main.go` patterns; dedicated `examples/todo` may still be labeled planned until that change ships)
+- **THEN** documentation directs them to the dedicated `examples/todo` run path (sync + `forma dev` from that project root) and confirms a Go-driven interactive todo UI—not labeled planned
 
 ### Requirement: Guide documents the Go↔host bridge
+
 
 The author guide SHALL describe how the browser runtime mounts a root component, refreshes the host tree from Go state, and delivers sanitized callbacks into handlers with callback context. It SHALL describe `forma dev` as the available one-command browser rebuild loop. It SHALL describe the browser compile/rebuild story in terms of the project's supported compiler and SHALL NOT require authors to install GopherJS against Go 1.21 as the supported path.
 
@@ -88,7 +89,7 @@ The author guide SHALL describe how the browser runtime mounts a root component,
 
 ### Requirement: Guide documents the forma dev browser loop
 
-The author guide SHALL document how to run `forma dev`, including prerequisites, host-vs-Go update semantics, and a concrete browser verification path for the reference todo demo (or equivalent interactive UI from `main.go` patterns).
+The author guide SHALL document how to run `forma dev`, including prerequisites, host-vs-Go update semantics, and a concrete browser verification path for the dedicated `examples/todo` demo.
 
 #### Scenario: Author learns rebuild vs HMR
 
@@ -97,10 +98,25 @@ The author guide SHALL document how to run `forma dev`, including prerequisites,
 
 #### Scenario: Author runs the todo demo in the browser
 
-- **WHEN** an author follows the documented verification path after `forma sync`
-- **THEN** the guide tells them how to open the running app in a browser and confirm interactive todo (or equivalent) behavior driven by Go via the live bridge
+- **WHEN** an author follows the documented verification path after `forma sync` in `examples/todo`
+- **THEN** the guide tells them how to open the running app in a browser and confirm interactive todo behavior driven by Go via the live bridge
+
+### Requirement: Guide documents the examples/todo run path
+
+The author guide and repository entry points SHALL document how to sync and run the dedicated todo example with `forma dev`, including that the example is a nested app module with its own web tree (not the framework root).
+
+#### Scenario: Install or README reader
+
+- **WHEN** an author opens install material or the root README looking for a browser todo demo
+- **THEN** they find clear steps to enter `examples/todo`, sync, and run `forma dev`
+
+#### Scenario: Project layout distinguishes framework vs example
+
+- **WHEN** an author reads project-layout material about this repository
+- **THEN** they learn that `examples/todo` is the runnable demo app while the framework root remains library + CLI source without requiring an app `web/` at repo root
 
 ### Requirement: Guide documents the React host and text-input policy
+
 
 The author guide SHALL describe the web host modules under the project web tree (registry merge, recursive renderer location), how authors add custom registry entries for third-party wrappers, and the text-input hybrid policy (ephemeral React state while focused; sanitized string callbacks on edit; value prop sync when unfocused).
 

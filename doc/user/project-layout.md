@@ -31,13 +31,14 @@ Application code often dot-imports framework `ui` and `fn` for a dense DSL (see 
 
 ## This repository (github.com/zhulik/forma)
 
-The forma repo is **not** a typical user app today:
+The forma repo root is **library + CLI**, not a user app:
 
 - **`ui/`** at repo root = framework DSL + **hand-written** owned widgets.
-- **`main.go`** = reference todo demo at repo root.
+- **`main.go`** = short Hello-style smoke for the framework module.
 - No app-level **`web/`** or **`forma.yaml`** at the framework root (scaffold lives under `cmd/forma/templates/`).
+- **`examples/todo/`** = canonical **runnable** demo app (nested `go.mod`, `forma.yaml`, scaffold-derived `web/`). Run with `forma sync` + `forma dev` from that directory.
 
-When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source.
+When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source; use `examples/todo` to try the browser loop without scaffolding a new project.
 
 ## Version control
 

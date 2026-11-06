@@ -2,7 +2,7 @@
 
 forma is a **Go-native UI framework**: authors write composable components in Go; a fixed **React** host reconciles them. Visual look comes from **[0build](https://0build.dev)** (semantic CSS classes; successor to Franken UI); **widget APIs are hand-written Go** in forma—not generated from shadcn TSX, 0build React kits, or third-party `.d.ts`. Early phases prioritized DSL quality, docs, and the browser runtime loop; OpenSpec and code stay aligned with how people (and agents) actually use the framework.
 
-**Current status:** **P0–P3d** complete and archived (host + GoScript runtime + `forma dev` on [#3](https://github.com/zhulik/forma/pull/3)). Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`version`**, and **`dev`** (no kit `add`/`generate`). Canonical specs still include [`ui-host`](../openspec/specs/ui-host/spec.md) and [`ui-runtime`](../openspec/specs/ui-runtime/spec.md); author guide: [`doc/user/`](user/README.md). **Direction locked:** React thin host; **own Go widgets** + **0build** semantic classes (e.g. `.z-button-primary`, `.z-card`) for look; **no** per-widget YAML overrides or generated kit bindings as SoT. Mantine-from-`.d.ts` codegen is **parked**. Shadcn-codegen-as-primary is **retired** from the author path (historical through P3a). **Tip:** **P5** — `forma-owned-widgets`, then `forma-todo-example`. **P4** desktop stays deferred.
+**Current status:** **P0–P3d** complete and archived (host + GoScript runtime + `forma dev` on [#3](https://github.com/zhulik/forma/pull/3)). Nested **`cmd/forma`** ships **`init`**, **`sync`**, **`version`**, and **`dev`** (no kit `add`/`generate` on the tip path). Canonical specs still include [`ui-host`](../openspec/specs/ui-host/spec.md) and [`ui-runtime`](../openspec/specs/ui-runtime/spec.md); author guide: [`doc/user/`](user/README.md). **Direction locked:** React thin host; **own Go widgets** + **0build** semantic classes (e.g. `.z-button-primary`, `.z-card`) for look; **no** per-widget YAML overrides or generated kit bindings as SoT. Mantine-from-`.d.ts` codegen is **parked**. Shadcn-codegen-as-primary is **retired** from the author path (historical through P3a). **Tip:** **P5** — `forma-owned-widgets` ([#8](https://github.com/zhulik/forma/pull/8)), then `forma-todo-example` (`examples/todo`). **P4** desktop stays deferred.
 
 **Canonical design:** [DESIGN.md](./DESIGN.md). **Agent factory (operators):** [AGENT_FACTORY.md](./AGENT_FACTORY.md).
 
@@ -45,7 +45,7 @@ OpenSpec changes should name the ROADMAP phase they belong to. Browser loop thro
 | **P3c′** | **Browser compile control plane** — retire GopherJS; GoScript under Go 1.27; amend DESIGN | **`forma-browser-compile`** | **Done** |
 | **P3d** | **End-to-end dev loop** — one command to run host + rebuild Go; todo demo works in browser | **`forma-dev-experience`** | **Done** |
 | **P4** | **Desktop packaging** — native webview wrapper, same bundle | **`forma-desktop`** | Deferred |
-| **P5** | **Owned widgets + example** — **0build** + hand-written Go widgets (todo surface); in-browser todo-like example. Later: more widgets, optional 3rd-party recipes, perf notes | **`forma-owned-widgets`**, **`forma-todo-example`** | **In progress** (`forma-owned-widgets` PR open) |
+| **P5** | **Owned widgets + example** — **0build** + hand-written Go widgets (todo surface); in-browser todo-like example. Later: more widgets, optional 3rd-party recipes, perf notes | **`forma-owned-widgets`**, **`forma-todo-example`** | **In progress** (`forma-owned-widgets` #8 + `forma-todo-example` PR open) |
 
 ### Phase dependencies
 
@@ -91,7 +91,7 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 | Order | Change name | Phase | Purpose | Status | branch | PR |
 |-------|-------------|-------|---------|--------|--------|-----|
 | 1 | `forma-owned-widgets` | P5 | Hand-written Go widgets + thin React host primitives for a todo-sized surface; scaffold loads [0build](https://0build.dev) styles (+ runtime utils if required); map Go variants → semantic `.z-*` classes; drop generated kit bindings / per-widget YAML as SoT | PR open | `forma-owned-widgets` | [#8](https://github.com/zhulik/forma/pull/8) |
-| 2 | `forma-todo-example` | P5 | In-browser todo-like example on owned widgets (likely `examples/todo`), runnable with `forma dev`; docs point here | Planned | | |
+| 2 | `forma-todo-example` | P5 | In-browser todo-like example on owned widgets (`examples/todo`), runnable with `forma dev`; docs point here; stacks on owned-widgets/#8 | PR open | `forma-todo-example` | |
 | 3 | `forma-todo-shadcn-slice` | P5 | Prior tip: gap-fill default shadcn via codegen path | **Superseded** | `forma-todo-shadcn-slice` | [#5](https://github.com/zhulik/forma/pull/5) |
 | 4 | `forma-todo-example` (shadcn stack) | P5 | Prior tip: example on shadcn slice | **Superseded** | `forma-todo-example` | [#6](https://github.com/zhulik/forma/pull/6) |
 | 5 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
@@ -106,7 +106,7 @@ Proposals must reference **ROADMAP phase** (P4–P5) in the Impact section. **Pa
 
 ### P1 — DSL (complete)
 
-Authors rely on `openspec/specs/ui-dsl/` + [`main.go`](../main.go): `UIMount`/`RefreshUI`, dot-import `ui`/`fn`, `.With`/`.Or`, events via `ui.Context`, keys/inputs policy, escape hatches. Browser runtime is in `openspec/specs/ui-runtime/` (P3c).
+Authors rely on `openspec/specs/ui-dsl/` + the interactive demo under [`examples/todo`](../examples/todo/): `UIMount`/`RefreshUI`, dot-import `ui`/`fn`, `.With`/`.Or`, events via `ui.Context`, keys/inputs policy, escape hatches. Browser runtime is in `openspec/specs/ui-runtime/` (P3c).
 
 ### P2 — User docs (complete)
 

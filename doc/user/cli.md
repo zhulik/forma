@@ -56,7 +56,9 @@ Sync does **not** invoke shadcn or regenerate kit bindings.
 
 Starts the local browser loop: Vite for the web tree and GoScript rebuilds when Go sources change. Read **`forma.yaml`** for web root and mount. Assume **`forma sync`** has been run at least once.
 
-See [Install](install.md) for the first-run sequence.
+**Verify with the in-repo demo:** from [`examples/todo`](../../examples/todo/), run **`forma sync`** then **`forma dev`**, open the printed URL, and confirm empty state plus add / toggle-done / delete. See [examples/todo/README.md](../../examples/todo/README.md) and [Install](install.md).
+
+Host asset edits use Vite HMR; Go rebuilds rewrite `web/public/app.js` and need a **page reload** (Go heap is not preserved).
 
 ## Related
 

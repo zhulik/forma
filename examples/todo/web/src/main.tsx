@@ -1,0 +1,28 @@
+import "./index.css";
+import {
+  FormaBridgeHost,
+  builtinRegistry,
+  createFormaBridge,
+  mergeRegistry,
+  mountFormaHost,
+  registerFormaHost,
+} from "./host";
+import { customRegistry } from "./registry.custom";
+
+const effectiveRegistry = mergeRegistry(builtinRegistry, customRegistry);
+
+// Register before any Go UIMount call (load the GoScript bundle after this module).
+const bridge = createFormaBridge();
+registerFormaHost(bridge);
+
+mountFormaHost(
+  "app-root",
+  <FormaBridgeHost registry={effectiveRegistry} bridge={bridge} />,
+);
+
+// GoScript + Vite lib build writes web/public/app.js (ES module served as /app.js).
+// Host must be registered before this module runs UIMount via boot().
+const goBundle = document.createElement("script");
+goBundle.type = "module";
+goBundle.src = "/app.js";
+document.body.appendChild(goBundle);
