@@ -1,0 +1,8 @@
+version: "3"
+
+tasks:
+  test:
+    desc: Run Go and web host tests
+    cmds:
+      - go test ./...
+      - npm --prefix web test

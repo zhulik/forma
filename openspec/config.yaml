@@ -16,19 +16,21 @@ context: |
   - doc/ROADMAP.md — phased delivery; OpenSpec changes must align unless a proposal
     explicitly revises the roadmap
 
-  Current tip: owned widgets + 0build (ROADMAP P5). Reference demo: main.go (todo app).
+  Current tip: owned widgets + 0build (ROADMAP P5). Canonical interactive demo:
+  examples/todo (forma sync + forma dev). Root main.go is a Hello-style smoke only.
   Package ui/ holds hand-written owned widget types. Breaking changes allowed until a
   stable DSL v1 is declared.
 
   Delivery order (hard constraint for tasks and proposals):
   1. DSL — specify and refine the Go authoring model (dense, extensible, expressive);
-     main.go is the north-star example
+     examples/todo is the north-star interactive demo
   2. User documentation — install, dev workflow, owned widgets, 0build look, custom
      host islands; written against the stabilized DSL
   3. Implementation — React host, Go↔host bridge, Mount/Refresh; driven by DSL
      specs + user guide expectations
   4. Owned-widget breadth / examples — expand surface after todo-sized path is proven;
      do not revive shadcn/Tailwind kit codegen as SoT
+
 
   Stack (target — document deviations in design):
   - Go application logic compiled with GoScript (s4wave/goscript); official Wasm contingency only
@@ -40,10 +42,10 @@ context: |
   - Widgets: hand-written Go in ui/ + thin host class maps; no shadcn/Mantine codegen or
     forma-shipped per-widget YAML as SoT
 
-  DSL conventions (from demo — evolve via OpenSpec, do not silently diverge):
+  DSL conventions (from examples/todo — evolve via OpenSpec, do not silently diverge):
   - Dot-import ui and fn in app code for fluency (nolint revive/staticcheck where needed)
   - UIMount(rootElementID, rootComponent); event handlers take ui.Context and call
-    ctx.RefreshUI() after state mutation
+    ctx.RefreshUI() / ctx.Update after state mutation
   - Package fn: Map, Filter, … — forma uses it internally; authors reuse for lists/state
   - Components are Go structs with value-receiver .With(...) for children and .Or(...)
     for fallbacks when primary children are empty; implement ui.Component with
@@ -55,6 +57,7 @@ context: |
   - Typed props on owned widgets (Variant, Size, …); escape hatches: Class, Style, Attrs
   - App state: plain Go structs/vars owned by the app; no React state for business logic
   - List keys and text-input behavior are spec-level concerns (see DESIGN.md)
+
 
   Composition & interop:
   - Go-side: functions returning Component or composite structs
@@ -94,7 +97,7 @@ operations:
   apply:
     guidance:
       - "Follow tasks.md; consult doc/ROADMAP.md for phase and doc/DESIGN.md for architecture"
-      - "Preserve main.go as the canonical DSL example when touching the demo app"
+      - "Preserve examples/todo as the canonical interactive demo; keep root main.go Hello-style"
       - "Hand-written ui/ widgets + host builtins: keep APIs reviewable; map variants to .z-*"
       - "React host stays dumb: no business logic in JS; sanitize third-party events before Go"
       - "After reusable implementation feedback, follow .cursor/rules/promote-reusable-feedback.mdc

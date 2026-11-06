@@ -1,6 +1,6 @@
 # forma author guide
 
-forma is a Go-native UI framework: you compose **owned widgets** in Go; a thin React host renders them with **[0build](https://0build.dev)** semantic CSS (`.z-*`). This guide is the **primary onboarding path** for app authors—alongside the reference demo [`main.go`](../../main.go) and the [`ui-dsl`](../../openspec/specs/ui-dsl/spec.md) specification.
+forma is a Go-native UI framework: you compose **owned widgets** in Go; a thin React host renders them with **[0build](https://0build.dev)** semantic CSS (`.z-*`). This guide is the **primary onboarding path** for app authors—alongside the runnable demo [`examples/todo`](../../examples/todo/) and the [`ui-dsl`](../../openspec/specs/ui-dsl/spec.md) specification.
 
 ## Documentation is first-class
 
@@ -12,13 +12,14 @@ Contributors: see also OpenSpec capability **`ui-docs`** and `openspec/config.ya
 
 | Area | Status |
 |------|--------|
-| UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`main.go`](../../main.go), [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
+| UI DSL (composition, slots, `Context`, `fn`) | **Available** — [`examples/todo`](../../examples/todo/), [`ui-dsl` spec](../../openspec/specs/ui-dsl/spec.md), `task test` |
 | Author guide (this tree) | **Available** |
 | `forma` CLI (`init`, `sync`, `version`, `dev`) | **Available** — owned-widgets scaffold; [`forma-cli` spec](../../openspec/specs/forma-cli/spec.md) |
 | React host (builtins, registry merge, renderer, sanitize, text-input policy) | **Available** — scaffold `web/src/host/` |
 | Go↔host bridge (`UIMount` / `RefreshUI` / callbacks) | **Available** — host registers `globalThis.formaHost.setTree` |
 | Browser `forma dev` loop | **Available** — Vite host + GoScript rebuild (Go changes need page reload) |
 | Owned widgets + 0build look | **Available** — todo-sized surface (Button, Input, Checkbox, Card, layout, Text, Heading, Fragment) |
+| In-repo todo demo (`examples/todo`) | **Available** — `forma sync` + `forma dev` from that project root |
 
 Use [Install](install.md) and [CLI reference](cli.md) for new apps, or [Manual setup](manual-setup.md) without the CLI.
 

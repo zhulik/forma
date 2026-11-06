@@ -1,0 +1,24 @@
+<!doctype html>
+<!--
+  0build CDN (pinned production URLs from https://0build.dev/docs/latest/kit/installation/):
+  - CSS:  https://cdn.0build.dev/0build.css
+  - JS:   https://cdn.0build.dev/0build.js
+  Prefer semantic .z-* classes (e.g. .z-button, .z-card). Utilities / Go Class are escape hatches.
+-->
+<html lang="en" class="z-not-ready z-layout-small">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>forma app</title>
+    <link rel="stylesheet" href="https://cdn.0build.dev/0build.css" />
+    <script src="https://cdn.0build.dev/0build.js"></script>
+    <script>
+      window.zRuntime = window.zRuntime || {};
+      zRuntime.debug = true;
+    </script>
+  </head>
+  <body>
+    <div id="app-root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
