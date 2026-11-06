@@ -32,9 +32,6 @@ ui:
   mount: app-root
 web:
   path: web
-codegen:
-  dir: internal/ui
-  package: ui
 `), 0o600))
 	require.NoError(t, os.WriteFile(filepath.Join(dir, "go.mod"), []byte("module github.com/example/x\n\ngo 1.27.3\n"), 0o600))
 	webDir := filepath.Join(dir, "web")

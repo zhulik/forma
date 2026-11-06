@@ -4,9 +4,11 @@ schema: spec-driven
 # Constraints for planning — do not paste verbatim into proposal/design/specs.
 context: |
   Product: forma — a Go-native UI framework for building web (and later desktop) apps
-  without writing HTML/CSS/JS. Developers compose semantic widgets in Go; a fixed React +
-  shadcn/ui host renders a tree built at runtime. Optimized for human and agent authors:
-  dense DSL, strong types, minimal review surface.
+  without writing HTML/CSS/JS. Developers compose semantic widgets in Go; a thin React
+  host renders a tree built at runtime with [0build](https://0build.dev) semantic CSS
+  (`.z-*`; utilities / Class as escape hatch). Widget APIs are hand-written Go in
+  framework ui/ with matching host builtins—not kit codegen as SoT. Optimized for human
+  and agent authors: dense DSL, strong types, minimal review surface.
 
   Canonical documents (read before proposing or implementing):
   - doc/user/ — author guide (first-class; update when author UX changes)
@@ -14,27 +16,29 @@ context: |
   - doc/ROADMAP.md — phased delivery; OpenSpec changes must align unless a proposal
     explicitly revises the roadmap
 
-  Current phase: greenfield. Reference demo: main.go (todo app). Package ui/ holds stub
-  types and hand-written *.gen.go placeholders — not a working runtime yet. Breaking
-  changes allowed until a stable DSL v1 is declared.
+  Current tip: owned widgets + 0build (ROADMAP P5). Reference demo: main.go (todo app).
+  Package ui/ holds hand-written owned widget types. Breaking changes allowed until a
+  stable DSL v1 is declared.
 
   Delivery order (hard constraint for tasks and proposals):
   1. DSL — specify and refine the Go authoring model (dense, extensible, expressive);
      main.go is the north-star example
-  2. User documentation — install, dev workflow, adding shadcn components, codegen, custom
-     widgets; written against the stabilized DSL, before large runtime work
-  3. Implementation — React host, Go↔host bridge, generator, Mount/Refresh; driven by DSL
+  2. User documentation — install, dev workflow, owned widgets, 0build look, custom
+     host islands; written against the stabilized DSL
+  3. Implementation — React host, Go↔host bridge, Mount/Refresh; driven by DSL
      specs + user guide expectations
+  4. Owned-widget breadth / examples — expand surface after todo-sized path is proven;
+     do not revive shadcn/Tailwind kit codegen as SoT
 
   Stack (target — document deviations in design):
   - Go application logic compiled with GoScript (s4wave/goscript); official Wasm contingency only
-  - JavaScript host: React 18 + shadcn/ui (Tailwind); static ComponentRegistry + recursive
-    tree renderer (Widget loop)
+  - JavaScript host: React 18 thin host + forma-owned builtins; static ComponentRegistry
+    (builtins + registry.custom.ts) + recursive tree renderer
+  - Styling: 0build CDN CSS + runtime utilities; semantic .z-* first
   - Bridge: Go builds a component tree (Node / Component.Render); thin syscall/js seam
     converts to a host object graph + js.Func callbacks without mandating full-tree JSON
-  - Codegen: deterministic Go structs from local shadcn .tsx (ts-morph or equivalent);
-    emit ui/*.gen.go; union props → string + optional const block; React events → sanitized
-    Go callbacks (ui.Context first arg where applicable)
+  - Widgets: hand-written Go in ui/ + thin host class maps; no shadcn/Mantine codegen or
+    forma-shipped per-widget YAML as SoT
 
   DSL conventions (from demo — evolve via OpenSpec, do not silently diverge):
   - Dot-import ui and fn in app code for fluency (nolint revive/staticcheck where needed)
@@ -48,27 +52,26 @@ context: |
   - Text leaf copy via Text{Text: "…"}; With/Or accept Component only; layout helpers
     (Row, Column, Container, …) are first-class, not raw div soup
   - ui.If for lazy conditional branches; fn holds Map, Filter, FilterMap (generic only)
-  - Typed props on generated shadcn wrappers (Variant, Size, …); escape hatches: Class,
-    Style, Attrs on BaseComponent
+  - Typed props on owned widgets (Variant, Size, …); escape hatches: Class, Style, Attrs
   - App state: plain Go structs/vars owned by the app; no React state for business logic
   - List keys and text-input behavior are spec-level concerns (see DESIGN.md)
 
   Composition & interop:
   - Go-side: functions returning Component or composite structs
-  - JS-side: register wrappers for third-party React modules in the host; Go passes props +
-    callbacks only; JS sanitizes events before calling Go
+  - JS-side: register wrappers for third-party React modules in registry.custom.ts;
+    Go passes props + callbacks only; JS sanitizes events before calling Go
 
-  Out of scope until later (see ROADMAP): SSR/SSG, Wasm-first bridge, Electron, full shadcn
-  catalog parity on day one, desktop native webview packaging before web loop works.
+  Out of scope until later (see ROADMAP): SSR/SSG, Wasm-first bridge, Electron, full
+  widget catalog before todo example, desktop native webview packaging before web loop
+  works, kit codegen revival.
 
 rules:
   proposal:
     - Keep Why short; put architecture and DSL detail in design, not proposal
     - State out-of-scope explicitly; defer to doc/ROADMAP.md phases when scoping
-    - Name capabilities for user-visible behavior (e.g. ui-dsl, ui-runtime, ui-codegen,
+    - Name capabilities for user-visible behavior (e.g. ui-dsl, ui-runtime, ui-widgets,
       ui-docs) not internal package names alone
-    - Do not start implementation-phase changes until DSL specs and user-doc outline exist
-      unless the proposal is explicitly P1/P2 only
+    - Do not prescribe shadcn/Tailwind kit codegen or per-widget YAML as SoT for new work
     - Author-visible UX changes (CLI, forma.yaml, install/sync, documented DSL usage) must
       update doc/user/ in the same change unless the proposal documents an explicit opt-out
   specs:
@@ -79,15 +82,11 @@ rules:
     - Distinguish author-facing DSL from host/runtime behavior when they differ
   design:
     - Follow doc/DESIGN.md and doc/ROADMAP.md unless documenting a deliberate deviation
-    - Record GoScript + React + shadcn rationale only when relevant to the change
-    - Codegen pipeline changes must describe inputs (tsx paths), outputs (*.gen.go), and
-      manual override/escape hatch policy
+    - Record React thin host + 0build + hand-written Go widgets rationale when relevant
     - Prefer sentinel errors in Go; keep React host thin (registry + render loop + event
       sanitization)
   tasks:
-    - "Order by ROADMAP — DSL, then user docs, then implementation sub-phases"
-    - "P1 tasks may update main.go and spec-only stubs; avoid building full host until P3"
-    - "P2 tasks are documentation and examples, not production runtime"
+    - "Order by ROADMAP — prefer owned-widgets / tip path over historical kit codegen"
     - "Link tasks to roadmap phase in PR text when useful"
     - "When a task changes author-visible behavior, include doc/user/ updates in the same task list"
 
@@ -96,8 +95,7 @@ operations:
     guidance:
       - "Follow tasks.md; consult doc/ROADMAP.md for phase and doc/DESIGN.md for architecture"
       - "Preserve main.go as the canonical DSL example when touching the demo app"
-      - "Generated ui/*.gen.go: regenerate via codegen when props change; hand-edit only
-        escape hatches documented in DESIGN.md"
+      - "Hand-written ui/ widgets + host builtins: keep APIs reviewable; map variants to .z-*"
       - "React host stays dumb: no business logic in JS; sanitize third-party events before Go"
       - "After reusable implementation feedback, follow .cursor/rules/promote-reusable-feedback.mdc
         (ask durable-rule then occurrence-sweep; honor explicit promote/fix-all phrasing)"

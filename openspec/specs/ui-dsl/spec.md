@@ -230,34 +230,6 @@ When a compound widget represents a variable-length collection of linked items (
 - **WHEN** items in such a slice are rendered as repeated UI
 - **THEN** each item’s rendered nodes include stable keys derived from the item’s value identifier or an explicit key field on the item struct
 
-### Requirement: Catalog compound widgets are generated
-
-Shadcn-style compound widget structs MUST be emitted by shadcn-to-Go codegen into `*.gen.go` files. The UI package MUST NOT ship hand-maintained catalog compound types alongside generated leaf widgets.
-
-#### Scenario: No hand-written dialog type
-
-- **WHEN** a reader inspects the UI package for catalog widgets
-- **THEN** dialog-like compounds appear only as generated sources, not as hand-maintained Go files next to generated buttons
-
-### Requirement: Compound shape from shadcn exports
-
-The codegen pipeline MUST classify shadcn compound exports automatically when possible: a root export plus same-prefix part exports become one Go struct with field-based slots, not separate Go types per part. Per-source overrides MAY exist only when automatic classification fails.
-
-#### Scenario: Prefixed part exports
-
-- **WHEN** a shadcn source file exports a root component and sibling parts such as trigger and content with a shared name prefix
-- **THEN** codegen emits one compound struct whose fields correspond to stripped part names and a Render method that fills named slots, not separate Go types for each part export
-
-#### Scenario: Adding dialog from shadcn
-
-- **WHEN** a maintainer adds shadcn dialog source to the host and runs codegen
-- **THEN** the tool emits a single generated dialog struct with field-based slots, without adding hand-written dialog types in the UI package
-
-#### Scenario: Slot helpers for generated Render
-
-- **WHEN** generated compound Render methods run
-- **THEN** they use shared UI package slot helpers so slot keys and omitted empty slots behave consistently across compounds
-
 ### Requirement: Functional helpers for collections
 
 The framework SHALL provide a generic functional helper package for transforming slices and maps. Authors and framework code MUST be able to map, filter, and optionally keep elements; fallible collect helpers MUST stop on the first error and return that error with any partial result discarded. Side-effect-only walks are not required to use that package.
@@ -276,3 +248,17 @@ The framework SHALL provide a generic functional helper package for transforming
 
 - **WHEN** an author remaps or filters map entries into another map or slice of results
 - **THEN** the functional helper package supplies map-entry analogues to the slice helpers
+
+### Requirement: Core catalog widgets are hand-maintained
+
+Todo-sized leaf and layout widgets in the framework UI package MUST be hand-maintained Go source reviewed like ordinary library code. The DSL MUST NOT require authors to obtain those types from a kit codegen emit step.
+
+#### Scenario: Button is ordinary library source
+
+- **WHEN** a reader inspects the framework UI package for Button
+- **THEN** they find a hand-maintained type implementing the component interface, not a kit-generated binding file presented as the product SoT
+
+#### Scenario: Authors import framework UI for leaves
+
+- **WHEN** an application composes Button, Input, and Checkbox
+- **THEN** those types are imported from the framework UI package without a project-local generated widget package

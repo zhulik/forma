@@ -40,7 +40,7 @@ func TodoApp() Component {
 		MarginY:  10,
 	}.With(
 		Card{
-			Class:   "shadow-xl border-slate-200", // Escape hatch alongside props!
+			Class:   "shadow=xl", // 0build utility escape hatch alongside semantic .z-card
 			Padding: 6,
 		}.With(
 			Column{
@@ -83,7 +83,7 @@ func TodoApp() Component {
 				}.With(renderTodoList()...).
 					Or(
 						Text{
-							Class: "text-center py-6",
+							Class: "text-align=center py=6",
 							Text:  "No tasks yet. Enjoy your day!",
 							Muted: true,
 						},

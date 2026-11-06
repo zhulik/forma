@@ -8,12 +8,12 @@ Specify the forma command-line interface and project configuration authors use t
 
 ### Requirement: Init scaffolds module and syncs
 
-The CLI SHALL provide `forma init <module>` that runs `go mod init` with the given module path in an empty target directory, writes a project scaffold from the selected embedded template (including `forma.yaml`, application entry, imports of the forma library, and a web tree under the configured `web.path` with package manifest and shadcn configuration), and runs `forma sync` before exiting successfully. If a step fails after earlier steps wrote files, the command MAY leave a partially initialized directory; the CLI SHALL NOT claim success unless init and sync both complete. First sync on a new project SHALL materialize a default starter set of shadcn components defined by the CLI (currently button, input, and card) via the shadcn CLI even when those names are not listed in `forma.yaml`.
+The CLI SHALL provide `forma init <module>` that runs `go mod init` with the given module path in an empty target directory, writes a project scaffold from the selected embedded template (including `forma.yaml`, application entry, imports of the forma library, and a web tree under the configured `web.path` with package manifest and styling assets for the owned-widgets stack), and runs `forma sync` before exiting successfully. If a step fails after earlier steps wrote files, the command MAY leave a partially initialized directory; the CLI SHALL NOT claim success unless init and sync both complete. Init/sync MUST NOT materialize shadcn component sources or generate kit Go bindings for the default widget surface.
 
 #### Scenario: New project in empty directory
 
 - **WHEN** an author runs `forma init github.com/user/myapp` in an empty directory
-- **THEN** a Go module exists with that path, scaffold files from the template are present including the web tree tooling under `web.path`, and sync has installed npm dependencies, materialized the default starter shadcn components under the web root, generated Go bindings and the host registry from those sources, and reconciled Go module dependencies for the forma library
+- **THEN** a Go module exists with that path, scaffold files from the template are present including the web tree under `web.path`, sync has installed npm dependencies and reconciled Go module dependencies for the forma library, and the app can use framework owned widgets without shadcn materialization or kit codegen
 
 ### Requirement: Full init requires empty target directory
 
@@ -66,23 +66,14 @@ The CLI SHALL provide a version string via `--version` / `-v` and a `forma versi
 - **WHEN** an author runs `forma version`
 - **THEN** they receive a non-empty version or development identifier string
 
-### Requirement: Add registers a component and syncs
-
-The CLI SHALL provide `forma add <component>` that materializes the named shadcn component under the configured web root when not already present and runs `forma sync`.
-
-#### Scenario: Add dialog
-
-- **WHEN** an author runs `forma add dialog`
-- **THEN** shadcn sources for dialog exist under the configured web root and sync regenerates Go bindings and the host registry so dialog is available to the application
-
 ### Requirement: Sync materializes full project state
 
-The CLI SHALL provide `forma sync` that, from `forma.yaml`, ensures dependencies are installed under the configured web root, runs the same codegen path as `forma generate` (regenerating Go widget bindings and the JavaScript component registry from shadcn sources present under the web root), and runs `go mod tidy` so forma library imports resolve. Sync SHALL NOT require a component name list in `forma.yaml` to drive codegen. Sync SHALL run shadcn materialization for the init starter set only during the init-driven first sync, and SHALL run shadcn materialization for explicitly added component names when invoked via `forma add`; ordinary sync on an existing project SHALL regenerate from committed TSX without re-invoking shadcn for every widget unless add or init materialization is in progress.
+The CLI SHALL provide `forma sync` that, from `forma.yaml`, ensures dependencies are installed under the configured web root and runs `go mod tidy` so forma library imports resolve. Sync MUST NOT invoke shadcn materialization and MUST NOT run kit TSX→Go codegen as part of the default product path.
 
 #### Scenario: Fresh clone after init
 
-- **WHEN** an author runs `forma sync` on a clean checkout with a valid `forma.yaml` and committed web tree sources including shadcn TSX and generated bindings
-- **THEN** npm dependencies are installed under the web root, Go bindings and the host registry match the committed shadcn sources, and Go module dependencies are tidied
+- **WHEN** an author runs `forma sync` on a clean checkout with a valid `forma.yaml` and committed web tree
+- **THEN** npm dependencies are installed under the web root and Go module dependencies are tidied
 
 #### Scenario: Sync without Node tooling
 
@@ -91,59 +82,26 @@ The CLI SHALL provide `forma sync` that, from `forma.yaml`, ensures dependencies
 
 #### Scenario: Sync runs codegen
 
-- **WHEN** an author runs `forma sync` on a project with shadcn sources
-- **THEN** codegen and registry update run to completion and the command does not log that those steps were skipped
+- **WHEN** an author runs `forma sync` on a project without kit component sources
+- **THEN** sync completes successfully without running kit TSX→Go codegen or claiming that a codegen step was required
 
 ### Requirement: forma.yaml declares UI desired state
 
-Each forma application SHALL include a root `forma.yaml` that declares at minimum: the UI mount element id; web root path (`web.path`); codegen output directory and Go package name for generated widgets.
+Each forma application SHALL include a root `forma.yaml` that declares at minimum: the UI mount element id and web root path (`web.path`). Default scaffold MUST NOT require a codegen output directory for owned core widgets.
 
 #### Scenario: Default scaffold
 
 - **WHEN** init completes on a new project
-- **THEN** `forma.yaml` includes a default codegen directory of `internal/ui`, a default web root path of `web`, and a default UI mount id, and does not require a shadcn component name list for sync to succeed
-
-### Requirement: Generate regenerates bindings from config
-
-The CLI SHALL provide `forma generate` that reads the project's `forma.yaml`, regenerates Go widget bindings from shadcn sources under the configured web root into the configured codegen directory, and regenerates the JavaScript component registry under the web root. Generate SHALL NOT install npm dependencies, SHALL NOT invoke the shadcn CLI, SHALL NOT run `go mod tidy`, and SHALL NOT require Node.js or npm on PATH. Generate SHALL NOT require a component name list in `forma.yaml`.
-
-#### Scenario: Generate after editing committed TSX
-
-- **WHEN** an author edits a committed shadcn source under the web components directory and runs `forma generate`
-- **THEN** Go bindings and the host registry are updated to match the TSX without reinstalling npm packages or fetching new shadcn components
-
-#### Scenario: Generate without Node.js
-
-- **WHEN** an author runs `forma generate` with a valid `forma.yaml` and committed TSX while Node.js is unavailable on PATH
-- **THEN** codegen still completes successfully
-
-#### Scenario: Generate without forma.yaml
-
-- **WHEN** an author runs `forma generate` in a directory without a readable `forma.yaml`
-- **THEN** the command fails with a clear error and writes no generated output claimed as successful
-
-### Requirement: Init scaffold includes go generate and drift check
-
-The minimal init template SHALL include a root `generator.go` whose `go:generate` directive invokes `forma generate`, and a task target that runs `go generate` then fails when `git diff --exit-code` reports any change in the whole repository, so application CI can verify committed generated output is current without a dedicated forma check flag.
-
-#### Scenario: Author runs check in new project
-
-- **WHEN** an author runs the scaffold's generate check task after init on a clean tree whose generated files match current shadcn sources
-- **THEN** `go generate` runs successfully and the whole-repo git diff check exits successfully
-
-#### Scenario: Stale generated files fail check
-
-- **WHEN** generated Go or registry files are out of date relative to committed shadcn sources and the author runs the scaffold's generate check task
-- **THEN** the task fails with a non-zero exit status after regeneration leaves a dirty whole-repo git diff
+- **THEN** `forma.yaml` includes a default web root path of `web` and a default UI mount id, and does not require a kit component name list or codegen directory for sync to succeed
 
 ### Requirement: Dev command is reserved for the browser loop
 
-The CLI SHALL provide `forma dev` that runs the local browser development loop: a long-lived process that starts the web-tree development server and rebuilds the application's Go entrypoint for the browser with the project's supported browser compiler whenever relevant Go sources change. The command SHALL read `forma.yaml` for the web root and mount configuration. It SHALL assume `forma sync` has been run at least once; when required web dependencies or toolchain binaries are missing, it SHALL fail with a clear error that points authors at sync and documented install steps rather than claiming the loop started. On successful start it SHALL keep running until interrupted, forwarding child-process output so authors can see the host URL and rebuild status. Documentation SHALL describe `forma dev` as available (not planned). Documentation and error messages for the loop SHALL NOT require GopherJS or an EOL Go 1.21 toolchain as the supported browser compile path.
+The CLI SHALL provide `forma dev` that runs the local browser development loop: a long-lived process that starts the web-tree development server and rebuilds the application's Go entrypoint for the browser with the project's supported browser compiler whenever relevant Go sources change. The command SHALL read `forma.yaml` for the web root and mount configuration. It SHALL assume `forma sync` has been run at least once; when required web dependencies or toolchain binaries are missing, it SHALL fail with a clear error that points authors at sync and documented install steps rather than claiming the loop started. On successful start it SHALL keep running until interrupted, forwarding child-process output so authors can see the host URL and rebuild status. Documentation SHALL describe `forma dev` as available (not planned). Documentation and error messages for the loop SHALL NOT require GopherJS or an EOL Go 1.21 toolchain as the supported browser compile path. After owned-widgets migration, CLI docs MUST present `init`, `sync`, `version`, and `dev` as the primary commands and MUST NOT present shadcn `add`/`generate` as the primary widget path.
 
 #### Scenario: Documentation before P3d
 
 - **WHEN** an author reads CLI reference material that previously treated `forma dev` as planned-only
-- **THEN** after this change that material lists `forma dev` as available alongside implemented commands such as `init`, `generate`, `sync`, `add`, and `version`
+- **THEN** that material lists `forma dev` as available alongside implemented product commands such as `init`, `sync`, and `version`
 
 #### Scenario: Author starts the browser loop
 
@@ -177,5 +135,5 @@ The CLI SHALL provide `forma dev` that runs the local browser development loop: 
 
 #### Scenario: Documentation after P3d
 
-- **WHEN** an author reads CLI reference material after this change ships
-- **THEN** `forma dev` is listed as available alongside `init`, `generate`, `sync`, `add`, and `version`
+- **WHEN** an author reads CLI reference material after owned-widgets migration ships
+- **THEN** `forma dev` is listed as available alongside `init`, `sync`, and `version`, without presenting shadcn `add`/`generate` as the primary widget path

@@ -12,12 +12,10 @@ import (
 
 	"github.com/zhulik/forma/cmd/forma/internal/cli/app"
 	clierrors "github.com/zhulik/forma/cmd/forma/internal/cli/errors"
-	"github.com/zhulik/forma/cmd/forma/internal/codegen"
 	"github.com/zhulik/forma/cmd/forma/internal/core"
 	"github.com/zhulik/forma/cmd/forma/internal/formaconfig"
 	"github.com/zhulik/forma/cmd/forma/internal/gotool"
 	"github.com/zhulik/forma/cmd/forma/internal/webtool"
-	"github.com/zhulik/forma/fn"
 )
 
 // EnvFormaReplace is the environment variable for a local replace of the forma module (cmd only).
@@ -25,27 +23,23 @@ const EnvFormaReplace = "FORMA_REPLACE"
 
 // ProjectSyncer reconciles on-disk project state with forma.yaml.
 type ProjectSyncer struct {
-	Dir           string
-	FormaReplace  string
-	AddComponents []string
+	Dir          string
+	FormaReplace string
 
-	Logger        *slog.Logger
-	GoModWrapper  core.GoModWrapper
-	NpmWrapper    core.NpmWrapper
-	ShadcnWrapper core.ShadcnWrapper
-	CodeGenerator core.CodeGenerator
+	Logger       *slog.Logger
+	GoModWrapper core.GoModWrapper
+	NpmWrapper   core.NpmWrapper
 }
 
 // Run reconciles project state using CLI-bound fields (pal.Runner entry for sync).
 func (s *ProjectSyncer) Run(ctx context.Context) error {
 	return s.Sync(ctx, core.SyncRequest{
-		Dir:           s.Dir,
-		FormaReplace:  s.FormaReplace,
-		AddComponents: s.AddComponents,
+		Dir:          s.Dir,
+		FormaReplace: s.FormaReplace,
 	})
 }
 
-// Sync runs web, codegen, and Go reconciliation.
+// Sync runs web install and Go reconciliation (no kit materialization or codegen).
 func (s *ProjectSyncer) Sync(ctx context.Context, req core.SyncRequest) error {
 	target, err := resolveDir(req.Dir)
 	if err != nil {
@@ -78,15 +72,6 @@ func (s *ProjectSyncer) Sync(ctx context.Context, req core.SyncRequest) error {
 		return err
 	}
 
-	components := dedupeComponents(req.AddComponents)
-	if err := s.ShadcnWrapper.Add(ctx, webRoot, components); err != nil {
-		return err
-	}
-
-	if err := runCodegen(ctx, s.CodeGenerator, target, project); err != nil {
-		return err
-	}
-
 	if err := s.GoModWrapper.Require(ctx, target); err != nil {
 		return fmt.Errorf("require forma library: %w", err)
 	}
@@ -115,37 +100,11 @@ func RunWithReplace(ctx context.Context, dir, formaReplace string) error {
 	})
 }
 
-// RunWithComponents runs sync and materializes the given shadcn components first.
-func RunWithComponents(ctx context.Context, dir, formaReplace string, components []string) error {
-	return runViaPal(ctx, &ProjectSyncer{
-		Dir:           dir,
-		FormaReplace:  formaReplace,
-		AddComponents: components,
-	})
-}
-
 func runViaPal(ctx context.Context, s *ProjectSyncer) error {
 	services := []pal.ServiceDef{gotool.Provide()}
 	services = append(services, webtool.Provide()...)
-	services = append(services, codegen.Provide(), pal.Provide(s))
+	services = append(services, pal.Provide(s))
 	return app.Run(ctx, services...)
-}
-
-func runCodegen(ctx context.Context, generator core.CodeGenerator, projectDir string, project formaconfig.Project) error {
-	componentsDir, codegenDir, pkg, registryOut := project.ToCodegenPaths(projectDir)
-	if err := generator.Generate(ctx, core.CodegenRequest{
-		ComponentsDir: componentsDir,
-		CodegenDir:    codegenDir,
-		Package:       pkg,
-		RegistryOut:   registryOut,
-	}); err != nil {
-		return fmt.Errorf("codegen: %w", err)
-	}
-	return nil
-}
-
-func dedupeComponents(names []string) []string {
-	return fn.Uniq(fn.Filter(names, func(name string) bool { return name != "" }))
 }
 
 func resolveDir(directory string) (string, error) {

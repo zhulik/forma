@@ -10,7 +10,7 @@ import (
 	"github.com/zhulik/forma/cmd/forma/internal/formaconfig"
 )
 
-func TestLoad_UIWebCodegen(t *testing.T) {
+func TestLoad_UIWeb(t *testing.T) {
 	t.Parallel()
 
 	dir := t.TempDir()
@@ -19,9 +19,6 @@ ui:
   mount: app-root
 web:
   path: frontend
-codegen:
-  dir: internal/ui
-  package: ui
 `), 0o600))
 
 	project, err := formaconfig.Load(dir)
@@ -30,7 +27,5 @@ codegen:
 	require.Equal(t, "app-root", project.UI.Mount)
 	require.Equal(t, "frontend", project.Web.Path)
 	require.Equal(t, filepath.Join(dir, "frontend"), project.WebRoot(dir))
-	require.Equal(t, filepath.Join(dir, "internal", "ui"), project.CodegenAbsDir(dir))
-	require.Equal(t, filepath.Join(dir, "frontend", "src", "components", "ui"), project.ComponentsUIDir(dir))
-	require.Equal(t, filepath.Join(dir, "frontend", "src", "registry.gen.ts"), project.RegistryOutPath(dir))
+	require.Equal(t, filepath.Join(dir, "frontend", "public", "app.js"), project.BrowserAppJSPath(dir))
 }

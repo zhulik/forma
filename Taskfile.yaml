@@ -84,10 +84,13 @@ tasks:
         trap 'rm -f "$bin"; rm -rf "$target"' EXIT
         ( cd "$root/cmd/forma" && go build -o "$bin" . )
         FORMA_REPLACE="$root" "$bin" init github.com/zhulik/forma/ci-smoke -d "$target"
-        test -f "$target/generator.go"
-        test -n "$(find "$target/internal/ui" -name '*.gen.go' | head -n 1)"
+        test ! -e "$target/generator.go"
+        test ! -d "$target/internal/ui"
+        test ! -e "$target/web/src/registry.gen.ts"
+        test ! -e "$target/web/components.json"
         test -d "$target/web/src/host"
-        test -f "$target/web/src/registry.gen.ts"
+        test -f "$target/web/src/host/widgets/button.tsx"
+        grep -q 'cdn.0build.dev/0build.css' "$target/web/index.html"
         ( cd "$target" && go build -o /dev/null . )
         ( cd "$target/web" && npm test && npm run build )
 

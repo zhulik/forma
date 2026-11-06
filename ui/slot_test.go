@@ -7,7 +7,7 @@ import (
 	"github.com/zhulik/forma/ui"
 )
 
-// compoundProbe mimics generated compound Render glue (not a catalog widget).
+// compoundProbe mimics compound Render glue (not a catalog widget).
 type compoundProbe struct {
 	ui.WidgetMeta
 

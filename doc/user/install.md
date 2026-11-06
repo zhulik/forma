@@ -4,8 +4,8 @@
 
 | Tool | Why |
 |------|-----|
-| **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. Building the CLI needs **CGO** (a C toolchain) for tree-sitter. |
-| **Node.js** | Web tree (`npm install`, shadcn CLI during **`forma sync`** / **`forma add`** / **`forma init`**). Also required for **`forma dev`**. Not required for **`forma generate`** alone. |
+| **Go** | Application code and the `forma` CLI. Match the version in [`.tool-versions`](../../.tool-versions) or `go.mod`. Building the CLI needs **CGO** (a C toolchain) when required by dependencies. |
+| **Node.js** | Web tree (`npm install` during **`forma sync`** / **`forma init`**). Also required for **`forma dev`**. |
 | **GoScript** | Compile Go to TypeScript for the browser; required on PATH for **`forma dev`**. Pin **v0.6.3**. |
 
 Optional: [asdf](https://asdf-vm.com/) with `.tool-versions` for pinned Go, Node, and Task.
@@ -50,8 +50,8 @@ What **`forma init`** does today:
 
 1. Requires an **empty** directory (or creates one with `-d`).
 2. **`go mod init`** with your module path (no git remote setup).
-3. Applies the embedded **`minimal`** template: `main.go`, `forma.yaml`, **`generator.go`**, **`Taskfile.yaml`**, a **`web/`** Vite + React + shadcn-ready tree, and a hello layout using `github.com/zhulik/forma/ui`.
-4. Runs **`forma sync`**: **`npm install`**, **`shadcn add`** for starter components (button, input, card), **codegen** into **`internal/ui/`** plus **`web/src/registry.gen.ts`**, Go module tidy, and a **`require`** on the forma library.
+3. Applies the embedded **`minimal`** template: `main.go`, `forma.yaml`, **`Taskfile.yaml`**, and a **`web/`** Vite + React host with **0build** CDN styling and owned-widget builtins.
+4. Runs **`forma sync`**: **`npm install`**, Go module tidy, and a **`require`** on the forma library. No shadcn materialization or kit codegen.
 
 Use your real module path (e.g. `github.com/you/myapp`), not a placeholder.
 

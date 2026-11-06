@@ -35,7 +35,7 @@ import (
 
 Use `//nolint:revive,staticcheck` on those lines if your linter flags dot imports.
 
-Generated widgets import from **`your/module/internal/ui`** (or your configured `codegen.dir`), not from the framework root `ui` package.
+Owned widgets (`Button`, `Input`, `Checkbox`, layout, …) import from **`github.com/zhulik/forma/ui`**—the same package as `Component` and `UIMount`.
 
 ## Composition
 
@@ -65,7 +65,7 @@ After async work (goroutine), mutate state then **`RefreshUI()`** on the handler
 
 ## Compound widgets
 
-shadcn-style compounds (`Dialog`, `Tabs`, …) use **field slots**, not separate `DialogTrigger`-style Go types:
+Future owned compounds (`Dialog`, `Tabs`, …) use **field slots**, not separate `DialogTrigger`-style Go types:
 
 ```go
 Dialog{

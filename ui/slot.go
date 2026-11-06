@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 )
 
-// RenderComponentSlot renders one slot field for compound widgets (used from generated *.gen.go).
+// RenderComponentSlot renders one slot field for compound widgets (owned or future compounds).
 func RenderComponentSlot(ctx context.Context, c Component) []*Node {
 	if c == nil {
 		return nil
@@ -20,7 +20,7 @@ func RenderComponentSlot(ctx context.Context, c Component) []*Node {
 	return []*Node{node}
 }
 
-// PutSlot adds nodes to a slot map when non-empty (used from generated *.gen.go).
+// PutSlot adds nodes to a slot map when non-empty (owned or future compounds).
 func PutSlot(slots map[string][]*Node, wireKey string, nodes []*Node) {
 	if len(nodes) == 0 {
 		return

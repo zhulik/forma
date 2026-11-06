@@ -2,28 +2,21 @@
 
 ## Your app (after forma init)
 
-Layout after **`forma init`** (sync materializes starter shadcn components and runs codegen):
-
 ```
 myapp/
-  forma.yaml           # mount, web path, codegen paths
-  generator.go         # //go:generate forma generate
-  Taskfile.yaml        # check-generate: go generate + git diff --exit-code
+  forma.yaml           # mount + web path
+  Taskfile.yaml        # optional local tasks
   go.mod
   go.sum               # after sync / go mod tidy
   main.go              # UIMount, app root component
-  internal/
-    ui/                # generated *.gen.go (default codegen.dir)
-      button.gen.go
-      ...
-  web/                 # React + shadcn + Vite (web.path)
+  web/                 # React host + Vite (web.path)
     package.json
+    index.html         # 0build CDN CSS/JS + mount node
     src/
-      components/ui/   # shadcn TSX sources (committed)
-      host/            # write-once React host (registry merge, renderer, sanitize)
-      main.tsx         # mounts FormaHost on ui.mount
-      registry.gen.ts  # generated host registry (do not hand-edit)
-      registry.custom.ts  # optional custom / third-party registry merges
+      host/            # write-once React host (builtins, renderer, sanitize)
+        widgets/       # thin Button/Input/… mapped to .z-* classes
+      main.tsx         # mounts FormaHost; merges builtins + registry.custom
+      registry.custom.ts  # optional third-party / override registry
     ...
 ```
 
@@ -31,9 +24,8 @@ myapp/
 
 | Import | Role |
 |--------|------|
-| `github.com/zhulik/forma/ui` | Framework: `Component`, `Context`, `UIMount`, layout widgets, `Fragment`, … |
-| `github.com/zhulik/forma/fn` | `Map`, `Filter`, `MapErr`, `FilterMapErr`, map helpers (`MapValues`, `MapEntries`, …) for lists and transforms |
-| `your/module/internal/ui` | **Generated** shadcn bindings (`Button`, `Input`, …) |
+| `github.com/zhulik/forma/ui` | Framework: `Component`, `Context`, `UIMount`, owned widgets (Button, Input, layout, …) |
+| `github.com/zhulik/forma/fn` | `Map`, `Filter`, … for lists and transforms |
 
 Application code often dot-imports framework `ui` and `fn` for a dense DSL (see [Writing UI](writing-ui.md)).
 
@@ -41,9 +33,9 @@ Application code often dot-imports framework `ui` and `fn` for a dense DSL (see 
 
 The forma repo is **not** a typical user app today:
 
-- **`ui/`** at repo root = framework DSL + **hand-written** `*.gen.go` stubs until a follow-up moves demos to **`examples/`**.
+- **`ui/`** at repo root = framework DSL + **hand-written** owned widgets.
 - **`main.go`** = reference todo demo at repo root.
-- No app-level **`web/`** or **`forma.yaml`** at the framework root.
+- No app-level **`web/`** or **`forma.yaml`** at the framework root (scaffold lives under `cmd/forma/templates/`).
 
 When you build a real app, use **`forma init`** into its own module. This repo remains the library and CLI source.
 
@@ -51,14 +43,13 @@ When you build a real app, use **`forma init`** into its own module. This repo r
 
 Commit:
 
-- `forma.yaml`, `generator.go`, `Taskfile.yaml`, `go.mod`, `go.sum`
+- `forma.yaml`, `Taskfile.yaml`, `go.mod`, `go.sum`
 - `main.go` and your app packages
-- `web/` sources including shadcn **`components/ui/*.tsx`**
-- Generated **`internal/ui/*.gen.go`** and **`web/src/registry.gen.ts`**
+- `web/` sources (host, `registry.custom.ts`, lockfile)
 
-Do not commit `web/node_modules/`. After **`forma sync`** or **`forma generate`**, review diffs before commit.
+Do not commit `web/node_modules/`.
 
 ## Related
 
 - [forma.yaml](forma-yaml.md)
-- [Adding components](adding-components.md)
+- [Owned widgets](adding-components.md)

@@ -10,7 +10,7 @@ export type FormaNode = {
   Slots?: Record<string, FormaNode[] | null | undefined> | null;
 };
 
-/** One registry entry — same shape as generated `registry.gen.ts`. */
+/** One registry entry for a Go widget type name. */
 export type RegistryEntry = {
   component: ComponentType<Record<string, unknown>>;
   slots?: Record<string, ComponentType<Record<string, unknown>>>;

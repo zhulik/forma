@@ -28,7 +28,7 @@ Install the **`forma`** CLI per [Install](install.md). **`forma dev`** needs **N
 ## Browser shows blank page
 
 - **`ui.mount`** must match **`UIMount`** id and the mount node in **`web/index.html`** (or your `web.path` HTML). Missing mount fails closed (no alternate root); check the console for `[forma] mount element … not found`.
-- Registry must include every **Type** string your tree emits (builtins + generated + `registry.custom.ts`). Unknown types are skipped with a console warning.
+- Registry must include every **Type** string your tree emits (builtins + `registry.custom.ts`). Unknown types are skipped with a console warning.
 - Tree stays null until Go calls **`UIMount`** / refresh. Confirm **`web/public/app.js`** exists (initial `forma dev` build) and the console has no script load errors for `/app.js`.
 - Check the browser console for JavaScript errors (when the web tree is built and served).
 

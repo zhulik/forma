@@ -22,11 +22,6 @@ module: github.com/you/myapp
 
 ui:
   mount: app-root
-  components: []
-
-codegen:
-  dir: internal/ui
-  package: ui
 
 web:
   path: web
@@ -52,7 +47,7 @@ func App() Component {
 }
 ```
 
-The **`minimal`** embed template from **`forma init`** matches this layout.
+The **`minimal`** embed template from **`forma init`** matches this layout. Owned widgets (`Button`, `Input`, layout, …) come from **`github.com/zhulik/forma/ui`**.
 
 ## 4. Depend on the forma library
 
@@ -65,15 +60,21 @@ go mod edit -replace=github.com/zhulik/forma=/path/to/forma
 go mod tidy
 ```
 
-After **`forma`** is published, **`forma sync`** (stub today, full later) will reconcile requires for you.
+After **`forma`** is published, **`forma sync`** will reconcile requires for you.
 
-## 5. Verify
+## 5. Web tree
+
+Copy the scaffold under `cmd/forma/templates/scaffolds/minimal/web/` (or run **`forma init`** into a temp dir and copy), then:
+
+```bash
+forma sync
+```
+
+## 6. Verify
 
 ```bash
 go build -o /dev/null .
 ```
-
-Browser runtime and **`internal/ui`** codegen arrive with P3; this step only checks the Go authoring model.
 
 ## Related
 

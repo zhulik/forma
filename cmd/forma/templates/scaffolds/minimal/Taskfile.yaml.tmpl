@@ -1,8 +1,8 @@
 version: "3"
 
 tasks:
-  check-generate:
-    desc: Regenerate via go generate and fail if the whole repo drifts
+  test:
+    desc: Run Go and web host tests
     cmds:
-      - go generate ./...
-      - git diff --exit-code
+      - go test ./...
+      - npm --prefix web test

@@ -1,8 +1,8 @@
 # forma — design concepts
 
-forma lets you build interactive UIs in **Go only**. You describe screens as typed, composable components; a fixed **React + shadcn/ui** layer turns that description into DOM updates. The design goal is the best practical DSL for UI authoring with **as little hassle as possible**—especially for agents, who should output reviewable Go instead of HTML/CSS/JS.
+forma lets you build interactive UIs in **Go only**. You describe screens as typed, composable components; a fixed **React** host reconciles them. Look comes from **[0build](https://0build.dev)** semantic CSS; **widget APIs are hand-written Go** in forma (with thin React host components)—not generated from shadcn TSX, 0build React kits, or third-party `.d.ts` as the source of truth. The design goal is the best practical DSL for UI authoring with **as little hassle as possible**—especially for agents, who should output reviewable Go instead of HTML/CSS/JS.
 
-This document captures the architecture and product decisions from the original design exploration (high-level UI, shadcn, browser Go→JS vs Wasm, recursive tree rendering, codegen, state model). Implementation details evolve in OpenSpec changes; this is the conceptual anchor.
+This document captures architecture and product decisions (high-level UI, React host, browser Go→JS vs Wasm, recursive tree rendering, state model). Historical shadcn-codegen exploration remains in archived OpenSpec changes; **current tip** is owned widgets + **0build**—see [ROADMAP.md](./ROADMAP.md). Implementation details evolve in OpenSpec changes; this is the conceptual anchor.
 
 ---
 
@@ -21,8 +21,8 @@ This document captures the architecture and product decisions from the original 
 |--------|--------|-----|
 | Authoring | Go | Strong types, familiar backend idioms, good for agents |
 | Browser compilation | **GoScript** (`s4wave/goscript`, v1) | Go→TypeScript under the module’s Go version; thin `syscall/js` seam delivers an object/callback tree without mandating full-tree JSON |
-| Visual components | **React 18 + shadcn/ui** | shadcn is copy-paste TSX (great for codegen); huge third-party React catalog |
-| Styling | Tailwind (via shadcn) | Authors rarely touch CSS; optional `Class` escape hatch |
+| Visual components | **React 18** thin host + **forma-owned** widgets | Hand-written Go APIs + matching host components; React reconciles only—not a Go DOM framework |
+| Styling | **[0build](https://0build.dev)** (Franken UI successor) | Semantic `.z-*` classes first; utilities / `Class` escape hatch; CSS layers; CDN-friendly—host applies classes, does not codegen from 0build/shadcn React kits |
 | Official Go Wasm (`js/wasm`) | **Contingency only** | Heavier payloads / boundary copying; kept if GoScript ever fails product gates—not the supported author path |
 | GopherJS | **Retired** | Stuck on Go 1.21 while forma targets modern Go; removed from the supported toolchain |
 
@@ -45,7 +45,7 @@ Three cooperating parts:
                             ▼
 ┌─────────────────────────────────────────────────────────┐
 │  JavaScript host (write once)                            │
-│  • ComponentRegistry: "Button" → shadcn Button           │
+│  • ComponentRegistry: "Button" → forma-owned host Button │
 │  • Recursive Widget renderer                             │
 │  • Event sanitization (DOM → plain data)                 │
 │  • Optional islands for heavy 3rd-party React widgets  │
@@ -55,7 +55,7 @@ Three cooperating parts:
                      Browser DOM
 ```
 
-**Code generator (build time):** Node script (e.g. ts-morph) reads `components/ui/*.tsx`, emits `ui/*.gen.go` with typed fields and `Render` glue. Regenerating after shadcn updates keeps Go APIs in sync without hand-maintaining hundreds of props.
+**Owned widgets (build-time SoT):** Hand-written Go types in framework `ui/` plus thin React host builtins that apply **0build** semantic `.z-*` classes. No kit TSX→Go codegen on the tip path.
 
 ---
 
@@ -83,14 +83,14 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 - **Struct literals + `.With(...)`** — on **layout and leaf** widgets, primary children as **`Component` values only** (no bare strings); value receivers keep trees immutable per build. Splat `[]Component` from **`fn.Map`** into `.With(items...)`.
 - **`Fragment`** — groups siblings with **no layout or DOM host** (React `Fragment` semantics). Use when a single `Component` value must contain several roots (including inside a compound slot field).
-- **Compound widgets (field-only slots)** — shadcn/Radix-style widgets (`Dialog`, `Tabs`, …) expose each region as an **exported struct field** typed **`Component`** (or a widget-specific item slice such as **`[]TabItem`**). Authors do **not** use separate Go types that mirror Radix parts (`DialogTrigger`, `DialogContent`, …). Slot payload is **not** passed via `.With` on the compound. The render tree carries regions in **`Node.Slots`** (wire keys such as `trigger`, `content`); the JS registry maps slot names to internal React structure.
+- **Compound widgets (field-only slots)** — future owned compounds (`Dialog`, `Tabs`, …) expose each region as an **exported struct field** typed **`Component`** (or a widget-specific item slice such as **`[]TabItem`**). Authors do **not** use separate Go types that mirror toolkit parts (`DialogTrigger`, `DialogContent`, …). Slot payload is **not** passed via `.With` on the compound. The render tree carries regions in **`Node.Slots`** (wire keys such as `trigger`, `content`); the JS registry maps slot names to internal React structure.
 - **Text** — leaf copy via **`Text{Text: "hello"}`** (plus **`Muted`**, **`Strikethrough`**, **`Class`**, …); other widgets may use a **`Text` field** (e.g. `Heading{Text: "…"}`). Labels on buttons use **`.With(Text{Text: "…"})`**.
 - **`.Or(...)`** — fallback children when `.With` would otherwise be empty (e.g. dynamic list with zero items). Typed on each wrapper (same return type as `.With`); at render time, if there are no primary children, fallbacks are rendered instead.
 - **`If(cond, …func() Component)`** (package **`ui`**, dot-imported in apps) — lazy conditional branches; one branch and false yields no node; two branches select then/else.
 - **`Key`** — stable string on **`BaseComponent`** (promoted on widgets); required for repeated siblings built from lists.
 - **Layout primitives** — `Row`, `Column`, `Container`, `Card`, … express structure without HTML tag names.
-- **Generated shadcn types** — `Button`, `Input`, `Checkbox`, … with typed props (`Variant`, `Size`, …). **Compounds** (`Dialog`, `Sheet`, …) are **`*.gen.go` like leaves**: codegen analyzes each shadcn `.tsx` export graph (root + prefixed parts → one Go struct with slot fields; strip the prefix for field names). Optional per-file overrides only when heuristics fail (e.g. complex Select/Tabs). No hand-maintained catalog compounds in `ui/`.
-- **Escape hatches** — `Class`, `Style`, `Attrs` on **`WidgetMeta`**, embedded on layout/leaves via `BaseComponent`; generated compounds embed **`WidgetMeta` only** (no `.With`) and use **`RenderComponentSlot` / `PutSlot` / `SlotKeyFromField`** in generated `Render` methods.
+- **Owned interactive widgets** — `Button`, `Input`, `Checkbox`, … with a small typed prop surface (`Variant`, `Size`, …). Host maps variants to **0build** semantic classes (e.g. `.z-button` + `.z-button-primary`). Future compounds are hand-maintained Go + host pairs—not kit codegen.
+- **Escape hatches** — `Class`, `Style`, `Attrs` on **`WidgetMeta`**, embedded on layout/leaves via `BaseComponent`. Prefer semantic `.z-*`; use 0build utilities / `Class` for one-offs. Slot helpers (`RenderComponentSlot` / `PutSlot` / `SlotKeyFromField`) support compounds when added.
 
 ### Custom components
 
@@ -120,20 +120,9 @@ The north-star example is [`main.go`](../main.go): a todo app with no HTML.
 
 ---
 
-## Code generation
+## Code generation (historical)
 
-shadcn installs **source** `.tsx` into the repo, which makes AST-based generation reliable.
-
-| TypeScript | Go (typical) |
-|------------|----------------|
-| `string`, `boolean`, `number` | `string`, `bool`, `float64` |
-| Union literals `"default" \| "ghost"` | `string` + optional `const` block |
-| `React.ReactNode` | children via `.With(...)` / nested `Component` |
-| `(e: MouseEvent) => void` | `func(ctx ui.Context)` or `func(ctx ui.Context, data map[string]any)` |
-| Complex 3rd-party props | narrow in JS wrapper; Go sees clean fields |
-| Root + prefixed part exports (e.g. `Dialog`, `DialogTrigger`, `DialogContent`) | one **`Dialog` struct** in `dialog.gen.go`: scalar props from root; **`Trigger`**, **`Content`** as `Component` fields → `Node.Slots`; embed **`WidgetMeta`** only; registry mapping generated from the same export analysis |
-
-Generated files are **`*.gen.go`**; manual edits live in separate files or documented extension points. **Catalog compounds are never hand-written** in `ui/`—only framework primitives (`Fragment`, slot helpers, `WidgetMeta` / `BaseComponent`).
+Earlier phases explored **shadcn TSX → Go** codegen (`*.gen.go`, `registry.gen.ts`). That path is **retired** from the product CLI and default scaffold (ROADMAP P5). Tip path is owned widgets + 0build only.
 
 ---
 
@@ -142,8 +131,8 @@ Generated files are **`*.gen.go`**; manual edits live in separate files or docum
 Pattern:
 
 1. Add a small **JS wrapper** that owns refs, imperative APIs, and event sanitization.
-2. Register in **`ComponentRegistry`** under a stable type string (e.g. `"StripeCard"`).
-3. Expose **Go struct** (generated or hand-written) with props + callbacks.
+2. Register in **`ComponentRegistry`** via scaffold **`registry.custom.ts`** (merged after builtins) under a stable type string (e.g. `"StripeCard"`).
+3. Expose a **hand-written Go struct** with props + callbacks.
 
 Go stays free of DOM types; the wrapper converts vendor events to plain data before calling Go.
 
@@ -161,17 +150,17 @@ Author-facing workflow and install steps live in **[doc/user/](user/README.md)**
 
 ### Day-to-day flow
 
-1. **App module** depends on `github.com/zhulik/forma/ui` and `fn`; generated shadcn bindings live under **`internal/ui/`** by default (see **`forma.yaml`** `codegen.dir`).
+1. **App module** depends on `github.com/zhulik/forma/ui` and `fn` for the owned widget surface (Button, Input, layout, …).
 2. **Define app state** as ordinary Go types.
-3. **Implement `func MyApp() Component`** using dot-imported layout + generated widgets (see [`main.go`](../main.go) in this repo).
+3. **Implement `func MyApp() Component`** using dot-imported owned widgets (see [`main.go`](../main.go) in this repo).
 4. **`UIMount(mountID, MyApp())`** — mount id matches **`forma.yaml`** `ui.mount` and the mount node in the web tree HTML.
 5. On user actions or async completion: **update state → `ctx.RefreshUI()`** or **`ctx.Update`**.
 
-### Adding shadcn components
+### Extending the widget surface
 
-1. **`forma add <component>`** — updates **`forma.yaml`** and runs **`forma sync`**.
-2. **Sync** installs web tree deps, materializes shadcn TSX under **`web.path`**, runs **codegen** into the configured dir, updates the **JS registry**, and **`go mod tidy`**.
-3. Use the new Go type from your generated package.
+1. Prefer composing existing owned widgets in Go.
+2. For a new primitive: add a hand-written Go type in framework (or app) `ui/` and a thin host builtin that maps props → **0build** `.z-*` (utilities / `Class` escape hatch).
+3. For third-party React islands: register a wrapper in **`registry.custom.ts`** and expose a matching Go struct.
 
 ### Desktop (later)
 
@@ -182,10 +171,10 @@ Same Go + host bundle, served inside a **native system webview** (not Electron).
 ## Non-goals (initial releases)
 
 - **Server-side rendering** as a first-class story (possible later via V8/hydration or separate SSR track—not v1).
-- **Replacing React** with Solid/Svelte for the core registry while keeping shadcn parity.
+- **Replacing React** with Solid/Svelte for the core registry.
 - **Authoring HTML/CSS/JS** as the primary path.
-- **Hand-writing every shadcn prop** without codegen.
-- **Full shadcn catalog** before the DSL and runtime loops are proven on a subset (button, input, layout, table, dialog, …).
+- **Kit TSX→Go codegen** or per-widget YAML overrides as the widget source of truth.
+- **Full widget catalog** before a todo-like example proves the owned-widget + 0build path.
 
 ---
 
@@ -195,9 +184,9 @@ Same Go + host bundle, served inside a **native system webview** (not Electron).
 
 - Dot imports of `ui` and `fn` for a dense authoring surface
 - Global app state and CRUD handlers
-- Nested layout and generated widgets
+- Nested layout and owned interactive widgets
 - Dynamic list rendering with **`fn.Map`** and **`.Or(...)`** empty-state fallback
 - **`ui.Context`** on handlers (`RefreshUI` after mutations)
-- `Class` escape hatch alongside typed props
+- `Class` escape hatch alongside typed props (0build utilities)
 
-The `ui` package today implements **types and stub** `UIMount`/`RefreshUI`; runtime behavior is defined in OpenSpec and built in roadmap phase P3.
+The `ui` package holds the owned widget APIs and browser runtime (`UIMount` / `RefreshUI`); look is applied by the scaffold host via 0build.
