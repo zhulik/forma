@@ -91,7 +91,7 @@ Orch schedules from this table only. Leave **branch** / **PR** empty until a cha
 | Order | Change name | Phase | Purpose | Status | branch | PR |
 |-------|-------------|-------|---------|--------|--------|-----|
 | 1 | `forma-owned-widgets` | P5 | Hand-written Go widgets + thin React host primitives for a todo-sized surface; scaffold loads [0build](https://0build.dev) styles (+ runtime utils if required); map Go variants → semantic `.z-*` classes; drop generated kit bindings / per-widget YAML as SoT | PR open | `forma-owned-widgets` | [#8](https://github.com/zhulik/forma/pull/8) |
-| 2 | `forma-todo-example` | P5 | In-browser todo-like example on owned widgets (`examples/todo`), runnable with `forma dev`; docs point here; stacks on owned-widgets/#8 | PR open | `forma-todo-example` | |
+| 2 | `forma-todo-example` | P5 | In-browser todo-like example on owned widgets (`examples/todo`), runnable with `forma dev`; docs point here; stacks on owned-widgets/#8 | PR open | `forma-todo-example` | [#9](https://github.com/zhulik/forma/pull/9) |
 | 3 | `forma-todo-shadcn-slice` | P5 | Prior tip: gap-fill default shadcn via codegen path | **Superseded** | `forma-todo-shadcn-slice` | [#5](https://github.com/zhulik/forma/pull/5) |
 | 4 | `forma-todo-example` (shadcn stack) | P5 | Prior tip: example on shadcn slice | **Superseded** | `forma-todo-example` | [#6](https://github.com/zhulik/forma/pull/6) |
 | 5 | `forma-desktop` | P4 | Native webview packaging, same bundle | Deferred | | |
