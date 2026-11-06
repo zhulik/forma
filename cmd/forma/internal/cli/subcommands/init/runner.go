@@ -13,7 +13,6 @@ import (
 	"github.com/zhulik/forma/cmd/forma/internal/cli/app"
 	"github.com/zhulik/forma/cmd/forma/internal/cli/deps"
 	clierrors "github.com/zhulik/forma/cmd/forma/internal/cli/errors"
-	"github.com/zhulik/forma/cmd/forma/internal/cli/starters"
 	synccmd "github.com/zhulik/forma/cmd/forma/internal/cli/subcommands/sync"
 	"github.com/zhulik/forma/cmd/forma/internal/core"
 	"github.com/zhulik/forma/cmd/forma/internal/formaconfig"
@@ -109,7 +108,7 @@ func (r *runner) runFull(ctx context.Context, target string) error {
 	if replace == "" {
 		replace = os.Getenv(synccmd.EnvFormaReplace)
 	}
-	if err := synccmd.RunWithComponents(ctx, target, replace, starters.Components); err != nil {
+	if err := synccmd.RunWithReplace(ctx, target, replace); err != nil {
 		return fmt.Errorf("sync: %w", err)
 	}
 

@@ -1,49 +1,40 @@
-# Adding components
+# Owned widgets
 
-## Normal path: forma add
+forma ships a **todo-sized** owned widget surface. Import from **`github.com/zhulik/forma/ui`**—there is no shadcn `forma add` / kit codegen path.
 
-```bash
-forma add dialog
-```
+## Built-in types
 
-1. Materializes **`dialog`** via the shadcn CLI under the configured web root (if missing).
-2. Runs **`forma sync`**, which:
-   - Installs npm dependencies if needed
-   - Regenerates Go bindings in **`internal/ui/`** (or your `codegen.dir`)
-   - Regenerates **`web/src/registry.gen.ts`**
-   - Runs **`go mod tidy`**
+| Go type | Role |
+|---------|------|
+| `Button`, `Input`, `Checkbox` | Interactive |
+| `Card`, `Text`, `Heading` | Content |
+| `Row`, `Column`, `Container`, `Fragment` | Layout / grouping |
 
-You should not need to run **`npx shadcn add`** in the happy path. **`forma.yaml`** does not maintain a component name list.
+The scaffold host **`builtinRegistry`** maps each type to a thin React component that applies **0build** semantic classes (for example `.z-button`, `.z-button-primary`, `.z-card`, `.z-input`).
 
-## What to commit
+## Look: semantic first
 
-| Yes | No |
-|-----|-----|
-| New or changed TSX under `web/` | `node_modules/` |
-| New or changed `internal/ui/*.gen.go` | |
-| Updated `web/src/registry.gen.ts` | |
-| Lockfile under `web/` if sync changed deps | |
+Prefer semantic `.z-*` classes applied by the host from typed props (`Variant`, `Size`, …). Use **0build utilities** or the Go **`Class`** escape hatch for one-offs—not as the default authoring model.
 
-Generated Go and registry files are **committed** so CI can verify **`task check-generate`** (`go generate` then whole-repo **`git diff --exit-code`**) stays clean.
+Pinned CDN assets (scaffold `web/index.html`):
 
-## Using a new widget in Go
+- CSS: `https://cdn.0build.dev/0build.css`
+- Runtime: `https://cdn.0build.dev/0build.js` (`zRuntime`)
 
-After sync, import your generated package and use the struct the codegen emitted—for example `Button`, `Input`, or compound types with slot fields. Props and events are typed on the struct; events use **`func(ctx Context)`** (or variants documented for that widget).
+## Extending
 
-## Starter set
+1. **Compose** existing widgets in Go when possible.
+2. **New primitive:** hand-write a Go struct in framework or app code and a matching host builtin under `web/src/host/widgets/`; register it in `builtinRegistry` (framework) or **`registry.custom.ts`** (app override / third-party).
+3. **Third-party React:** thin JS wrapper → `registry.custom.ts` (merged last) → Go props/callbacks only.
 
-**`forma init`** materializes a CLI-hardcoded starter set (`button`, `input`, `card`) during the first sync so hello world works without an immediate **`forma add`**.
+## What not to do
 
-## Manual / advanced
-
-If you add or edit TSX by hand:
-
-- Run **`forma generate`** (codegen only) or **`forma sync`** (npm + codegen + tidy).
-- Prefer CLI-managed files under **`components/ui/`**.
-
-See [Advanced](advanced.md).
+- Do not expect **`forma add`** or **`forma generate`**.
+- Do not treat shadcn TSX or `*.gen.go` as the widget source of truth.
+- Do not add a Tailwind/PostCSS kit pipeline to the default scaffold.
 
 ## Related
 
 - [CLI reference](cli.md)
-- [forma.yaml](forma-yaml.md)
+- [Advanced](advanced.md)
+- [Writing UI](writing-ui.md)

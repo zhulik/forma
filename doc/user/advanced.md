@@ -1,54 +1,35 @@
 # Advanced
 
-## Override codegen output path
-
-In **`forma.yaml`**:
-
-```yaml
-codegen:
-  dir: pkg/widgets
-  package: widgets
-```
-
-Use when a monorepo or import policy requires generated code outside **`internal/ui`**. After changing paths, run **`forma generate`** or **`forma sync`**.
-
-Framework types (`Component`, `Context`, layout) stay in **`github.com/zhulik/forma/ui`**.
-
 ## Custom Go components
 
-Any struct that implements **`Component`** (`Render(context.Context) *Node`) can appear in the tree. Use layout helpers (`Row`, `Column`, `Fragment`, …) and compose without shadcn.
+Return `ui.Component` from functions or structs by composing owned widgets:
 
-Register a stable **`Type`** string in the host registry when the renderer must map to a custom React wrapper (see below).
+```go
+func UserRow(name string) Component {
+	return Row{Align: Center, Gap: 2}.With(
+		Text{Text: name},
+	)
+}
+```
 
-## Custom / third-party registry entries
+## Custom host islands
 
-The host merges registries in this order (later keys win):
+1. Implement a thin React wrapper that sanitizes events.
+2. Export it from **`web/src/registry.custom.ts`** (merged after builtins; last wins).
+3. Add a matching Go struct that renders a `Node` with that type name and props.
 
-1. **Builtins** — framework types (`Fragment`, `Text`, `Row`, …) under `web/src/host/`
-2. **Generated** — `web/src/registry.gen.ts` (codegen-owned; never hand-edit)
-3. **Custom** — `web/src/registry.custom.ts` (hand-written merges)
+Do not put business logic in the host.
 
-To add a third-party React wrapper:
+## Escape hatches
 
-1. Write a thin **JS wrapper** in `web/` that sanitizes vendor events to plain data (or rely on the host prop-wiring sanitizers).
-2. Export an entry from **`registry.custom.ts`** with the same shape as generated entries (`{ component, slots? }`).
-3. Expose a Go struct with props + callbacks (hand-written or via codegen for shadcn files).
+- **`Class` / `Style` / `Attrs`** on widgets (via `WidgetMeta` / `BaseComponent`).
+- Prefer semantic `.z-*`; use 0build utility shorthand (for example `p=4`, `gap=2`) when a one-off is clearer than a new semantic class.
 
-`main.tsx` already merges `customRegistry` last. Do **not** patch `registry.gen.ts`.
+## Slots / future compounds
 
-## Text-input hybrid policy
-
-For **`Input`** (and similar string fields), the host keeps ephemeral React state while the field is focused so typing survives tree refreshes. Domain state still lives in Go: the sanitized **`OnChange`** callback receives a plain string. When the field is unfocused, the displayed value syncs from the tree’s value prop. See [Troubleshooting](troubleshooting.md) if caret jumps persist.
-
-## Edit shadcn TSX
-
-shadcn is **source in your repo** so you can tailor Tailwind and behavior. After edits, run **`forma generate`** (or **`forma sync`**). Prefer CLI-managed files under **`components/ui/`**.
-
-## Agents and automation
-
-Agents should prefer outputting **Go** that composes generated structs and framework layout—not raw HTML/JS. When CLI exists, prefer **`forma add`** + documented patterns in [Writing UI](writing-ui.md) over inventing registry entries.
+Fragment and `Node.Slots` remain for field-only compound regions. New compounds should be hand-maintained Go + host pairs—not kit-generated catalogs.
 
 ## Related
 
-- [DESIGN.md](../DESIGN.md)
-- [Troubleshooting](troubleshooting.md)
+- [Owned widgets](adding-components.md)
+- [Project layout](project-layout.md)

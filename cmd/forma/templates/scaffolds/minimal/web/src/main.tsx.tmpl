@@ -1,3 +1,4 @@
+import "./index.css";
 import {
   FormaBridgeHost,
   builtinRegistry,
@@ -7,13 +8,8 @@ import {
   registerFormaHost,
 } from "./host";
 import { customRegistry } from "./registry.custom";
-import { registry as generatedRegistry } from "./registry.gen";
 
-const effectiveRegistry = mergeRegistry(
-  builtinRegistry,
-  generatedRegistry,
-  customRegistry,
-);
+const effectiveRegistry = mergeRegistry(builtinRegistry, customRegistry);
 
 // Register before any Go UIMount call (load the GoScript bundle after this module).
 const bridge = createFormaBridge();
